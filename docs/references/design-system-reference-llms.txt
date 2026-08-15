@@ -1,0 +1,14 @@
+MEET DESIGN SYSTEM V1 — COMPACT AGENT REFERENCE
+
+Product feel: calm, practical, trustworthy, lightly optimistic; event/activity first; NOT dating/nightlife/content-feed.
+Primary light: #245BFF white text. Accent/trust: #0F766E white text. BG #F7F8FA. Surface #FFFFFF. Text #111827. Secondary #596273. Border #D8DEE8.
+Dark: bg #0B1017; surface #121A24; text #F4F7FA; secondary #AEB8C7; border #283445; primary #7EA2FF with dark text; accent #5DD3C1 with dark text.
+Spacing base 4: 4/8/12/16/20/24/32/40/48/64. Card radius 16; controls 12; sheets 24; pill 999. Minimum target 48.
+Type: Inter Variable/system sans. Body 16/24. Small 14/20. Title 18/24 semibold. H3 20/28. H2 24/32. H1 32/40.
+Mobile nav: Home / Map / Create / Chats / Profile, icon + label.
+Home: city → search → Now/Today/Weekend → event sections. Map is secondary.
+Event card: event image, time first, title, venue/distance, useful language/capacity, attendee facepile, ONE CTA. Person portraits never dominate discovery.
+Event detail: image → time/title → place → sticky CTA → capacity → people/Pods → organizer/trust → description → practical info → safety/source.
+No gradients by default, no glassmorphism, no neon, no swipe-card people browsing, no gamified streak/confetti for ordinary activity.
+System theme dark/light. Reduced motion. WCAG 2.2 AA. FI/EN/RU expansion. 24h time Finland.
+All raw values come from design/tokens.json; UI PRs require visual screenshots/QA.

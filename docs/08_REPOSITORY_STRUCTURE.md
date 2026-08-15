@@ -3,6 +3,7 @@
 ```text
 /
 ├─ AGENTS.md
+├─ ARCHITECTURE.md
 ├─ README.md
 ├─ CODEX_BOOTSTRAP_PROMPT.md
 ├─ project-manifest.json
@@ -10,9 +11,7 @@
 ├─ pnpm-workspace.yaml
 ├─ turbo.json
 ├─ tsconfig.base.json
-├─ .editorconfig
-├─ .github/
-│  └─ workflows/
+├─ .github/workflows/
 ├─ apps/
 │  ├─ mobile/
 │  ├─ web/
@@ -30,95 +29,39 @@
 │  ├─ i18n/
 │  ├─ ui/
 │  └─ testing/
+├─ design/
+│  ├─ tokens.json
+│  └─ DESIGN_SYSTEM_PREVIEW.html
 ├─ infra/
-│  ├─ modules/
-│  └─ envs/
 ├─ docs/
+│  ├─ design-docs/
+│  ├─ product-specs/
+│  ├─ exec-plans/{active,completed}/
+│  ├─ references/
+│  ├─ generated/
+│  ├─ DESIGN.md
+│  ├─ FRONTEND.md
+│  ├─ PRODUCT_SENSE.md
+│  ├─ PLANS.md
+│  ├─ QUALITY_SCORE.md
+│  ├─ RELIABILITY.md
+│  └─ SECURITY.md
 └─ schemas/
 ```
 
-## API module layout
+## API modules
+`auth, users, identity-verification, organizations, venues, events, event-ingestion, discovery, participation, pods, chat, connections, reputation, safety, moderation, notifications, billing, analytics, admin, platform`.
 
-```text
-apps/api/src/modules/
-  auth/
-  users/
-  identity-verification/
-  organizations/
-  venues/
-  events/
-  event-ingestion/
-  discovery/
-  participation/
-  pods/
-  chat/
-  connections/
-  reputation/
-  safety/
-  moderation/
-  notifications/
-  billing/
-  analytics/
-  admin/
-  platform/
-```
-
-Recommended module internals:
-```text
-module/
-  domain/
-  application/
-  infrastructure/
-  presentation/
-  module.ts
-```
-
-Do not create ceremonial empty abstractions merely to satisfy folder shape. Preserve dependency direction and ownership.
+Recommended module dependency direction: `presentation → application → domain`; infrastructure implements ports. Do not create ceremonial abstractions with no value.
 
 ## Shared contracts
+DTO schemas, error codes, event envelopes and safe enums/value types only; no server business logic/provider implementations.
 
-`packages/contracts` owns:
-- DTO schemas;
-- API error codes;
-- event envelopes;
-- safe enums/value types;
-- generated-client inputs.
+## UI
+`packages/ui` owns generated design tokens, primitives, icons/accessibility helpers. Mobile/web share primitives and contracts, not giant screens.
 
-It must not own:
-- server business logic;
-- DB repositories;
-- secrets;
-- provider-specific implementations.
+## Agent legibility
+As code appears, place local `AGENTS.md` only where package/app-specific commands or constraints materially help. Root rules always win on product/architecture contracts.
 
-## Database package
-
-`packages/database` owns:
-- Drizzle schema;
-- migrations;
-- DB connection factories;
-- test DB helpers;
-- PostGIS helpers where truly generic.
-
-Domain repositories remain in their module infrastructure layer.
-
-## UI package
-
-Share:
-- design tokens;
-- primitives;
-- icon wrappers;
-- accessibility helpers.
-
-Do not force mobile and web to share giant screen components.
-
-## Workers
-
-`apps/workers` hosts deployable consumers/jobs, but imports application/module interfaces rather than duplicating business rules.
-
-Potential worker entry points:
-- outbox-publisher;
-- ingestion;
-- notifications;
-- media;
-- moderation;
-- maintenance/backfill.
+## Mechanical enforcement
+Phase 0 adds structural lint/tests for module dependency direction, raw design-token violations, generated-doc freshness and documentation links.

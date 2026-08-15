@@ -1,61 +1,45 @@
-# AGENTS.md — IRL Social Platform
+# AGENTS.md — Meet
 
-This repository is governed by the specifications in `docs/`. Codex must read `docs/00_INDEX.md` before implementation.
+Meet is an **event-first IRL social network / real-world social marketplace**. This file is a map, not the full manual.
 
-## Non-negotiable architecture
+## Read first
+1. `ARCHITECTURE.md` — system map and boundaries.
+2. `docs/00_INDEX.md` — progressive documentation map.
+3. For product work: relevant file under `docs/product-specs/`.
+4. For UI work: `docs/DESIGN.md`, `docs/FRONTEND.md` and relevant `docs/design-docs/`.
+5. For backend/data work: `docs/02_DOMAIN_AND_DATABASE.md`, `docs/03_API_AND_STATE_MACHINES.md`.
+6. For infrastructure/reliability/security: `docs/06_INFRASTRUCTURE_DEVOPS.md`, `docs/RELIABILITY.md`, `docs/SECURITY.md`.
+7. Before architectural changes: `docs/09_FIXED_ARCHITECTURE_DECISIONS.md`.
+8. For multi-step implementation: `docs/PLANS.md` + `docs/exec-plans/`.
 
-1. Product category: **event-first IRL social network / real-world social marketplace**. Event is the core product entity.
-2. Initial public product: **18+ only**, no dating positioning, no sexual solicitation, no random DMs.
-3. Backend: **modular monolith**, not microservices, until an accepted ADR explicitly authorizes extraction.
-4. Runtime/tooling: Node.js 24 LTS, pnpm 11, Turborepo, TypeScript strict mode.
-5. Mobile: React Native + Expo + Expo Router + TypeScript.
-6. Web/B2B/Admin: Next.js + TypeScript.
-7. API/Workers: NestJS + Fastify + TypeScript.
-8. Primary data store: PostgreSQL 18 + PostGIS. PostgreSQL is the source of truth.
-9. ORM/query layer: Drizzle for schema/migrations/ordinary CRUD, hand-written SQL for PostGIS and hot queries.
-10. Cache/realtime helper: Valkey. Never authoritative.
-11. API: REST + OpenAPI. Generate typed clients from shared contracts.
-12. Async: transactional outbox + Pub/Sub + Cloud Tasks. Consumers must be idempotent.
-13. Cloud: GCP, primary region `europe-north1` Finland. Cloud Run, Cloud SQL, Memorystore for Valkey, Cloud Storage, Pub/Sub, Cloud Tasks, Secret Manager, KMS, BigQuery, Artifact Registry.
-14. Edge: Cloudflare DNS/WAF/rate limiting/Turnstile/CDN.
-15. Infrastructure as code: Terraform.
-16. Maps: MapLibre client with provider abstraction.
-17. Analytics: PostHog + BigQuery. Observability: OpenTelemetry + Sentry.
-18. Consumer auth: Google Cloud Identity Platform. Staff auth is isolated and requires MFA.
-19. Strong identity/age: external provider abstraction. Do not store passport scans or numbers.
-20. Private-home hosts require strong identity verification. Exact home address is never public.
-21. Imported event data must preserve source provenance, source ID, rights/license metadata and fetch history.
-22. All first-party domain IDs use UUIDv7.
-23. Store UTC timestamps plus IANA timezone where local scheduling semantics matter.
-24. Money uses integer minor units + ISO 4217 currency.
-25. Country behavior belongs in centralized country configuration, not scattered country conditionals.
-26. No public 1–5 star rating of people. Reputation is structured and safety-oriented.
-27. Recommendation objective is successful real-world attendance, not CTR or screen time.
-28. Admin/moderation capabilities are isolated from consumer surfaces and sensitive actions are audited.
-29. Every retry-prone mutation must be idempotent.
-30. Do not replace a fixed framework/provider/database/cloud choice without an accepted ADR.
+## Golden invariants
+- Event is the core product entity; optimize for successful IRL attendance, not screen time.
+- Initial public network is 18+, no dating positioning/sexual solicitation/random DMs.
+- Backend is a NestJS + Fastify TypeScript modular monolith until an accepted ADR says otherwise.
+- Mobile: React Native + Expo. Web/B2B/Admin: Next.js.
+- PostgreSQL 18 + PostGIS is authoritative. Valkey is ephemeral.
+- REST + OpenAPI typed clients. Transactional outbox + Pub/Sub/Cloud Tasks; consumers idempotent.
+- GCP `europe-north1`, Cloud Run/Cloud SQL/Memorystore/Storage, Cloudflare edge, Terraform.
+- Imported events preserve provenance, rights/license and raw source identity.
+- UUIDv7 first-party IDs; UTC + IANA timezone; money in minor units + ISO currency.
+- Country differences live in country configuration, not scattered conditionals.
+- Strong identity required for private-home hosts; exact home address never public; identity documents never stored.
+- No public 1–5 star human rating.
+- Admin/moderation is isolated and audited.
+- UI consumes `design/tokens.json`; no ad-hoc visual system. Event-first hierarchy and 5-tab navigation are design contracts.
+- Large frontend changes require visual verification/screenshots, not compile-only approval.
 
 ## Codex workflow
-
-Before any feature:
-1. Read `docs/00_INDEX.md`.
-2. Read the relevant specification files.
-3. Read `docs/09_FIXED_ARCHITECTURE_DECISIONS.md`.
-4. Locate the task in `docs/10_IMPLEMENTATION_BACKLOG.md`.
-5. Implement only inside the defined module boundaries.
-6. Add tests, validation, authorization, telemetry, rate-limit/abuse handling and documentation.
-7. Run lint, typecheck, tests and build.
-8. Never silently redesign. If the spec truly conflicts with reality, propose an ADR instead.
+Before a task:
+1. Read the smallest relevant specs from the index.
+2. If multi-step/risky, create or update an execution plan.
+3. Implement within defined module boundaries.
+4. Add validation, authorization, safety/abuse controls, telemetry and docs.
+5. Run lint/typecheck/tests/build plus visual/accessibility checks when UI changes.
+6. Never silently redesign. Propose an ADR/design decision if a fixed contract conflicts with measured reality.
 
 ## Definition of done
+Read `docs/11_DEFINITION_OF_DONE.md`. CI green is necessary but not sufficient; user-visible work must also satisfy design/accessibility and visual QA.
 
-A task is not done until:
-- code is implemented in the correct module;
-- migrations and indexes are complete;
-- API/contracts are updated;
-- authorization and abuse controls are implemented;
-- unit/integration/E2E coverage is appropriate;
-- analytics/observability is present;
-- privacy/safety impacts are addressed;
-- documentation is updated;
-- CI is green.
+## When code exists
+Nested package/app `AGENTS.md` files may add local commands and constraints, but cannot contradict root architecture/design contracts.

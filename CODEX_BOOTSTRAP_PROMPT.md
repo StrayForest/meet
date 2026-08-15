@@ -1,33 +1,23 @@
 # Codex bootstrap prompt
 
-You are implementing a greenfield production system from this repository specification.
+Read `AGENTS.md` first, then `ARCHITECTURE.md` and `docs/00_INDEX.md`.
 
-Read, in order:
-1. `AGENTS.md`
-2. `docs/00_INDEX.md`
-3. `docs/01_PRODUCT_AND_FEATURES.md`
-4. `docs/02_DOMAIN_AND_DATABASE.md`
-5. `docs/03_API_AND_STATE_MACHINES.md`
-6. `docs/04_EVENT_INGESTION_AND_DISCOVERY.md`
-7. `docs/05_TRUST_SECURITY_PRIVACY.md`
-8. `docs/06_INFRASTRUCTURE_DEVOPS.md`
-9. `docs/07_ANALYTICS_I18N_SCALING.md`
-10. `docs/08_REPOSITORY_STRUCTURE.md`
-11. `docs/09_FIXED_ARCHITECTURE_DECISIONS.md`
-12. `docs/10_IMPLEMENTATION_BACKLOG.md`
+You are implementing Meet from a greenfield repository. The repository documentation is the source of truth.
 
-Then execute `docs/10_IMPLEMENTATION_BACKLOG.md` in order.
+## Operating rules
+1. Treat accepted architecture and approved design decisions as fixed. Do not substitute frameworks/providers/navigation/design system without the documented ADR/design-decision process.
+2. Use progressive disclosure: before a task read the relevant `docs/product-specs/*`, backend/security docs and design docs rather than loading the entire repository manual.
+3. For multi-step/risky work use `docs/PLANS.md` and maintain the active execution plan under `docs/exec-plans/active/`.
+4. Begin with the active Phase 0 plan and `docs/10_IMPLEMENTATION_BACKLOG.md`. Complete prerequisites before product screens.
+5. Keep individual implementation tasks well scoped even though the full roadmap is documented. Parallelize only independent work and preserve migration/contract merge order.
+6. For UI work, implement `design/tokens.json` through `packages/ui`, use approved screen/component specs and perform screenshot/visual/accessibility verification described in `docs/design-docs/visual-qa.md`.
+7. Never use raw ad-hoc colors/spacing to bypass the design contract.
+8. Do not introduce microservices. Preserve future extraction seams via module interfaces/outbox/contracts.
+9. If an external credential/account is unavailable, implement the provider port, fake/test adapter, config, tests and exact dependency note; continue every unblocked task.
+10. Every mutation considers authorization, idempotency, audit/safety and failure behavior.
+11. Update tests, analytics/telemetry, documentation, quality score and active plan as appropriate.
+12. Do not mark work complete until `docs/11_DEFINITION_OF_DONE.md` is satisfied and root checks are green.
+13. If measured reality genuinely conflicts with a frozen architecture/design choice, write a proposed ADR/design decision instead of silently changing the project.
 
-Rules:
-- Treat accepted architecture decisions as fixed.
-- Do not replace technologies because another library is more familiar.
-- Do not create microservices.
-- Preserve extraction seams through module interfaces, REST contracts and versioned outbox/domain events.
-- When an external credential/account is unavailable, implement the provider interface, local fake, configuration, tests and documentation; continue with all unblocked tasks.
-- Use expand → backfill/migrate → contract for breaking database changes.
-- Use feature flags for risky capabilities.
-- Never commit secrets.
-- Never mark a task complete if acceptance criteria are unmet.
-- Production-safe behavior is preferred over demo shortcuts.
-
-Primary objective: ship a production-grade Finland launch whose domain architecture does not require a rewrite for Nordic/EU expansion.
+## First action
+Open `docs/exec-plans/active/phase-0-foundation.md`, reconcile it with Phase 0 in `docs/10_IMPLEMENTATION_BACKLOG.md`, then execute Phase 0 tasks in dependency order.

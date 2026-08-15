@@ -1,40 +1,55 @@
 # Documentation index
 
-## Required reading order
+The repository is the system of record. Use progressive disclosure: read only the map plus documents relevant to the task.
 
-1. `01_PRODUCT_AND_FEATURES.md` — complete product definition and feature inventory.
-2. `02_DOMAIN_AND_DATABASE.md` — modules, entities, persistence and data ownership.
-3. `03_API_AND_STATE_MACHINES.md` — API conventions, endpoint families and state transitions.
-4. `04_EVENT_INGESTION_AND_DISCOVERY.md` — external supply, dedupe, map/search/ranking.
-5. `05_TRUST_SECURITY_PRIVACY.md` — identity, moderation, private-home safety, GDPR/DSA engineering.
-6. `06_INFRASTRUCTURE_DEVOPS.md` — fixed production topology, CI/CD, Terraform, deployment.
-7. `07_ANALYTICS_I18N_SCALING.md` — analytics, localization, country expansion and scale path.
-8. `08_REPOSITORY_STRUCTURE.md` — final monorepo layout.
-9. `09_FIXED_ARCHITECTURE_DECISIONS.md` — decisions Codex cannot alter without ADR.
-10. `10_IMPLEMENTATION_BACKLOG.md` — exact implementation order.
-11. `11_DEFINITION_OF_DONE.md` — completion standard.
+## Core maps
+1. `../AGENTS.md`
+2. `../ARCHITECTURE.md`
+3. `PRODUCT_SENSE.md`
+4. `09_FIXED_ARCHITECTURE_DECISIONS.md`
 
-## Schemas and diagrams
+## Product
+- `01_PRODUCT_AND_FEATURES.md` — complete inventory/reference.
+- `product-specs/index.md` — task-sized behavior/acceptance contracts.
 
+## Design/frontend
+- `DESIGN.md` — visual/product design source of truth.
+- `FRONTEND.md` — frontend engineering rules.
+- `design-docs/index.md` — design decisions, screens/components/accessibility/visual QA.
+- `../design/tokens.json` — machine-readable tokens.
+- `../design/DESIGN_SYSTEM_PREVIEW.html` — visual reference.
+
+## Backend/data/API
+- `02_DOMAIN_AND_DATABASE.md`
+- `03_API_AND_STATE_MACHINES.md`
+- `04_EVENT_INGESTION_AND_DISCOVERY.md`
 - `../schemas/database.dbml`
-- `../schemas/system-context.mmd`
-- `../schemas/deployment.mmd`
-- `../schemas/event-ingestion.mmd`
-- `../schemas/join-sequence.mmd`
-- `../schemas/moderation-flow.mmd`
 
-## Visual plan
+## Safety/security/reliability
+- `05_TRUST_SECURITY_PRIVACY.md`
+- `SECURITY.md`
+- `RELIABILITY.md`
+- `06_INFRASTRUCTURE_DEVOPS.md`
 
-- `../MASTER_ARCHITECTURE_BOARD.html`
+## Analytics/i18n/scaling
+- `07_ANALYTICS_I18N_SCALING.md`
 
-## Change policy
+## Repository and execution
+- `08_REPOSITORY_STRUCTURE.md`
+- `PLANS.md`
+- `exec-plans/index.md`
+- `10_IMPLEMENTATION_BACKLOG.md`
+- `11_DEFINITION_OF_DONE.md`
+- `QUALITY_SCORE.md`
 
-Architecture decisions are frozen unless a new ADR explicitly explains:
-- measured problem;
-- alternatives;
-- compatibility impact;
-- migration;
-- rollback;
-- approval.
+## References/generated
+- `references/`
+- `generated/`
+- architecture diagrams under `../schemas/`
 
-Resource sizing, indexes, cache TTLs and compatible dependency upgrades do not constitute architecture redesign.
+## Documentation rules
+- Stable decisions belong in indexed docs, not chat history.
+- Complex tasks keep progress/decision logs under `exec-plans/`.
+- Generated docs are regenerated, not hand-edited.
+- CI will eventually lint links, architecture boundaries and generated-doc freshness.
+- When implementation disproves a spec, update the spec/decision intentionally; never allow silent drift.

@@ -1,0 +1,20 @@
+flowchart LR
+  U[Consumer Mobile/Web] --> CF[Cloudflare]
+  B[B2B Dashboard] --> CF
+  A[Admin Console] --> CF
+  CF --> LB[GCP HTTPS Load Balancer]
+  LB --> API[NestJS API Modular Monolith]
+  LB --> RT[Realtime Gateway]
+  API --> PG[(PostgreSQL + PostGIS)]
+  API --> VK[(Valkey)]
+  RT --> VK
+  API --> ASYNC[Pub/Sub + Cloud Tasks]
+  API --> GCS[Cloud Storage]
+  SRC[External Event Sources] --> ING[Ingestion Workers]
+  ING --> ASYNC
+  ASYNC --> WK[Workers]
+  WK --> PG
+  WK --> GCS
+  API --> ID[Strong Identity Provider]
+  API --> AN[PostHog / BigQuery]
+  API --> OT[OpenTelemetry / Sentry]

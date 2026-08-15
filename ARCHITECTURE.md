@@ -1,41 +1,15 @@
 # Meet — Architecture 1.3 map
 
-Detailed truth lives in `docs/`; this is the short system map.
+Cross-domain map only; task contracts live in `docs/`.
 
-## Product/domain
-Meet is an event-first IRL social network.
+`Event → EventOccurrenceTemplate + optional EventRecurrence → physical EventOccurrence → Participation / Pods / Attendance`.
 
-Core model:
-`Event → EventOccurrenceTemplate + optional EventRecurrence → EventOccurrence → Participation / Pods / Attendance`.
+Clients: React Native/Expo mobile + Next.js web/B2B/admin. Backend: NestJS/Fastify TypeScript modular monolith. Data: PostgreSQL/PostGIS authoritative, Valkey ephemeral. API: REST/OpenAPI. Async: transactional outbox → Pub/Sub/Cloud Tasks with versioned idempotent consumers.
 
-- Event = stable canonical/series identity.
-- Template = defaults required to generate a physical occurrence.
-- Occurrence = concrete physical date/time/location users attend.
-- V1 is physical-only.
-- Admission/ticketing is independent from Meet social participation.
+Runtime: `Cloudflare → GCP external load balancer → Cloud Run → Cloud SQL/Memorystore/Storage`; primary `europe-north1`, DR `europe-north2`. Terraform owns infrastructure.
 
-## Runtime topology
-`Mobile/Web/B2B/Admin → Cloudflare → authenticated/restricted GCP External Application Load Balancer → Cloud Run API/Realtime → PostgreSQL/PostGIS + Valkey + Pub/Sub/Cloud Tasks + Cloud Storage`.
+Critical invariants: physical-only V1; admission != social participation; exact private-home data separately encrypted/authorized; staff identity isolated/MFA/audited; old mobile clients remain compatible; first-party kill switches; tamper-evident privileged audit; SLO/error budgets gate risky releases.
 
-Cloud Run direct public bypass is disabled/restricted. Exact origin controls are in `docs/ORIGIN_SECURITY.md`.
+Schema authority changes at P0-006: DBML design blueprint → Drizzle+migrations executable truth.
 
-## Backend/data
-NestJS + Fastify TypeScript modular monolith. Module-owned writes/persistence. PostgreSQL authoritative; Valkey ephemeral. Durable async effects use transactional outbox and versioned event contracts.
-
-Before first migration, `schemas/database.dbml` is design truth. After P0-006, Drizzle schema+migrations are executable truth and DBML is generated/verified.
-
-## Mobile
-React Native + Expo. EAS Build/Submit for binaries; EAS Update only inside compatible runtimeVersion. Backend supports minimum-supported mobile clients.
-
-## Safety/privacy
-18+ adult network. Strong identity for private-home hosts. Exact private location is occurrence-scoped and self-describing envelope ciphertext. Moderation evidence uses immutable snapshots when required. Staff identity is isolated/MFA/audited.
-
-## Reliability/DR
-Tier-0 correctness includes join/capacity, imminent event truth, cancellation, safety controls and exact-location authorization. Primary region Finland (`europe-north1`); recoverability target Stockholm (`europe-north2`) evolves from tested restore to warm standby based on business-impact triggers, not MAU.
-
-## Security/governance
-- first-party OperationalFlags for kill switches;
-- supply-chain controls, pinned CI actions, SBOM/provenance where plan permits;
-- append-only/tamper-evident security audit;
-- protected PR/release workflow;
-- SLI/SLO/error budgets gate risky releases.
+For implementation context, use `docs/00_INDEX.md`; do not use this map as a feature spec.

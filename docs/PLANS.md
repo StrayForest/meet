@@ -1,23 +1,9 @@
-# PLANS — Execution-plan policy
+# PLANS — execution-plan policy
 
-Complex work is tracked as repository-local execution plans.
+Use an exec plan for multi-module work, migrations, rollout/rollback, new providers, multi-task work, or meaningful safety/privacy/reliability risk.
 
-## Locations
-- `exec-plans/active/`: current multi-step plans.
-- `exec-plans/completed/`: completed plans retained as design/decision history.
-- `exec-plans/tech-debt-tracker.md`: known debt and cleanup commitments.
+Locations: `exec-plans/active/`, `exec-plans/completed/`, `exec-plans/tech-debt-tracker.md`.
 
-## When a plan is required
-Use an execution plan when work:
-- spans multiple modules/apps;
-- changes data/migrations;
-- has rollout/rollback steps;
-- involves a new integration/provider;
-- is expected to take more than one focused Codex task;
-- has meaningful safety/privacy/reliability risk.
+A plan records: goal/non-goals, **links/context-pack IDs instead of copied specs**, milestones, acceptance, migration/test/telemetry/rollout/rollback, risks, progress, and decision/deviation deltas.
 
-## Required plan sections
-Goal; non-goals; source specs; current state; milestones; acceptance criteria; migrations; test plan; telemetry; rollout; rollback; risks; progress log; decisions/deviations.
-
-## Agent behavior
-Codex updates the active plan as work proceeds. Unexpected discoveries are written into the plan rather than kept in chat memory. On completion, move the plan to `completed/` and update quality/tech-debt docs.
+Do not repeat stable architecture/product text in a plan. Codex updates the plan as discoveries occur; completed plans move to `completed/`.

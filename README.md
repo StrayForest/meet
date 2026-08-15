@@ -1,11 +1,9 @@
 # Meet
 
-Event-first IRL social platform. **Architecture 1.3** is frozen for greenfield implementation.
+Event-first IRL social platform. Architecture **1.3** is frozen for greenfield implementation.
 
-Start: `AGENTS.md` → `ARCHITECTURE.md` → `docs/00_INDEX.md` → active Phase 0 exec plan.
+Codex starts with `AGENTS.md` only. Task-specific context is routed by `docs/00_INDEX.md`; do not preload the documentation tree.
 
-Core model: `Event → EventOccurrenceTemplate + optional EventRecurrence → physical EventOccurrence → participation/Pods/attendance`.
+Core model: `Event → EventOccurrenceTemplate + optional EventRecurrence → physical EventOccurrence`.
 
-Do not implement from old chat/history. Before P0-006 DBML V3 is the schema design blueprint; after P0-006 schema truth moves to Drizzle+migrations and DBML is generated/verified.
-
-Codex bootstrap: `CODEX_BOOTSTRAP_PROMPT.md`.
+Bootstrap: `CODEX_BOOTSTRAP_PROMPT.md`.

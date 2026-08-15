@@ -1,63 +1,29 @@
-# Documentation index — Architecture 1.3
+# Context router — Architecture 1.3
 
-The repository is the system of record. Read only the smallest relevant set.
+**Rule:** do not read every pack. Pick the smallest pack for the task; add a second pack only when the diff crosses that boundary.
 
-## Core
-1. `../AGENTS.md`
-2. `../ARCHITECTURE.md`
-3. `PRODUCT_SENSE.md`
-4. `09_FIXED_ARCHITECTURE_DECISIONS.md`
-5. accepted rationale under `adr/`
+| Pack | Use | Read |
+|---|---|---|
+| `R` | repo/tooling/structure | `08_REPOSITORY_STRUCTURE.md`, `REPOSITORY_GOVERNANCE.md`, relevant exec-plan section |
+| `DB` | schema/migration | `02_DOMAIN_AND_DATABASE.md`, `SCHEMA_GOVERNANCE.md`, targeted `../schemas/database.dbml` section |
+| `API` | endpoint/application logic | relevant `product-specs/*`, `BACKEND.md`, `03_API_AND_STATE_MACHINES.md` |
+| `EV` | Event/recurrence/participation | relevant product spec, `02_DOMAIN_AND_DATABASE.md`; add `DB` only for schema changes |
+| `UI` | consumer/B2B/admin UI | relevant product spec, relevant `design-docs/*`, `../design/tokens.json` |
+| `MOB` | Expo/release/client lifecycle | `MOBILE_RELEASES.md`, `CLIENT_COMPATIBILITY.md`; add privacy/deep-links only if touched |
+| `RT` | chat/realtime | `product-specs/pods-chat-connections.md`, `REALTIME.md` |
+| `ING` | event import/discovery supply | `04_EVENT_INGESTION_AND_DISCOVERY.md`; add `DB` only for persistence changes |
+| `ASY` | durable domain events | `EVENT_CONTRACTS.md` + owning module/product spec |
+| `SAFE` | safety/private-home/moderation | relevant safety product spec + `SECURITY.md`; add crypto/audit/lifecycle only if touched |
+| `OPS` | infra/reliability | `06_INFRASTRUCTURE_DEVOPS.md` + **one** specialist doc: origin, DR, SLO, supply-chain or capacity |
+| `TEST` | tests/QA | `TESTING.md` + the contract being tested |
+| `AN` | analytics/i18n | `07_ANALYTICS_I18N_SCALING.md` + named reference only if needed |
+| `ADR` | architecture change | `09_FIXED_ARCHITECTURE_DECISIONS.md` + relevant accepted ADR; read alternatives only when changing it |
 
-## Product/design
-- `01_PRODUCT_AND_FEATURES.md`
-- `product-specs/index.md`
-- `DESIGN.md`, `FRONTEND.md`, `design-docs/index.md`
-- `../design/tokens.json`
+## Large/rare sources
+- Full `database.dbml`: only schema-wide work such as P0-006/audit; otherwise search table names and read bounded spans.
+- `01_PRODUCT_AND_FEATURES.md`: inventory only; use a task-sized `product-specs/*` for implementation.
+- `MASTER_*`, completed exec plans, competitor research and `references/`: on-demand only, never routine preload.
+- `DESIGN_SYSTEM_PREVIEW.html`: visual reference only.
 
-## Backend/data/contracts
-- `BACKEND.md`
-- `02_DOMAIN_AND_DATABASE.md`
-- `03_API_AND_STATE_MACHINES.md`
-- `SCHEMA_GOVERNANCE.md`
-- `EVENT_CONTRACTS.md`
-- `04_EVENT_INGESTION_AND_DISCOVERY.md`
-- `REALTIME.md`
-- `../schemas/database.dbml` — pre-P0-006 design blueprint; generated/verified after schema cutover
-
-## Mobile
-- `MOBILE_RELEASES.md`
-- `MOBILE_PRIVACY_COMPLIANCE.md`
-- `CLIENT_COMPATIBILITY.md`
-- `DEEP_LINKS_SEO.md`
-- `DEVICE_APP_INTEGRITY.md`
-
-## Security/privacy/reliability
-- `05_TRUST_SECURITY_PRIVACY.md`
-- `SECURITY.md`
-- `CRYPTOGRAPHY_KEY_MANAGEMENT.md`
-- `AUDIT_LOGGING.md`
-- `DATA_LIFECYCLE_AND_RETENTION.md`
-- `SUPPLY_CHAIN_SECURITY.md`
-- `ORIGIN_SECURITY.md`
-- `RELIABILITY.md`
-- `SLO_SLI_ERROR_BUDGETS.md`
-- `DISASTER_RECOVERY.md`
-- `OPERATIONS.md`
-- `06_INFRASTRUCTURE_DEVOPS.md`
-
-## Scaling/quality/governance
-- `CAPACITY_AND_COST_MODEL.md`
-- `TESTING.md`
-- `07_ANALYTICS_I18N_SCALING.md`
-- `REPOSITORY_GOVERNANCE.md`
-- `PLANS.md`, `exec-plans/index.md`
-- `10_IMPLEMENTATION_BACKLOG.md`
-- `11_DEFINITION_OF_DONE.md`
-- `QUALITY_SCORE.md`
-
-## References
-`references/` contains analytics catalog, data classification, permissions, provider/config/source/research registries.
-
-## Conflict rule
-Before P0-006, accepted ADR + indexed prose + DBML must agree. After P0-006, executable Drizzle schema+migrations supersede DBML as schema truth, while API/event/product contracts remain governed separately. A conflict stops the affected implementation path until reconciled.
+## Conflict
+If accepted ADR/product contract/schema truth disagree, stop only the affected path and reconcile. Do not solve conflicts by loading the entire repository.

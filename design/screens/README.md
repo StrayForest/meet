@@ -4,7 +4,7 @@ Static HTML examples for every major consumer, organization and staff page defin
 
 ## Open
 - `index.html` — surface index
-- `consumer.html` — M01–M97
+- `consumer.html` — M01–M100
 - `b2b.html` — B01–B20
 - `admin.html` — A01–A22
 

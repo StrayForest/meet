@@ -1,0 +1,27 @@
+{
+  "project": "irl-social-platform",
+  "architectureVersion": "1.0",
+  "product": "event-first IRL social network / real-world social marketplace",
+  "launchMarket": "Finland",
+  "launchLocales": ["fi", "en", "ru"],
+  "minimumAge": 18,
+  "primaryCloudRegion": "gcp:europe-north1",
+  "runtime": {"node": "24 LTS", "packageManager": "pnpm 11", "monorepo": "Turborepo"},
+  "apps": {
+    "mobile": "React Native + Expo + TypeScript",
+    "web": "Next.js + TypeScript",
+    "b2b": "Next.js + TypeScript",
+    "admin": "Next.js + TypeScript",
+    "api": "NestJS + Fastify + TypeScript",
+    "workers": "NestJS/Node.js + TypeScript"
+  },
+  "data": {
+    "primary": "PostgreSQL 18 + PostGIS",
+    "cache": "Valkey",
+    "objects": "GCP Cloud Storage",
+    "warehouse": "BigQuery"
+  },
+  "edge": "Cloudflare",
+  "infraAsCode": "Terraform",
+  "northStar": "Successful IRL Participations per week"
+}

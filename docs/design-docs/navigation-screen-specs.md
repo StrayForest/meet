@@ -1,111 +1,85 @@
 # Navigation and screen specifications
 
 ## Mobile navigation
-Persistent bottom tabs:
-1. Home
-2. Map
-3. Create
-4. Chats
-5. Profile
-
-Notification inbox is top-level from Home header; Search is visible on Home/Map and deep-linkable. Back behavior follows platform conventions.
+Persistent tabs: Home, Map, Create, Chats, Profile. Notification inbox from Home; Search visible on Home/Map/deep-linkable. Back follows platform conventions.
 
 ## Home
-### Header
-- current city/area chip;
-- notification icon with accessible unread state.
+Header: city/area + notifications. Search field: “Search events, activities or places”. Quick time filters: Now · Today · Weekend · Pick date.
 
-### Search
-Full-width search field: “Search events, activities or places”.
-
-### Quick time filters
-Now · Today · Weekend · Pick date.
-
-### Feed hierarchy
-1. `Now near you` when supply exists.
-2. `For you` personalized but deterministic/explainable V1.
-3. `Today`.
-4. `This weekend`.
-5. category/organization/editorial collections only when useful.
-
-Low-density: widen radius, show official/imported supply, explain distance, then offer “Create an activity”. Never blank.
+Feed hierarchy: Now near you → For you → Today → This weekend → useful collections. Low-density widens radius, shows official/imported supply, explains distance, then offers Create; never blank by default when broader supply exists.
 
 ## Event card
-Preferred mobile list card:
 - 16:9 event image/category fallback;
-- source/trust badge over image only if readable;
-- start time/date is first text metadata;
+- source/trust badge where relevant;
+- start/date first metadata;
 - title max 2 lines;
 - venue/area + distance;
-- language/capacity only when decision-relevant;
-- attendee facepile + count or Pod count;
-- contextual CTA: Join / Request / Tickets / Full / View.
+- language/social capacity when decision-relevant;
+- attendee facepile/count or Pod count;
+- **social CTA**: Join / Request / Waitlist / Joined / View;
+- independent admission indicator/action: Free / Tickets / Register where relevant.
 
-No bio text or large person portrait dominates an event card.
+A ticketed event may show `Get tickets` and `I'm going` simultaneously. Never imply ticket ownership from Meet participation.
 
 ## Map
-- full-screen map;
-- search and compact filter chips at top safe area;
-- map pins cluster;
-- selecting pin opens bottom card/sheet;
-- List toggle returns same query/filter context;
-- private-home events show coarse area only;
-- location permission can be denied; city-based map remains usable.
+Full-screen map; search/filter chips; clusters; selected pin bottom card; List preserves query/filter context; private-home only coarse area; location permission optional because city-based discovery remains usable.
 
 ## Event detail
 Order:
 1. image/gallery;
-2. date/time + title;
-3. venue/area/distance + map affordance;
-4. primary CTA/sticky bottom action;
-5. availability/capacity;
-6. attendee/Pod social context;
-7. organizer + verification;
-8. description;
-9. practical info: language, accessibility, age/audience, cost/ticketing;
-10. safety/source info;
-11. report/share.
+2. selected EventOccurrence date/time + Event title;
+3. venue/area/distance + map;
+4. primary **Meet social CTA**;
+5. admission/ticket action/info if separate;
+6. Meet social capacity/availability;
+7. attendees/Pods;
+8. organizer + verification;
+9. description;
+10. language/accessibility/age/audience/cost;
+11. safety/source;
+12. report/share.
 
-Material cancellation/update banner must appear above normal content.
+Recurring series provides occurrence switcher/next dates without hiding concrete location/capacity changes. Cancellation/material update banner overrides normal content.
 
 ## Join
-Open event: CTA → lightweight confirmation only if needed → confirmed state.
-Approval event: CTA → optional host-required answers → request sent.
-Full event: CTA → Join waitlist.
-External ticket: `Get tickets` opens trusted external flow; “I’m going” social intent must be distinguishable from ticket ownership if supported.
+- OPEN → Join / I'm going.
+- APPROVAL_REQUIRED → Request to join.
+- full + waitlist enabled → Join waitlist.
+- INVITE_ONLY → invite state/action.
+- DISABLED → no social join CTA.
+- EXTERNAL_TICKET admission → separate Get tickets/Register external action; does not replace social CTA.
+
+Before high-impact CTA completes, current server occurrence state is revalidated.
 
 ## Pod
-Event detail shows Pods after core join context. Pod card: title, purpose/meeting point, members, capacity, language, join mode. Do not use dating-like member grid.
+Displayed after core occurrence/social context. Pod card: title, purpose/meeting point, members, capacity, language, social participation mode. No ticket semantics or dating-like member grid.
 
 ## Create event
-Mobile wizard uses progressive steps and autosaved draft:
+Progressive autosaved wizard:
 1. What are you doing? category + title.
-2. When? date/time/recurrence.
-3. Where? venue/outdoor/home/online.
-4. Who can join? capacity, approval, age/audience, language.
-5. Details/media/accessibility/cost.
-6. Preview + safety/verification checks + publish.
+2. When? one-time or supported recurrence.
+3. Where? Public Venue / Outdoor / Private Home / Hybrid.
+4. Admission? None / Free / External ticket-registration.
+5. Who can join in Meet? Open / Approval / Invite only / Disabled + capacity/waitlist/audience/language.
+6. Details/media/accessibility.
+7. Preview + safety/verification + publish.
 
-Private-home selection immediately explains verification/address privacy before later steps.
+No online-only V1 option. Private Home immediately explains strong verification and exact-address privacy. Occurrence overrides are explicit for recurring series.
 
 ## Chats
-Conversation list prioritizes upcoming event/Pod chats. Each row shows event context and event time, not only avatar/name. Connection DMs are visually secondary.
+Upcoming EventOccurrence/Pod chats prioritized. Rows show event context/time, not only avatar/name. Connection DMs secondary.
 
 ## Profile
-Own profile starts with practical identity/trust: nickname/avatar, city, languages/interests, verification, activity history. No follower/following vanity counters.
+Nickname/avatar, city, languages/interests, verification, activity history. No follower vanity counters.
 
 ## Onboarding
-Keep to approximately 5 grouped stages after auth:
-1. basic identity/18+;
-2. city + languages;
-3. interests;
-4. photo optional + trust explanation;
-5. permissions/preferences + final terms confirmation.
+Approximately five grouped stages after auth: identity/18+; city/languages; interests; optional photo/trust; permissions/preferences + legal acceptance. Ask notification/location contextually.
 
-Ask notification/location permissions contextually, not all at first launch.
+## Deep links
+Canonical HTTPS event/organization URL opens native route via Universal/App Links when installed and public web otherwise. Alias links resolve canonical.
 
 ## Web
-Public web prioritizes SEO/event detail/share and account handoff. It is not a desktop clone of every mobile feature initially.
+Public web prioritizes SEO/event detail/share/account handoff; not a desktop clone of all mobile features.
 
 ## B2B/Admin
-Desktop information architecture uses left navigation, tables and detail panels. Safety/admin pages prioritize density and traceability over consumer card styling.
+Desktop left navigation, tables/detail panels. Safety/admin prioritizes density/traceability. Staff actions are visibly privileged/audited and never represented as consumer impersonation.

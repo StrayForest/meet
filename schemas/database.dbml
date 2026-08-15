@@ -1,6 +1,6 @@
-Project irl_social_platform {
+Project meet_v2 {
   database_type: 'PostgreSQL'
-  Note: 'PostgreSQL 18 + PostGIS. First-party IDs are UUIDv7.'
+  Note: 'Authoritative V2 blueprint. PostgreSQL 18 + PostGIS. First-party IDs UUIDv7. Migrations add CHECK constraints noted below.'
 }
 
 Enum user_status { ACTIVE RESTRICTED SUSPENDED DELETION_PENDING DELETED }
@@ -8,13 +8,24 @@ Enum event_state { DRAFT PENDING_REVIEW PUBLISHED CANCELLED COMPLETED REMOVED AR
 Enum occurrence_state { SCHEDULED JOIN_CLOSED CANCELLED COMPLETED REMOVED }
 Enum event_origin { IMPORTED ORGANIZATION COMMUNITY PLATFORM }
 Enum event_access { PUBLIC UNLISTED PRIVATE ORGANIZATION_ONLY }
-Enum join_mode { OPEN APPROVAL_REQUIRED INVITE_ONLY EXTERNAL_TICKET }
-Enum place_type { PUBLIC_VENUE OUTDOOR PRIVATE_HOME ONLINE }
+Enum admission_mode { NONE FREE EXTERNAL_TICKET INTERNAL_TICKET }
+Enum participation_mode { OPEN APPROVAL_REQUIRED INVITE_ONLY DISABLED }
+Enum waitlist_policy { DISABLED ENABLED }
+Enum place_type { PUBLIC_VENUE OUTDOOR PRIVATE_HOME HYBRID }
 Enum participation_state { REQUESTED WAITLISTED SLOT_OFFERED CONFIRMED REJECTED EXPIRED CANCELLED_BY_USER REMOVED_BY_HOST ATTENDED NO_SHOW }
+Enum pod_state { DRAFT OPEN FULL CLOSED CANCELLED COMPLETED REMOVED }
+Enum pod_member_state { REQUESTED CONFIRMED REJECTED LEFT REMOVED }
 Enum org_status { UNCLAIMED CLAIM_PENDING VERIFIED SUSPENDED CLOSED }
 Enum org_role { OWNER ADMIN EVENT_MANAGER MODERATOR ANALYST BILLING }
 Enum verification_status { CREATED PENDING VERIFIED FAILED EXPIRED REVOKED }
+Enum media_status { UPLOADING QUARANTINED PROCESSING READY REJECTED DELETED }
+Enum ingestion_run_status { CREATED RUNNING SUCCEEDED PARTIAL FAILED }
+Enum report_status { SUBMITTED TRIAGED LINKED_TO_CASE CLOSED }
 Enum case_state { OPEN TRIAGED INVESTIGATING ACTIONED APPEALED CLOSED }
+Enum appeal_state { SUBMITTED UNDER_REVIEW UPHELD OVERTURNED PARTIALLY_OVERTURNED CLOSED }
+Enum conversation_type { OCCURRENCE POD CONNECTION ORGANIZATION_ANNOUNCEMENT }
+Enum delivery_status { QUEUED SENT DELIVERED FAILED_RETRYABLE FAILED_FINAL SUPPRESSED }
+Enum job_status { REQUESTED RUNNING SUCCEEDED FAILED CANCELLED }
 
 Table users {
   id uuid [pk]
@@ -29,8 +40,8 @@ Table user_public_profiles {
   user_id uuid [pk, ref: > users.id]
   nickname varchar [not null]
   bio text
-  avatar_media_id uuid
-  home_city_id uuid
+  avatar_media_id uuid [ref: > media_assets.id]
+  home_city_id uuid [ref: > cities.id]
   gender_display varchar
   visibility varchar [not null]
   created_at timestamptz [not null]
@@ -57,6 +68,7 @@ Table user_interests {
   user_id uuid [ref: > users.id]
   interest_id uuid [ref: > interests.id]
   weight int
+  created_at timestamptz [not null]
   indexes { (user_id, interest_id) [unique] }
 }
 
@@ -71,8 +83,70 @@ Table user_preferences {
   user_id uuid [pk, ref: > users.id]
   discovery jsonb [not null]
   privacy jsonb [not null]
-  notifications jsonb [not null]
   updated_at timestamptz [not null]
+}
+
+Table notification_preferences {
+  user_id uuid [pk, ref: > users.id]
+  preferences jsonb [not null]
+  quiet_hours jsonb
+  updated_at timestamptz [not null]
+}
+
+Table user_devices {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  platform varchar [not null]
+  device_install_id varchar [not null]
+  push_provider varchar
+  push_token varchar
+  app_version varchar
+  build_number varchar
+  runtime_version varchar
+  last_seen_at timestamptz [not null]
+  revoked_at timestamptz
+  created_at timestamptz [not null]
+  indexes { (user_id, device_install_id) [unique] }
+}
+
+Table legal_documents {
+  id uuid [pk]
+  document_type varchar [not null]
+  version varchar [not null]
+  locale varchar [not null]
+  content_hash varchar [not null]
+  effective_at timestamptz [not null]
+  retired_at timestamptz
+  indexes { (document_type, version, locale) [unique] }
+}
+
+Table legal_acceptances {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  legal_document_id uuid [ref: > legal_documents.id, not null]
+  accepted_at timestamptz [not null]
+  ip_country char(2)
+  indexes { (user_id, legal_document_id) [unique] }
+}
+
+Table data_export_requests {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  status job_status [not null]
+  result_object_uri text
+  expires_at timestamptz
+  requested_at timestamptz [not null]
+  completed_at timestamptz
+}
+
+Table account_deletion_requests {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  status job_status [not null]
+  requested_at timestamptz [not null]
+  scheduled_purge_at timestamptz
+  completed_at timestamptz
+  failure_code varchar
 }
 
 Table identity_verifications {
@@ -91,6 +165,25 @@ Table identity_verifications {
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   indexes { (provider, provider_reference) [unique] }
+}
+
+Table staff_accounts {
+  id uuid [pk]
+  identity_subject varchar [not null, unique]
+  email_normalized varchar [not null]
+  status varchar [not null]
+  mfa_required boolean [not null, default: true]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  disabled_at timestamptz
+}
+
+Table staff_account_roles {
+  staff_account_id uuid [ref: > staff_accounts.id]
+  role varchar [not null]
+  scope jsonb
+  granted_at timestamptz [not null]
+  indexes { (staff_account_id, role) [unique] }
 }
 
 Table countries {
@@ -116,6 +209,22 @@ Table cities {
   center_geography geography
 }
 
+Table media_assets {
+  id uuid [pk]
+  owner_user_id uuid [ref: > users.id]
+  status media_status [not null]
+  media_type varchar [not null]
+  storage_key text [not null, unique]
+  mime_type varchar
+  byte_size bigint
+  width int
+  height int
+  moderation_metadata jsonb
+  created_at timestamptz [not null]
+  ready_at timestamptz
+  deleted_at timestamptz
+}
+
 Table organizations {
   id uuid [pk]
   status org_status [not null]
@@ -125,6 +234,7 @@ Table organizations {
   description text
   country_code char(2) [ref: > countries.code]
   website_url text
+  logo_media_id uuid [ref: > media_assets.id]
   verified_at timestamptz
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
@@ -146,7 +256,7 @@ Table organization_claims {
   claimant_user_id uuid [ref: > users.id, not null]
   status varchar [not null]
   evidence jsonb
-  reviewed_by uuid
+  reviewed_by_staff_id uuid [ref: > staff_accounts.id]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 }
@@ -164,10 +274,66 @@ Table venues {
   updated_at timestamptz [not null]
 }
 
+Table event_categories {
+  id uuid [pk]
+  slug varchar [not null, unique]
+  parent_id uuid [ref: > event_categories.id]
+  sort_order int [not null, default: 0]
+  active boolean [not null, default: true]
+}
+
+Table ingestion_sources {
+  id uuid [pk]
+  source_key varchar [not null, unique]
+  source_type varchar [not null]
+  country_code char(2) [ref: > countries.code]
+  rights_metadata jsonb [not null]
+  rights_review_at timestamptz
+  config jsonb [not null]
+  freshness_sla_seconds int
+  enabled boolean [not null, default: true]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table organization_source_mappings {
+  source_id uuid [ref: > ingestion_sources.id]
+  source_organization_id varchar [not null]
+  organization_id uuid [ref: > organizations.id, not null]
+  created_at timestamptz [not null]
+  indexes { (source_id, source_organization_id) [unique] }
+}
+
+Table venue_source_mappings {
+  source_id uuid [ref: > ingestion_sources.id]
+  source_venue_id varchar [not null]
+  venue_id uuid [ref: > venues.id, not null]
+  created_at timestamptz [not null]
+  indexes { (source_id, source_venue_id) [unique] }
+}
+
+Table ingestion_runs {
+  id uuid [pk]
+  source_id uuid [ref: > ingestion_sources.id, not null]
+  status ingestion_run_status [not null]
+  cursor_before text
+  cursor_after text
+  fetched_count int [not null, default: 0]
+  created_count int [not null, default: 0]
+  updated_count int [not null, default: 0]
+  cancelled_count int [not null, default: 0]
+  error_count int [not null, default: 0]
+  error_summary jsonb
+  started_at timestamptz [not null]
+  finished_at timestamptz
+}
+
 Table raw_event_records {
   id uuid [pk]
-  source_key varchar [not null]
+  ingestion_run_id uuid [ref: > ingestion_runs.id]
+  source_id uuid [ref: > ingestion_sources.id, not null]
   source_event_id varchar [not null]
+  source_occurrence_id varchar
   fetched_at timestamptz [not null]
   source_updated_at timestamptz
   content_hash varchar [not null]
@@ -176,6 +342,7 @@ Table raw_event_records {
   rights_metadata jsonb
   parse_status varchar [not null]
   error_code varchar
+  indexes { (source_id, source_event_id, content_hash) }
 }
 
 Table events {
@@ -183,36 +350,35 @@ Table events {
   origin event_origin [not null]
   state event_state [not null]
   access event_access [not null]
-  join_mode join_mode [not null]
-  place_type place_type [not null]
   owner_user_id uuid [ref: > users.id]
   organization_id uuid [ref: > organizations.id]
-  venue_id uuid [ref: > venues.id]
-  category_id uuid
-  default_capacity int
+  category_id uuid [ref: > event_categories.id]
+  default_admission_mode admission_mode [not null]
+  default_participation_mode participation_mode [not null]
+  default_waitlist_policy waitlist_policy [not null]
+  default_social_capacity int
   min_age int [not null, default: 18]
   max_age int
   audience_policy jsonb [not null]
-  recurrence_rule text
-  external_ticket_url text
+  accessibility_metadata jsonb
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   published_at timestamptz
 }
 
-Table event_sources {
-  id uuid [pk]
-  event_id uuid [ref: > events.id]
-  source_key varchar [not null]
-  source_event_id varchar [not null]
-  source_url text
-  license_key varchar
-  rights_metadata jsonb
-  source_updated_at timestamptz
-  last_fetched_at timestamptz [not null]
-  content_hash varchar
-  raw_record_id uuid [ref: > raw_event_records.id]
-  indexes { (source_key, source_event_id) [unique] }
+Table event_recurrences {
+  event_id uuid [pk, ref: > events.id]
+  frequency varchar [not null]
+  interval int [not null, default: 1]
+  byday varchar
+  count int
+  until_local timestamp
+  dtstart_local timestamp [not null]
+  timezone varchar [not null]
+  materialized_through timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  Note: 'Migration CHECK: frequency DAILY/WEEKLY/MONTHLY; interval>0; COUNT/UNTIL validity.'
 }
 
 Table event_translations {
@@ -226,6 +392,16 @@ Table event_translations {
   indexes { (event_id, locale) [unique] }
 }
 
+Table private_locations {
+  id uuid [pk]
+  encrypted_address bytea [not null]
+  encrypted_exact_location bytea [not null]
+  public_area_label varchar [not null]
+  disclosure_policy jsonb [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
 Table event_occurrences {
   id uuid [pk]
   event_id uuid [ref: > events.id, not null]
@@ -233,32 +409,73 @@ Table event_occurrences {
   starts_at timestamptz [not null]
   ends_at timestamptz
   timezone varchar [not null]
-  capacity_override int
-  join_closes_at timestamptz
+  venue_id uuid [ref: > venues.id]
+  place_type place_type [not null]
+  private_location_id uuid [ref: > private_locations.id]
   public_geography geography
+  admission_mode admission_mode [not null]
+  participation_mode participation_mode [not null]
+  waitlist_policy waitlist_policy [not null]
+  social_capacity int
+  join_closes_at timestamptz
+  external_ticket_url text
+  price_display jsonb
+  policy_overrides jsonb
+  version bigint [not null, default: 1]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   indexes {
     (event_id, starts_at)
     (state, starts_at)
   }
+  Note: 'Migration CHECK: PRIVATE_HOME requires private_location_id; non-private must not leak private location; HYBRID still requires physical public/private location.'
 }
 
-Table private_event_locations {
-  event_id uuid [pk, ref: > events.id]
-  encrypted_address bytea [not null]
-  encrypted_exact_location bytea [not null]
-  public_area_label varchar [not null]
-  disclosure_policy jsonb [not null]
-  updated_at timestamptz [not null]
+Table event_source_links {
+  id uuid [pk]
+  source_id uuid [ref: > ingestion_sources.id, not null]
+  source_event_id varchar [not null]
+  event_id uuid [ref: > events.id, not null]
+  source_url text
+  rights_metadata jsonb
+  source_updated_at timestamptz
+  last_fetched_at timestamptz [not null]
+  content_hash varchar
+  last_raw_record_id uuid [ref: > raw_event_records.id]
+  indexes { (source_id, source_event_id) [unique] }
+}
+
+Table occurrence_source_links {
+  id uuid [pk]
+  source_id uuid [ref: > ingestion_sources.id, not null]
+  source_occurrence_id varchar [not null]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  source_updated_at timestamptz
+  last_fetched_at timestamptz [not null]
+  indexes { (source_id, source_occurrence_id) [unique] }
+}
+
+Table event_aliases {
+  alias_event_id uuid [pk]
+  canonical_event_id uuid [ref: > events.id, not null]
+  reason varchar [not null]
+  merged_at timestamptz [not null]
+  merged_by_staff_id uuid [ref: > staff_accounts.id]
+  Note: 'Application/migration prevents self-alias, cycles and alias chains; resolve/flatten to live canonical Event.'
+}
+
+Table occurrence_aliases {
+  alias_occurrence_id uuid [pk]
+  canonical_occurrence_id uuid [ref: > event_occurrences.id, not null]
+  reason varchar [not null]
+  merged_at timestamptz [not null]
 }
 
 Table event_media {
-  id uuid [pk]
-  event_id uuid [ref: > events.id, not null]
-  media_id uuid [not null]
+  event_id uuid [ref: > events.id]
+  media_asset_id uuid [ref: > media_assets.id]
   sort_order int [not null]
-  created_at timestamptz [not null]
+  indexes { (event_id, media_asset_id) [unique] }
 }
 
 Table participations {
@@ -293,7 +510,7 @@ Table waitlist_offers {
 
 Table invitations {
   id uuid [pk]
-  occurrence_id uuid [ref: > event_occurrences.id]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
   invited_user_id uuid [ref: > users.id]
   invited_by_user_id uuid [ref: > users.id, not null]
   token_hash varchar
@@ -316,32 +533,45 @@ Table pods {
   id uuid [pk]
   occurrence_id uuid [ref: > event_occurrences.id, not null]
   created_by_user_id uuid [ref: > users.id, not null]
-  state varchar [not null]
-  join_mode join_mode [not null]
+  state pod_state [not null]
+  participation_mode participation_mode [not null]
   title varchar [not null]
   description text
   capacity int
   meeting_point jsonb
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
+  Note: 'Pod participation_mode cannot use admission semantics; DISABLED normally only terminal/admin policy.'
 }
 
 Table pod_members {
   pod_id uuid [ref: > pods.id]
   user_id uuid [ref: > users.id]
-  state varchar [not null]
+  state pod_member_state [not null]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   indexes { (pod_id, user_id) [unique] }
 }
 
+Table connections {
+  id uuid [pk]
+  user_low_id uuid [ref: > users.id, not null]
+  user_high_id uuid [ref: > users.id, not null]
+  status varchar [not null]
+  created_at timestamptz [not null]
+  indexes { (user_low_id, user_high_id) [unique] }
+  Note: 'Migration CHECK requires distinct canonical ordered pair; application canonicalizes pair before insert.'
+}
+
 Table conversations {
   id uuid [pk]
-  type varchar [not null]
-  event_id uuid [ref: > events.id]
+  type conversation_type [not null]
   occurrence_id uuid [ref: > event_occurrences.id]
   pod_id uuid [ref: > pods.id]
+  connection_id uuid [ref: > connections.id]
+  organization_id uuid [ref: > organizations.id]
   created_at timestamptz [not null]
+  Note: 'Migration CHECK enforces exactly one context column matching conversation type.'
 }
 
 Table conversation_members {
@@ -367,12 +597,10 @@ Table messages {
   indexes { (conversation_id, created_at, id) }
 }
 
-Table connections {
-  id uuid [pk]
-  user_a_id uuid [ref: > users.id, not null]
-  user_b_id uuid [ref: > users.id, not null]
-  status varchar [not null]
-  created_at timestamptz [not null]
+Table message_media {
+  message_id uuid [ref: > messages.id]
+  media_asset_id uuid [ref: > media_assets.id]
+  indexes { (message_id, media_asset_id) [unique] }
 }
 
 Table blocks {
@@ -380,6 +608,7 @@ Table blocks {
   blocked_user_id uuid [ref: > users.id]
   created_at timestamptz [not null]
   indexes { (blocker_user_id, blocked_user_id) [unique] }
+  Note: 'Migration CHECK blocker != blocked.'
 }
 
 Table feedback {
@@ -394,6 +623,17 @@ Table feedback {
   created_at timestamptz [not null]
 }
 
+Table share_plans {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  token_hash varchar [not null, unique]
+  include_exact_location boolean [not null, default: false]
+  expires_at timestamptz [not null]
+  revoked_at timestamptz
+  created_at timestamptz [not null]
+}
+
 Table reports {
   id uuid [pk]
   reporter_user_id uuid [ref: > users.id, not null]
@@ -401,7 +641,7 @@ Table reports {
   target_id uuid [not null]
   reason_code varchar [not null]
   description text
-  status varchar [not null]
+  status report_status [not null]
   created_at timestamptz [not null]
 }
 
@@ -411,9 +651,18 @@ Table moderation_cases {
   severity varchar [not null]
   primary_target_type varchar [not null]
   primary_target_id uuid [not null]
-  assigned_staff_id uuid
+  assigned_staff_id uuid [ref: > staff_accounts.id]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
+}
+
+Table moderation_evidence {
+  id uuid [pk]
+  case_id uuid [ref: > moderation_cases.id, not null]
+  evidence_type varchar [not null]
+  reference jsonb [not null]
+  classification varchar [not null]
+  created_at timestamptz [not null]
 }
 
 Table moderation_actions {
@@ -426,7 +675,7 @@ Table moderation_actions {
   starts_at timestamptz [not null]
   ends_at timestamptz
   appealable boolean [not null]
-  actor_staff_id uuid
+  actor_staff_id uuid [ref: > staff_accounts.id]
   created_at timestamptz [not null]
 }
 
@@ -434,9 +683,9 @@ Table appeals {
   id uuid [pk]
   moderation_action_id uuid [ref: > moderation_actions.id, not null]
   appellant_user_id uuid [ref: > users.id, not null]
-  state varchar [not null]
+  state appeal_state [not null]
   statement text
-  reviewed_by_staff_id uuid
+  reviewed_by_staff_id uuid [ref: > staff_accounts.id]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 }
@@ -447,10 +696,26 @@ Table notifications {
   category varchar [not null]
   template_key varchar [not null]
   payload jsonb [not null]
-  status varchar [not null]
   dedup_key varchar
   created_at timestamptz [not null]
   read_at timestamptz
+  archived_at timestamptz
+  indexes { (user_id, dedup_key) }
+}
+
+Table notification_deliveries {
+  id uuid [pk]
+  notification_id uuid [ref: > notifications.id, not null]
+  channel varchar [not null]
+  destination_ref varchar
+  status delivery_status [not null]
+  attempts int [not null, default: 0]
+  provider_reference varchar
+  last_error_code varchar
+  next_attempt_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes { (notification_id, channel, destination_ref) [unique] }
 }
 
 Table subscriptions {
@@ -465,6 +730,22 @@ Table subscriptions {
   amount_minor bigint
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
+  Note: 'Migration CHECK enforces exactly one supported subscriber subject where required.'
+}
+
+Table billing_transactions {
+  id uuid [pk]
+  organization_id uuid [ref: > organizations.id]
+  user_id uuid [ref: > users.id]
+  provider varchar [not null]
+  provider_transaction_id varchar [not null]
+  type varchar [not null]
+  status varchar [not null]
+  amount_minor bigint [not null]
+  currency char(3) [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes { (provider, provider_transaction_id) [unique] }
 }
 
 Table entitlements {
@@ -475,6 +756,32 @@ Table entitlements {
   valid_from timestamptz [not null]
   valid_until timestamptz
   source varchar [not null]
+  indexes { (subject_type, subject_id, key, valid_from) [unique] }
+}
+
+Table operational_flags {
+  key varchar [pk]
+  value jsonb [not null]
+  environment varchar [not null]
+  safety_critical boolean [not null, default: false]
+  updated_by_staff_id uuid [ref: > staff_accounts.id]
+  updated_at timestamptz [not null]
+}
+
+Table client_policies {
+  id uuid [pk]
+  platform varchar [not null]
+  environment varchar [not null]
+  minimum_supported_version varchar [not null]
+  recommended_version varchar
+  latest_known_version varchar
+  minimum_runtime_version varchar
+  force_update boolean [not null, default: false]
+  required_capabilities jsonb [not null]
+  effective_at timestamptz [not null]
+  updated_by_staff_id uuid [ref: > staff_accounts.id]
+  updated_at timestamptz [not null]
+  indexes { (platform, environment, effective_at) }
 }
 
 Table audit_logs {
@@ -501,16 +808,24 @@ Table outbox_events {
   occurred_at timestamptz [not null]
   published_at timestamptz
   attempts int [not null, default: 0]
+  indexes { (published_at, occurred_at) }
+}
+
+Table processed_events {
+  consumer_name varchar [not null]
+  event_id uuid [not null]
+  processed_at timestamptz [not null]
+  indexes { (consumer_name, event_id) [unique] }
 }
 
 Table idempotency_keys {
   id uuid [pk]
-  actor_id uuid
+  actor_scope varchar [not null]
   operation varchar [not null]
   key varchar [not null]
   request_hash varchar [not null]
   outcome jsonb
   expires_at timestamptz [not null]
   created_at timestamptz [not null]
-  indexes { (actor_id, operation, key) [unique] }
+  indexes { (actor_scope, operation, key) [unique] }
 }

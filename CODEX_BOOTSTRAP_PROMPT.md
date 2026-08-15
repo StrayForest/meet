@@ -1,23 +1,37 @@
 # Codex bootstrap prompt
 
-Read `AGENTS.md` first, then `ARCHITECTURE.md` and `docs/00_INDEX.md`.
+Read `AGENTS.md`, `ARCHITECTURE.md` and `docs/00_INDEX.md` first.
 
-You are implementing Meet from a greenfield repository. The repository documentation is the source of truth.
+You are implementing Meet from a greenfield repository. Repository documentation is the source of truth.
+
+## Critical architecture generation
+Use architecture version **1.2** and `schemas/database.dbml` V2. Do not implement obsolete semantics from earlier history/chat.
+
+Mandatory domain checks before writing Event code:
+- Event is canonical/series identity.
+- EventOccurrence is physical participation unit.
+- AdmissionMode is separate from ParticipationMode.
+- `EXTERNAL_TICKET` is never a participation/join mode.
+- Private exact location is occurrence-scoped/restricted.
+- V1 has physical/hybrid events, not online-only discovery.
+- Native recurrence is intentionally limited.
+- Dedupe/merge preserves aliases and provenance.
 
 ## Operating rules
-1. Treat accepted architecture and approved design decisions as fixed. Do not substitute frameworks/providers/navigation/design system without the documented ADR/design-decision process.
-2. Use progressive disclosure: before a task read the relevant `docs/product-specs/*`, backend/security docs and design docs rather than loading the entire repository manual.
-3. For multi-step/risky work use `docs/PLANS.md` and maintain the active execution plan under `docs/exec-plans/active/`.
-4. Begin with the active Phase 0 plan and `docs/10_IMPLEMENTATION_BACKLOG.md`. Complete prerequisites before product screens.
-5. Keep individual implementation tasks well scoped even though the full roadmap is documented. Parallelize only independent work and preserve migration/contract merge order.
-6. For UI work, implement `design/tokens.json` through `packages/ui`, use approved screen/component specs and perform screenshot/visual/accessibility verification described in `docs/design-docs/visual-qa.md`.
-7. Never use raw ad-hoc colors/spacing to bypass the design contract.
-8. Do not introduce microservices. Preserve future extraction seams via module interfaces/outbox/contracts.
-9. If an external credential/account is unavailable, implement the provider port, fake/test adapter, config, tests and exact dependency note; continue every unblocked task.
-10. Every mutation considers authorization, idempotency, audit/safety and failure behavior.
-11. Update tests, analytics/telemetry, documentation, quality score and active plan as appropriate.
-12. Do not mark work complete until `docs/11_DEFINITION_OF_DONE.md` is satisfied and root checks are green.
-13. If measured reality genuinely conflicts with a frozen architecture/design choice, write a proposed ADR/design decision instead of silently changing the project.
+1. Treat accepted ADR/design/domain decisions as fixed.
+2. Use progressive disclosure from `docs/00_INDEX.md`.
+3. Multi-step/risky work uses `docs/PLANS.md` + active exec plan.
+4. Start with `docs/exec-plans/active/phase-0-foundation.md` and Phase 0 of `docs/10_IMPLEMENTATION_BACKLOG.md`.
+5. Complete Phase 0 V2 schema/contracts/operational flags/client-compatibility prerequisites before product screens/migrations depending on them.
+6. UI work uses `design/tokens.json`, design specs and visual/accessibility verification.
+7. Mobile work follows `docs/MOBILE_RELEASES.md`, `docs/CLIENT_COMPATIBILITY.md`, `docs/DEEP_LINKS_SEO.md`.
+8. Realtime follows `docs/REALTIME.md`; WebSocket/push are never authoritative.
+9. Do not introduce microservices or substitute stack/providers without accepted ADR.
+10. If external credential/account is missing, implement port/fake/config/tests, document dependency and continue unblocked work.
+11. Every mutation considers authorization, idempotency, audit/safety and failure behavior.
+12. Update tests, telemetry, docs, quality score and active plan as appropriate.
+13. Do not mark complete until `docs/11_DEFINITION_OF_DONE.md` passes.
+14. If accepted ADR, indexed prose and DBML disagree, stop affected implementation and reconcile docs; never silently pick one.
 
 ## First action
-Open `docs/exec-plans/active/phase-0-foundation.md`, reconcile it with Phase 0 in `docs/10_IMPLEMENTATION_BACKLOG.md`, then execute Phase 0 tasks in dependency order.
+Open `docs/exec-plans/active/phase-0-foundation.md`, reconcile it with current Phase 0 backlog, then execute Phase 0 in dependency order.

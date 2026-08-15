@@ -1,211 +1,66 @@
 # 07 — Analytics, i18n, country expansion and scaling
 
-## 1. Analytics stack
+## 1. Analytics/experiments
+PostHog: product events, funnels, cohorts, retention, **product experiment flags**, experiments.
+BigQuery: long-term warehouse, marketplace/growth/safety/finance analysis, ML datasets later.
 
-PostHog:
-- product events;
-- funnels;
-- cohorts;
-- retention;
-- feature flags;
-- experiments.
+Server mutation events are authoritative. See `references/analytics-event-catalog.md`.
 
-BigQuery:
-- long-term warehouse;
-- marketplace analysis;
-- growth/safety/finance reporting;
-- ML datasets later.
+**Operational/safety kill switches are not PostHog flags.** They use first-party OperationalFlags described in `06_INFRASTRUCTURE_DEVOPS.md`.
 
-Server-side events are authoritative for completed mutations.
+## 2. Required analytics context
+Where lawful/necessary: pseudonymous actor/session, platform, app version/build/runtime/capabilities, country/city coarse context, event/occurrence/source type, experiment assignment, correlation ID, timestamp.
 
-## 2. Canonical analytics naming
+Never send raw DOB, exact private address, KYC evidence/documents, tokens or message bodies.
 
-`<surface>.<entity>.<action>`
+## 3. Dashboards
+Marketplace: active physical supply, social join conversion, fill, show-up, waitlist, time to first participation, repeat participation.
 
-Examples:
-- `mobile.event.impression`
-- `mobile.event.opened`
-- `server.participation.joined`
-- `server.participation.cancelled`
-- `server.attendance.checked_in`
-- `server.pod.created`
-- `server.connection.created`
-- `server.report.created`
-- `b2b.event.published`
+Supply: imported/org/community, source freshness, cancellations, coverage city/category/day, dedupe/alias rate.
 
-## 3. Required analytics context
+Trust: reports/10k participations, severe incidents, no-show, moderation SLA, appeals/overturn.
 
-Where lawful and necessary:
-- pseudonymous user/session ID;
-- app/version;
-- country/city coarse context;
-- event/occurrence/source type;
-- experiment assignment;
-- correlation ID;
-- timestamp.
+Growth: activation, D1/D7/D30, referrals, city liquidity, org acquisition.
 
-Never send raw DOB, exact private address, identity documents, access tokens or message bodies.
+Client health: active users/requests by platform/app/build/runtime, unsupported/deprecated clients, update funnel, realtime reconnect/recovery rate.
 
-## 4. Dashboards
+## 4. Launch localization
+Locales: fi/en/ru. Stable translation keys.
 
-### Marketplace
-- active event supply;
-- join conversion;
-- fill rate;
-- show-up;
-- waitlist utilization;
-- time to first join;
-- repeat participation.
+Event translations store locale/title/description/source locale/translation source (ORIGINAL/ORGANIZER/MACHINE/HUMAN)/updated timestamp. Machine translation visibly labeled.
 
-### Supply
-- imported vs organization vs community;
-- source freshness;
-- cancellations;
-- coverage by city/category/day.
+## 5. Time/recurrence
+Absolute stored times UTC. EventOccurrence stores IANA timezone. Native recurrence uses local DTSTART + timezone and only documented V1 subset. DST behavior tested.
 
-### Trust
-- reports / 10k participations;
-- severe incidents;
-- no-show rate;
-- moderation SLA;
-- appeals/overturn rate.
-
-### Growth
-- activation;
-- D1/D7/D30;
-- referrals;
-- city liquidity;
-- organization acquisition.
-
-## 5. Launch localization
-
-Locales:
-- fi
-- en
-- ru
-
-UI uses stable translation keys.
-
-Event translation stores:
-- locale;
-- title;
-- description;
-- source locale;
-- translation source: ORIGINAL / ORGANIZER / MACHINE / HUMAN;
-- updated timestamp.
-
-Machine translations are visibly labeled.
-
-## 6. Time/local scheduling
-
-- persisted absolute timestamps are UTC;
-- event occurrence stores IANA timezone;
-- recurrence is interpreted in local event timezone;
-- display follows user/event context;
-- DST behavior covered by tests.
-
-## 7. Country configuration
-
-Central config/domain data defines:
-- country code;
-- supported locales;
-- currency;
-- timezone defaults;
-- age policy;
-- identity providers;
-- event-source connectors;
-- payment availability;
-- legal document versions;
-- private-home policy;
-- moderation policy configuration;
-- feature flags.
+## 6. Country configuration
+Central config/domain data defines country, locales, currency, timezone defaults, age policy, identity providers, event connectors, payment availability, legal versions, private-home policy, moderation configuration and country-specific feature availability.
 
 Do not scatter `if country === 'FI'` through domain code.
 
-## 8. Expansion checklist
+OperationalFlags are environment/runtime controls and are separate from country product configuration and PostHog experiments.
 
-For every new country:
-1. legal/privacy/local platform review;
-2. country config;
-3. identity/age verification support;
-4. event source/license support;
-5. localization;
-6. payment/tax readiness if monetized;
-7. moderation/support coverage;
-8. city activation plan;
-9. analytics dashboard;
-10. incident/safety wording.
+## 7. Expansion checklist
+Per new country: legal/privacy/platform review; country config; identity/age support; source/license support; localization; payment/tax readiness if monetized; moderation/support; city activation; analytics; incident/safety wording; app-store/deep-link/domain configuration.
 
-Nordic hypothesis:
-- Sweden;
-- Norway;
-- Denmark;
-then broader EU/EEA based on market size, social need, event data, competition, CAC and regulatory cost.
+Nordic hypothesis: Sweden, Norway, Denmark, then broader EU/EEA based on market/event-data/competition/CAC/regulatory cost.
 
-## 9. Scaling stages
-
+## 8. Scaling stages
 ### Stage A — launch to ~50k MAU
-- Cloud Run API/realtime/workers;
-- one HA Cloud SQL primary;
-- Valkey;
-- Pub/Sub/Tasks;
-- Postgres FTS/PostGIS;
-- Cloud Storage.
+Cloud Run API/realtime/workers; HA Cloud SQL; Valkey; Pub/Sub/Tasks; Postgres FTS/PostGIS; Cloud Storage. Enforce explicit DB connection budget.
 
 ### Stage B — ~50k to 500k MAU
-- read replicas where measured;
-- dedicated worker deployments;
-- cache hot projections;
-- partition append-heavy tables where needed;
-- stronger DB pooling/connection control;
-- dedicated realtime service scaling.
+Read replicas if measured, worker isolation, hot projection cache, partition append-heavy tables, stronger connection control, dedicated realtime scaling.
 
 ### Stage C — ~500k to 5M MAU
-Possible extractions behind existing interfaces:
-- search index/service;
-- Chat service;
-- Recommendation service;
-- Notification service;
-- Ingestion service;
-- richer read models;
-- ML pipelines.
-
-Extraction criteria:
-- independent scaling need;
-- measurable contention;
-- reliability isolation;
-- independent deployment/ownership need.
+Possible extraction behind existing interfaces: search, chat, recommendation, notification, ingestion, richer read models, ML pipelines. Extract only for measured scaling/contention/reliability/ownership need.
 
 ### Stage D — 5M+ / multi-region
-- regional application stacks;
-- data-residency/routing strategy;
-- regional chat/search/recommendation;
-- database topology reviewed from measured write patterns.
+Regional app stacks, residency/routing strategy, regional chat/search/recommendation, DB topology from measured write patterns.
 
-No credible architecture can promise immutable physical infrastructure at global scale. The guarantee is no avoidable domain/API rewrite.
+Guarantee is no avoidable domain/API rewrite, not immutable physical infrastructure.
 
-## 10. Scale safeguards from day one
+## 9. Scale safeguards from day one
+UUIDv7; cursor pagination; bounded APIs; proper indexes; no N+1; query budgets; partition-friendly append tables; outbox; resumable backfills; stable canonical aliases; caches/read models replaceable without changing authority; supported-client compatibility measured before breaking changes.
 
-- UUIDv7;
-- cursor pagination;
-- bounded APIs;
-- proper indexes;
-- no N+1;
-- query budgets;
-- partition-friendly append tables;
-- transactional outbox;
-- resumable backfills;
-- caches/materialized read models can be replaced without changing authority.
-
-## 11. Rate/abuse quotas
-
-Configuration-driven initial quotas:
-- event creation/day;
-- joins/minute;
-- chat messages/minute;
-- image uploads/day;
-- reports/day abuse threshold;
-- organization member actions;
-- connector concurrency.
-
-Trust/account history can increase limits.
+## 10. Rate/abuse quotas
+Configuration-driven: event creation/day, joins/minute, chat/minute, uploads/day, report abuse threshold, org member actions, connector concurrency, realtime subscription/message limits. Trust/history may increase limits.

@@ -1,255 +1,422 @@
 # 10 — Exact implementation backlog
 
-Execute in dependency order. Large phases are a roadmap; implementation work must remain well scoped. Codex may parallelize independent tasks, but merge order preserves migrations/contracts. For multi-step work maintain an execution plan.
+Execute in dependency order. Multi-step work uses `PLANS.md` + active exec plan. A phase gate must pass before downstream work relies on it.
 
-## Phase 0 — Agent-legible repository, design and platform foundation
+## Phase 0 — Agent-legible repository and platform contracts
 
-### P0-000 Documentation harness
-Validate root maps/index, add docs link checker, reserve `docs/generated/` regeneration checks and ensure architecture/design decisions are mechanically discoverable.
-Acceptance: no broken indexed links; one command validates docs when tooling exists.
+### P0-000 Documentation conformance
+Validate indexed links, ADR links, DBML/prose references and generated-doc locations.
+Acceptance: no broken indexed references; architecture docs identify V2 schema as authoritative.
 
 ### P0-001 Monorepo
-Create pnpm/Turborepo workspace with `apps/mobile`, `apps/web`, `apps/b2b`, `apps/admin`, `apps/api`, `apps/workers`, shared packages and `infra`.
-Acceptance: root lint/typecheck/test/build commands work.
+pnpm/Turborepo with `apps/mobile`, `apps/web`, `apps/b2b`, `apps/admin`, `apps/api`, `apps/workers`, shared packages and `infra`.
 
 ### P0-002 Toolchain
-Pin Node 24 LTS, pnpm 11, strict TS, ESLint, Prettier, Vitest, editor config and deterministic installs.
+Node 24 LTS, pnpm 11, strict TS, ESLint, Prettier, Vitest, deterministic installs.
 
-### P0-003 Design token pipeline and primitives
-Generate typed light/dark token exports from `design/tokens.json` into `packages/ui`; build Button, Text, Icon, Avatar, Badge, Chip, Input, SearchField, Card shell, Sheet/Modal, Banner, Toast, Skeleton, EmptyState and ErrorState primitives.
-Acceptance: no product screen needs raw color/space/radius values; component preview/tests cover states/themes/text expansion.
+### P0-003 Design token pipeline/primitives
+Generate typed light/dark tokens from `design/tokens.json`; core UI primitives and preview states.
 
 ### P0-004 Shared contracts
-Create UUID/value schemas, Problem Details errors, cursor pagination, locale/country/money/time contracts and stable error-code baseline.
+UUID/value types, Problem Details, cursor pagination, locale/country/money/time, client metadata/capability envelope, stable error codes.
 
 ### P0-005 Local dependencies
-PostgreSQL 18 + PostGIS, Valkey and test/fake async/storage/providers with one documented bootstrap command.
+PostgreSQL 18 + PostGIS, Valkey, fake async/storage/provider adapters. One documented bootstrap command.
 
-### P0-006 Database migration baseline
-Drizzle migrations; enable PostGIS and pg_trgm; zero-to-latest migration test.
+### P0-006 V2 database baseline
+Implement Drizzle schema/migration from `schemas/database.dbml` V2. Enable PostGIS/pg_trgm.
+Mandatory DB CHECK/unique constraints:
+- private-home occurrence/location consistency
+- canonical connection pair
+- conversation context XOR/type consistency
+- idempotency actor_scope uniqueness
+- subscriber subject consistency
+- recurrence subset validity
+- alias cycle/self prevention at application + DB-supported layer
+Acceptance: zero→latest migration and schema conformance tests.
 
 ### P0-007 Architecture boundary enforcement
-Add dependency/structural checks that prevent forbidden module imports, server business logic in shared contracts and consumer access to admin-only packages. Add lint/rule for design-token bypass where practical.
+Prevent forbidden module imports, server logic in shared contracts, consumer access to admin/staff packages and design-token bypass where practical.
 
 ### P0-008 Observability baseline
-Request/correlation IDs, structured logs, OTel hooks, Sentry adapters/no-op local behavior.
+Correlation IDs, structured logs, OTel, Sentry adapters/no-op local.
 
 ### P0-009 Analytics baseline
-Canonical analytics package, PostHog provider interface and no-op/test provider.
+Canonical analytics package/PostHog adapter. Explicit rule: experiments ≠ operational flags.
 
-### P0-010 Config/feature flags
-Runtime env validation, country config loader and feature flag abstraction.
+### P0-010 First-party operational flags
+PostgreSQL source + Valkey cache + typed config interface + safe defaults + audit hook. No UI required yet.
 
-### P0-011 Deterministic fixtures and visual QA harness
-Create seeded fixtures and runnable/screenshot-capable shell for mobile/web reference states. Establish visual snapshot directory/process without pretending implementation screenshots already exist.
+### P0-011 Client compatibility baseline
+Client metadata headers, `/v1/client/bootstrap` contract, capability model, minimum/recommended version policy repository/service.
 
-### P0-012 Terraform foundation
-Module/env folders, GCP provider/state strategy and least-privilege/WIF design.
+### P0-012 Mobile release skeleton
+Expo/EAS configuration structure, runtimeVersion strategy, channels/environments documentation; no production credentials required.
 
-### P0-013 CI
-GitHub Actions for docs links/generated freshness, architecture checks, lint/typecheck/tests/contracts/migrations/build/security scans. UI jobs gain screenshot/accessibility gates as reference screens become implemented.
+### P0-013 Deterministic fixtures + visual QA harness
+Seeded fixtures and screenshot-capable mobile/web shells.
 
-**Phase 0 gate:** fresh checkout is bootable from documented commands; root checks are green; design tokens/primitives and architecture checks exist before product UI.
+### P0-014 Terraform foundation
+GCP env/module skeleton, WIF/state design, DB connection budget variables.
 
-## Phase 1 — Auth, user and Finland foundation
+### P0-015 CI
+Docs/ADR/schema checks, architecture boundaries, lint/typecheck/tests/contracts/migrations/build/security. Visual/accessibility jobs activate as screens appear.
 
-### P1-001 Identity Platform adapter
+**Phase 0 gate:** fresh checkout boots; V2 schema migrates; contracts/flags/client policy exist; root checks green; no product screen uses an obsolete join/admission model.
+
+---
+
+## Phase 1 — Auth, users, staff and account lifecycle
+
+### P1-001 Consumer Identity Platform adapter
 Token/session validation + test adapter.
 
-### P1-002 Internal user bootstrap
-Create UUIDv7 User on first valid auth.
+### P1-002 User bootstrap
+Create UUIDv7 User from authenticated subject.
 
-### P1-003 Profile data
-Public/private profile split, nickname, DOB, gender, city, languages, interests.
+### P1-003 Profile/interests/languages/preferences
+Public/private split.
 
 ### P1-004 18+ server policy
-Cannot bypass through client.
+No UI-only age gate.
 
-### P1-005 Preferences
-Privacy/discovery/notification preferences.
+### P1-005 Devices/push registrations
+Track platform/app/build/runtime/capabilities.
 
-### P1-006 Device registration
-Push token/device model.
+### P1-006 Legal documents/acceptances
+Versioned Terms/Privacy/Guidelines acceptance.
 
-### P1-007 Account status
+### P1-007 Export/deletion workflow
+Durable data export and deletion request/status jobs.
+
+### P1-008 Account statuses/restrictions
 ACTIVE/RESTRICTED/SUSPENDED/DELETION_PENDING/DELETED.
 
-### P1-008 Finland seed/config
-Country, FI/EN/RU, cities/regions import strategy.
+### P1-009 Finland seed/i18n
+FI, cities/regions strategy, fi/en/ru.
 
-### P1-009 Mobile onboarding
-Implement `product-specs/new-user-onboarding.md` and approved design specs using token primitives. Capture FI/EN/RU + large-text reference screenshots and accessibility evidence.
+### P1-010 Mobile onboarding
+Uses design/feature specs, analytics, accessibility and server policy.
 
-### P1-010 Consumer web shell
-Auth/deep-link/public shell with frontend/design contracts.
+### P1-011 Consumer web auth/profile shell
+Deep-link fallback capable.
 
-## Phase 2 — Events, venues and ingestion
+### P1-012 Staff identity baseline
+Separate StaffAccount + roles/scopes + mandatory MFA adapter boundary; no consumer-user impersonation shortcut.
 
-### P2-001 Venue model + PostGIS indexes
-### P2-002 Event/EventOccurrence model
-### P2-003 Event translations/media/restrictions
-### P2-004 Public/private location split
-### P2-005 Recurrence materialization worker
-### P2-006 Connector framework
-### P2-007 Raw event record/provenance/rights storage
-### P2-008 Canonical normalizer
-### P2-009 Organizer/venue entity resolution
-### P2-010 Dedupe engine v1
-### P2-011 Admin dedupe queue
-### P2-012 Helsinki/first highest-value licensed/open Finland source connector
-### P2-013 Additional Finland connectors one-by-one from source register after current license review
-### P2-014 Source health dashboard
-### P2-015 Multi-source cancellation/update reconciliation
+---
 
-**Phase gate:** nationwide event store can be populated without source-specific fields leaking into canonical domain; provenance/rights retained.
+## Phase 2 — Canonical event/occurrence domain and ingestion
 
-## Phase 3 — Discovery, map, search
+### P2-001 Categories/media assets
+Event categories + media upload/quarantine metadata.
 
-### P3-001 Occurrence-centric discovery query layer
-### P3-002 Nearby PostGIS feed
-### P3-003 For You / Now / Today / Weekend / Nearby sections
-### P3-004 Deterministic ranker + score explanation
-### P3-005 FTS + pg_trgm search
-### P3-006 Natural-language → structured-filter parser
-### P3-007 Map viewport/clustering endpoint
-### P3-008 Event detail API
-### P3-009 Mobile Home per discovery/design specs + visual QA
-### P3-010 Mobile MapLibre map per map/privacy specs + visual QA
-### P3-011 Search/filter UX
-### P3-012 Public event web pages/deep links/SEO
+### P2-002 Venue model/source mappings
+PostGIS, public address/geo and source mapping.
+
+### P2-003 Event model V2
+Event stable identity with defaults/origin/access/owner/organization/category/translations/media.
+
+### P2-004 EventOccurrence model V2
+Concrete physical instance: time/timezone/venue/place/private location/admission/participation/waitlist/capacity/version.
+
+### P2-005 Admission vs participation policies
+AdmissionMode and ParticipationMode are independently validated and serialized. Pods must not accept admission mode.
+
+### P2-006 Native recurrence subset
+DAILY/WEEKLY/MONTHLY + INTERVAL/BYDAY/COUNT/UNTIL + local DTSTART/timezone; rolling materialization and DST tests.
+
+### P2-007 Private-location storage
+KMS-ready encrypted exact location record; occurrence assignment; generic DTO leak tests.
+
+### P2-008 Source registry/import runs/raw records
+Rights metadata/review date, health/config, run metrics/history.
+
+### P2-009 Connector framework
+Separate source adapters with cursor/rate/cancellation semantics.
+
+### P2-010 Normalization/entity resolution
+Canonical Event vs Occurrence mapping; org/venue source mappings.
+
+### P2-011 Dedupe engine
+Candidate score, auto/manual thresholds.
+
+### P2-012 Stable aliases/merge history
+Old Event/Occurrence IDs resolve to canonical IDs; cycle/self prevention; deep-link migration tests.
+
+### P2-013 Admin dedupe queue
+Audited merge/link actions.
+
+### P2-014 Finland connectors
+Add approved high-value sources one by one behind same contract.
+
+### P2-015 Source reconciliation/health
+Freshness, cancellations, stale records, quotas, rights review.
+
+**Phase 2 gate:** one imported external-ticket event can expose `Tickets` and independent `I'm going`; recurring occurrences can override location/capacity safely.
+
+---
+
+## Phase 3 — Discovery, public web, deep links and search
+
+### P3-001 Occurrence-centric read model
+Efficient physical-occurrence queries and freshness/version metadata.
+
+### P3-002 Nearby feed
+PostGIS/time/eligibility.
+
+### P3-003 Home sections
+For You/Now/Today/Weekend/Nearby.
+
+### P3-004 Deterministic ranker
+Attendance-oriented signals/diversity with explainable debug reasons.
+
+### P3-005 Search
+FTS + pg_trgm + filters.
+
+### P3-006 Natural-language filter parser
+Structured filters only; no invented events.
+
+### P3-007 Map viewport/clusters
+Never expose private exact point.
+
+### P3-008 Event/Occurrence detail API
+Admission and social participation rendered separately; alias resolution.
+
+### P3-009 Mobile Home/Map/Search
+All screen-state matrix conditions.
+
+### P3-010 Public event/organization pages
+Next.js SEO-capable output.
+
+### P3-011 Universal Links / Android App Links
+Canonical HTTPS URL opens app when installed, web otherwise.
+
+### P3-012 SEO metadata
+Canonical redirects, OG, eligible Schema.org Event, sitemap/robots/noindex rules.
+
+### P3-013 Critical truth revalidation
+Imminent event/join/ticket/private-location actions refresh authoritative state.
+
+---
 
 ## Phase 4 — Community event creation
 
-### P4-001 Idempotent create-event command
-### P4-002 Draft/edit/review/publish lifecycle
-### P4-003 Location selection including private-home model
-### P4-004 Capacity/join policies
-### P4-005 Eligibility/audience policies
-### P4-006 Signed media upload/quarantine/process/publish
-### P4-007 Mobile creation wizard per product/design specs + autosave
-### P4-008 Host management
-### P4-009 Material update/cancellation notifications
+### P4-001 Create Event draft
+Idempotent command and ownership.
 
-## Phase 5 — Participation, approval, waitlist
+### P4-002 One-time/recurring flow
+Only supported recurrence subset.
+
+### P4-003 Physical place flow
+PUBLIC_VENUE/OUTDOOR/PRIVATE_HOME/HYBRID. No online-only V1 creation.
+
+### P4-004 Admission setup
+NONE/FREE/EXTERNAL_TICKET; INTERNAL_TICKET feature-gated.
+
+### P4-005 Social participation setup
+OPEN/APPROVAL_REQUIRED/INVITE_ONLY/DISABLED + social capacity + waitlist.
+
+### P4-006 Eligibility/audience/safety
+18+ floor and policy rules.
+
+### P4-007 Media pipeline
+Signed upload→quarantine→process/moderate→ready.
+
+### P4-008 Mobile create wizard/preview
+Design contract + accessibility/analytics.
+
+### P4-009 Host occurrence/series management
+Occurrence overrides/cancellation vs series edits explicit.
+
+### P4-010 Material update notifications
+Time/location/cancellation changes produce durable notification + delivery attempts.
+
+---
+
+## Phase 5 — Participation and waitlist
 
 ### P5-001 Participation state machine
-### P5-002 Transactionally safe instant join
-### P5-003 Approval-required join
-### P5-004 Leave/cancel + capacity release
-### P5-005 Waitlist ordering
-### P5-006 Cloud Tasks slot offers/expiry
-### P5-007 Invitations/private joins
-### P5-008 Participant privacy/block awareness
-### P5-009 Calendar export/handoff
-### P5-010 Reminders
-### P5-011 Concurrency/load tests for popular-event join storm
+Occurrence-targeted only.
 
-## Phase 6 — Pods, chat, realtime
+### P5-002 Instant join
+Concurrency-safe social capacity.
 
-### P6-001 Pod model/state
-### P6-002 Pod capacity/approval
-### P6-003 Pod meeting point
-### P6-004 Conversation/membership model
-### P6-005 Durable messages
-### P6-006 Authenticated WebSocket gateway
-### P6-007 Valkey cross-instance fan-out
-### P6-008 Chat report/moderation integration
-### P6-009 Mobile chats per contextual/non-dating design contract
-### P6-010 Pods on imported events — launch-critical differentiator
+### P5-003 Approval flow
+Request/approve/reject.
 
-## Phase 7 — Attendance, reputation, connections
+### P5-004 Leave/host removal
+Reasoned/idempotent, releases capacity.
 
-### P7-001 QR/code check-in
-### P7-002 Attendance signal reconciliation
-### P7-003 No-show derivation/policy
-### P7-004 Structured post-event feedback
-### P7-005 Reputation read projection/badges
-### P7-006 Mutual connections
-### P7-007 Connection DM only after permission
-### P7-008 Block enforcement across all social paths
+### P5-005 Waitlist/slot offers
+Only when waitlist enabled; Cloud Tasks expiry, atomic acceptance.
 
-## Phase 8 — Trust, identity, moderation
+### P5-006 Invite-only flow
+Secure invitation tokens/status.
 
-### P8-001 Report API/taxonomy
+### P5-007 External admission independence
+Ticket purchase/URL never counts as confirmed Meet participation unless explicit integration later says so.
+
+### P5-008 Calendar/reminders
+Occurrence-local truth.
+
+### P5-009 Concurrency/load tests
+Final slot, duplicate request, duplicate task/message.
+
+---
+
+## Phase 6 — Pods, chat and realtime
+
+### P6-001 Pod model
+Occurrence-linked; social participation mode only.
+
+### P6-002 Pod membership/capacity
+Open/approval/invite semantics.
+
+### P6-003 Conversation model + DB XOR constraints
+Occurrence/Pod/Connection/Organization contexts valid only.
+
+### P6-004 Message persistence/media/report hooks
+Durable state before fanout.
+
+### P6-005 Realtime gateway
+Auth/subscriptions/versioned events.
+
+### P6-006 Reconnect/recovery
+Forced disconnect tests, reauth/resubscribe, REST cursor recovery.
+
+### P6-007 Presence/typing
+Valkey TTL, approximate only.
+
+### P6-008 Backpressure/limits
+Payload/subscription/rate/buffer limits.
+
+### P6-009 Mobile chats/Pods
+Visual/accessibility/offline states.
+
+---
+
+## Phase 7 — Attendance, reputation and connections
+
+### P7-001 Check-in
+QR/code architecture.
+
+### P7-002 Attendance reconciliation
+Host/peer/check-in precedence.
+
+### P7-003 No-show/reliability private signals
+
+### P7-004 Structured feedback
+Private negative safety path.
+
+### P7-005 Public reputation projection
+No human star score.
+
+### P7-006 Canonical mutual connections
+Ordered pair invariant; no A↔B duplicate rows.
+
+### P7-007 Connection DM
+Only after allowed mutual connection.
+
+### P7-008 Block enforcement
+All communication/social paths.
+
+---
+
+## Phase 8 — Trust, identity and moderation
+
+### P8-001 Reports/taxonomy
+
 ### P8-002 Moderation cases/evidence
-### P8-003 Reason-coded actions
-### P8-004 Appeals
-### P8-005 Admin moderation queue
-### P8-006 Identity-provider abstraction + dev fake
-### P8-007 Finland strong-eID provider integration after provider/legal selection
-### P8-008 International age/KYC provider interface
-### P8-009 Private-home verification gate
-### P8-010 KMS-backed exact-address encryption/access
-### P8-011 Share My Plans
-### P8-012 AI text/image moderation pre-screen provider
-### P8-013 Anti-dating/sexual solicitation enforcement
-### P8-014 Trust/safety analytics dashboard
+
+### P8-003 Reason-coded actions/appeals
+
+### P8-004 Admin moderation queue
+Separate staff identity, audit.
+
+### P8-005 Identity provider abstraction
+Fake/dev + production boundary.
+
+### P8-006 Finnish strong identity vendor integration
+After provider/compliance review.
+
+### P8-007 Home-host verification gate
+
+### P8-008 Exact-location disclosure endpoint
+Current membership/verification/policy revalidated every access.
+
+### P8-009 Share My Plans
+Expiring/revocable token.
+
+### P8-010 AI moderation pre-screen
+Provider abstraction; no sole irreversible authority.
+
+### P8-011 Safety metrics/kill switches
+First-party operational flags.
+
+---
 
 ## Phase 9 — Organizations / B2B2C
+Organization model/imported mappings, claim, verification, RBAC, B2B app, event/occurrence management, attendees/check-in, analytics, announcements, audit.
 
-### P9-001 Organization type/status model
-### P9-002 Imported unclaimed organizations
-### P9-003 Claim flow/evidence
-### P9-004 Organization verification
-### P9-005 RBAC with six roles + permission matrix tests
-### P9-006 B2B Next.js application shell
-### P9-007 Organization event/recurring management
-### P9-008 Attendee approval/removal
-### P9-009 QR check-in dashboard
-### P9-010 Basic organization analytics
-### P9-011 Announcements
-### P9-012 Organization/staff audit coverage
+---
 
-## Phase 10 — Production infrastructure hardening
+## Phase 10 — Production infrastructure and mobile delivery
 
-### P10-001 Terraform dev environment
-### P10-002 Isolated staging
-### P10-003 Production GCP topology
-### P10-004 Cloudflare WAF/rates/Turnstile
-### P10-005 Origin protection
-### P10-006 Cloud SQL HA/PITR/backups
-### P10-007 CI deploy via Workload Identity Federation
-### P10-008 Canary/rollback using Cloud Run revisions
-### P10-009 Alerts/SLO dashboards
-### P10-010 Budgets/quotas/max-instance safeguards
-### P10-011 Security/authorization review
-### P10-012 External pentest before broad private-home launch
+### P10-001 GCP dev/staging/prod Terraform
+Isolated projects and private DB/cache.
 
-## Phase 11 — Finland public launch
+### P10-002 Cloud SQL connection budget
+Pool defaults and Cloud Run max-instance calculations enforced/configured; saturation alert.
 
-### P11-001 Event source coverage/freshness review by city/category
-### P11-002 FI/EN/RU localization QA
-### P11-003 Terms/privacy/community-guideline versioning
-### P11-004 DPIA/privacy legal launch gate
-### P11-005 DSA/moderation process launch gate
-### P11-006 Support/moderation operating process
-### P11-007 App Store/Google Play production builds
-### P11-008 Consumer web production
-### P11-009 City liquidity dashboards; Helsinki activation first
-### P11-010 Feature-flagged private-home rollout after safety evidence/pentest
-### P11-011 Finnish usability/accessibility validation across age/language cohorts; resolve launch-blocking design findings
+### P10-003 Cloudflare/origin protection
 
-## Phase 12 — Monetization only after activity proof
+### P10-004 Backups/PITR/restore drill procedure
 
-### P12-001 Stripe Billing adapter/webhooks
-### P12-002 Entitlements
-### P12-003 Organization Pro
-### P12-004 Promoted events with clear labeling/ranking guardrails
-### P12-005 B2B billing UI
-### P12-006 Affiliate ticket links per provider agreement
-### P12-007 Native ticketing product/legal feasibility
-### P12-008 Stripe Connect only if marketplace payouts approved
+### P10-005 CI deploy + canary/rollback
+WIF and immutable images.
 
-## Phase 13 — ML and Nordic expansion
+### P10-006 Operational flag Admin controls
+Audited and independent of PostHog.
 
-### P13-001 Reliable warehouse models
-### P13-002 Privacy-reviewed attendance prediction dataset
-### P13-003 ML ranker offline evaluation
-### P13-004 Feature-flagged online experiment
-### P13-005 Sweden config/localization/connectors + local usability review
-### P13-006 Norway EEA config/localization/connectors + local usability review
-### P13-007 Denmark config/localization/connectors + local usability review
-### P13-008 External search index only when Postgres metrics justify it
+### P10-007 EAS Build/Submit environments
+Production signing access, store pipeline and release runbook.
 
-## Build-order prohibition
-Do NOT prioritize before core phases: custom ML, stories/reels, voice/video, complex Groups, consumer premium, native ticket marketplace, microservices or visual redesign outside approved design-decision process.
+### P10-008 EAS Update/runtimeVersion
+Staging/production channels, rollback procedure.
+
+### P10-009 Client compatibility dashboards
+Active versions/capabilities/deprecation usage.
+
+### P10-010 SLO/security/cost alerts
+
+### P10-011 Security review/pentest
+Before broad private-home rollout.
+
+---
+
+## Phase 11 — Finland public launch gates
+- source coverage/freshness review
+- FI/EN/RU localization/accessibility QA
+- Terms/Privacy/Guidelines versions
+- DPIA/GDPR/DSA review
+- Identity Platform/provider DPA/data-processing/data-location review
+- moderation/support/on-call operations
+- app-store production binaries + Universal/App Links
+- minimum supported client policy verified
+- private-home limited rollout via first-party operational flag
+- DB restore drill and severe-safety runbook
+- Helsinki liquidity dashboard
+
+---
+
+## Phase 12 — Monetization
+Stripe Billing, entitlements, promoted events, B2B billing, affiliate ticket links. Native ticketing/Stripe Connect only after separate product/legal/payment review.
+
+---
+
+## Phase 13 — Data/ML and expansion
+Warehouse quality, attendance dataset, offline ML ranker evaluation, controlled experiment, Sweden/Norway/Denmark country configs/connectors. External search index only when Postgres metrics justify it.
+
+## Execution rule
+Codex may parallelize independent tasks but must preserve contracts/migration order. If implementation reveals a conflict with accepted ADR/design/domain contract, stop that path and propose an ADR/spec change instead of silently adapting architecture.

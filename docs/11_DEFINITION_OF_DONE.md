@@ -1,60 +1,75 @@
-# 11 — Definition of done and quality gates
+# 11 — Definition of Done
 
-A task is DONE only when applicable items are complete.
+A backlog item is DONE only when all applicable sections are satisfied.
 
-## Product/spec
-- behavior matches relevant `product-specs/` acceptance criteria;
-- design/frontend contracts read for user-facing work;
-- no undocumented scope substitution.
+## Architecture/domain
+- implemented in correct module;
+- accepted ADR/domain model followed;
+- Event/Occurrence/admission/participation semantics preserved where relevant;
+- no silent architecture substitution;
+- DBML/prose/contracts remain consistent.
 
-## Code/data/API
-- correct module and strict TypeScript;
-- migrations/indexes/constraints complete and backward-compatible;
-- validation, authorization, stable errors, OpenAPI/contracts;
-- idempotency/cursor pagination where applicable;
-- failure paths handled; no secrets/debug hacks.
+## Code/data
+- strict TypeScript passes;
+- migration/index/constraint added where needed;
+- backward-compatible rollout considered;
+- schema change follows expand→migrate→contract;
+- data retention/classification considered.
 
-## Safety/security/privacy
-- abuse/rate-limit review;
+## API/mobile compatibility
+- validation/authorization/stable errors;
+- OpenAPI/shared contracts updated;
+- idempotency/pagination where relevant;
+- latest and minimum-supported mobile compatibility considered/tested;
+- capability/version bootstrap updated if semantics require;
+- no force-update shortcut without release decision.
+
+## Safety/security
+- abuse/rate-limit analysis;
 - block/restriction behavior;
 - PII/logging review;
-- private location leak review if relevant;
-- audit event for privileged action;
-- threat model/tests updated when new abuse surface is added.
+- private location leak review where relevant;
+- privileged action audit;
+- operational kill-switch impact for high-risk capability.
+
+## Reliability
+- failure/degraded behavior defined;
+- push/WebSocket not treated as truth;
+- retries/duplicate async delivery safe;
+- high-impact stale event state revalidated;
+- external provider outage behavior considered.
 
 ## Analytics/observability
-- authoritative server analytics event where appropriate;
-- traces/logs/metrics and Sentry visibility;
+- server/product analytics event where required;
+- logs/traces/metrics;
+- errors visible in observability;
 - no sensitive payload leakage.
 
 ## Tests
-- domain unit tests;
-- repository/PostGIS/integration tests;
-- API auth/error tests;
+- unit/application tests;
+- real DB integration where invariants matter;
 - E2E for critical journey;
-- authorization tests;
-- concurrency/idempotency tests where relevant.
+- concurrency for capacity/idempotency;
+- compatibility test for changed client contract;
+- realtime reconnect/recovery test where relevant;
+- authorization/security tests.
 
-## UX/design
-- uses `design/tokens.json`, not ad-hoc visual values;
-- loading, refreshing, empty, error and retry/offline behavior;
-- FI/EN/RU text expansion;
-- light + dark theme;
-- accessibility semantics/targets/contrast/focus/text scaling;
-- screenshot/visual QA for changed reference surfaces;
-- event-first hierarchy/no dating visual drift.
+## UX
+- loading/refreshing/empty/stale/error/restricted/success states;
+- accessibility;
+- localization;
+- visual QA/screenshots for layout changes;
+- deep-link behavior for public/shareable entities where relevant.
 
 ## Documentation
-- relevant specs updated;
-- active execution plan progress/decision log updated;
-- generated docs refreshed when affected;
-- quality score/tech debt updated if gap remains.
+- relevant product/design/backend docs updated;
+- ADR if architecture changes;
+- active exec plan/progress updated;
+- tech debt recorded if an approved shortcut remains.
 
-## CI gates
-PR cannot merge when lint/typecheck/required tests/build/contracts/migrations/critical security scans fail. Once implemented, docs link/freshness and architecture-boundary checks also block drift.
-
-## Critical concurrency
-Last slot cannot double-book; waitlist offer once; duplicate Pub/Sub/task/payment webhook safe; repeated client mutation idempotent.
-
-## Critical E2E
-Onboarding, discovery, join/approval/waitlist, create event, private-home protections, Pod/chat/report, check-in/feedback, connection DM, organization claim, moderation/appeal.
+## Delivery
+- CI green;
+- staging verification;
+- rollout/rollback considered;
+- feature/operational flag strategy appropriate;
+- mobile binary/OTA compatibility respected.

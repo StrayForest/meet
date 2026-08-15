@@ -1,14 +1,21 @@
 flowchart LR
-  S[Source Connector] --> R[Raw Record + Rights]
+  S[Source Connector] --> RUN[Ingestion Run]
+  RUN --> R[Raw Record + rights snapshot]
   R --> V[Validate]
   V --> N[Normalize]
-  N --> E[Resolve Venue/Organizer]
-  E --> G[Geocode]
-  G --> C[Classify]
-  C --> D[Dedupe Candidates]
-  D -->|high confidence| M[Canonical Upsert]
-  D -->|medium| Q[Admin Dedupe Queue]
+  N --> E[Resolve Organization / Venue]
+  E --> GEO[Geocode]
+  GEO --> EO[Map Event vs EventOccurrence]
+  EO --> D[Dedupe candidates]
+  D -->|new| C[Canonical Event / Occurrence upsert]
+  D -->|high-confidence duplicate| M[Merge/link]
+  D -->|medium| Q[Admin dedupe queue]
   Q --> M
-  M --> T[Translation/Moderation]
-  T --> P[Published Event/Occurrence]
-  P --> F[Feed/Search/Map]
+  M --> AL[Create/flatten stable alias + preserve provenance]
+  AL --> C
+  C --> T[Translate / Moderate]
+  T --> P[Publish physical occurrence projection]
+  P --> F[Feed / Search / Map]
+
+  Ticket[Admission data\nexternal ticket/free] --> C
+  Social[Meet Participation policy\nindependent] --> C

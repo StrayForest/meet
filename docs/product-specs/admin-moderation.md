@@ -1,22 +1,42 @@
-# Product spec — Admin and moderation console
+# Product spec — Admin and moderation
 
 ## Goal
-Resolve safety/operational cases quickly without giving staff invisible unlimited power.
+Privileged operations are safe, auditable and impossible to confuse with ordinary consumer ownership.
 
-## Areas
-Moderation queue, reports, cases, appeals, users, events, organizations/claims, verification status (not documents), ingestion/dedupe, feature flags, audit/operations links.
+## Staff identity
+Admin/moderation uses separate StaffAccount identity, mandatory MFA and explicit roles/scopes. A consumer User flag does not grant staff access. Staff never “becomes” a consumer user to perform privileged actions.
 
-## Case screen
-Severity/status, target, reports, evidence versions/references, relevant limited history, existing restrictions, suggested policy reasons, action controls, notice/appeal state, immutable timeline.
+## Core surfaces
+- moderation queue/cases/evidence;
+- reports;
+- appeals;
+- users/account restrictions;
+- events/occurrences;
+- organizations/claims;
+- identity verification status (not documents);
+- ingestion/source health;
+- dedupe/alias management;
+- first-party operational flags;
+- mobile client policy;
+- audit/operations links.
 
-## Guardrails
-Mandatory staff MFA; least privilege; sensitive actions reason-coded/audited; no raw KYC documents; exceptional private-address access separately permissioned/audited; destructive/high-impact actions may require elevated role/confirmation.
+## Dedupe merge
+Before merge show canonical target, source/provenance, occurrence mappings, aliases/public URLs that will be preserved and affected references. Merge cannot create alias cycles/self-alias.
 
-## Queue UX
-Prioritize severe/offline-imminent cases. Filters by severity/type/age/assignee. Keyboard-efficient desktop workflow. Never hide old unresolved cases merely due to sorting.
+## Operational flags
+Safety-critical changes require reason/confirmation/audit. PostHog product experiments are visually/architecturally separate.
 
-## Appeals
-Reviewer sees original action/reason/evidence and appeal statement. Outcome upheld/overturned/partial, with notice and audit.
+## Client policy
+Changing minimum supported app version/forceUpdate requires reason, platform/version, effective time and audit; UI warns about active-user impact where telemetry exists.
+
+## Moderation
+Reason-coded case/action/appeal workflow. Evidence access is least-privilege. Permanent/high-impact action follows policy/human review requirements.
 
 ## Acceptance
-Permission matrix tests; all actions route through domain/application APIs; no direct DB edit controls; audit search; private data minimization; operational latency metrics.
+- staff auth/scope tests;
+- no consumer impersonation authorization path;
+- every high-impact command audited;
+- operational flag works independently of PostHog;
+- alias merge preserves old route resolution;
+- client-policy change is audited;
+- exact private location staff access remains exceptional/authorized/audited.

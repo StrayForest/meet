@@ -1,17 +1,29 @@
 sequenceDiagram
   participant C as Client
   participant A as API
-  participant P as Participation Module
+  participant P as Participation Service
   participant DB as PostgreSQL
-  participant O as Transactional Outbox
+  participant O as Outbox
   participant W as Workers
-  C->>A: POST join + Idempotency-Key
-  A->>P: authorize + command
-  P->>DB: begin transaction / capacity lock
-  DB-->>P: existing participation + capacity
-  P->>DB: insert/update participation
+
+  Note over C,A: Admission/ticket action is independent.\nExternal ticket purchase does not confirm Meet participation.
+
+  C->>A: POST /occurrences/{id}/join + Idempotency-Key
+  A->>P: authorize + revalidate occurrence + ParticipationMode
+  P->>DB: transaction / capacity lock or constraint-safe reserve
+  DB-->>P: current occurrence state + existing participation
+  alt OPEN + capacity
+    P->>DB: CONFIRMED participation
+  else APPROVAL_REQUIRED
+    P->>DB: REQUESTED participation
+  else full + waitlist enabled
+    P->>DB: WAITLISTED entry
+  else INVITE_ONLY without invite / DISABLED / cancelled
+    P-->>A: deterministic domain error
+  end
   P->>O: insert domain event in same transaction
-  P-->>A: confirmed / requested / waitlisted
-  A-->>C: stable logical outcome
+  P-->>A: stable logical outcome
+  A-->>C: authoritative response
   O->>W: publish after commit
-  W-->>C: notifications/realtime side effects
+  W-->>C: push/realtime hint
+  Note over C,A: Client treats API/REST state as truth;\npush/realtime may be missed or duplicated.

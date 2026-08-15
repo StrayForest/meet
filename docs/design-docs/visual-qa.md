@@ -1,55 +1,54 @@
 # Visual QA and design acceptance
 
 ## Principle
-A UI implementation is not accepted solely because tests compile. Codex must be able to see/drive the result and compare it against the design contract.
+UI is not accepted because it compiles. Codex must drive/see deterministic states and compare them to the design/product contract.
 
 ## Reference viewports
-Web screenshots:
-- 390×844 mobile web smoke;
-- 768×1024 tablet;
-- 1440×900 desktop.
+Web: 390×844, 768×1024, 1440×900.
+Native: representative modern iPhone, representative mid-range Android, one large-text pass.
 
-Native app verification:
-- representative modern iPhone;
-- representative mid-range Android;
-- one large-text accessibility pass.
-
-## Required reference screens
-Maintain screenshots once apps exist:
+## Required reference states once apps exist
 - onboarding;
-- Home populated;
-- Home low-density/empty;
+- Home populated + low-density;
 - Map selected event;
-- Event detail open/full/cancelled/private-home;
-- create wizard;
+- Event detail normal/open;
+- Event detail **EXTERNAL_TICKET + OPEN social participation** showing separate actions;
+- recurring Event with two occurrences having materially different location/capacity;
+- Event detail full/waitlist;
+- cancelled/materially changed occurrence;
+- private-home unauthorized vs authorized disclosure state;
+- create wizard admission step + social participation step;
 - waitlist slot offer;
 - Pod detail/chat;
+- realtime reconnect/recovery visible state where UI changes;
 - Profile/verification;
+- client soft-update and force-update surfaces;
 - Report flow;
 - B2B event list/detail;
-- Admin moderation case.
+- Admin moderation/operational flag state.
 
 ## Review checklist
-- tokens only, no accidental raw styles;
-- correct typography hierarchy;
-- one dominant CTA;
-- touch targets;
-- text truncation only where specified;
-- FI/EN/RU expansion;
+- tokens only/no accidental raw visual system;
+- correct hierarchy;
+- social primary CTA and external admission action are not conflated;
+- occurrence-specific time/location/capacity shown correctly;
+- one dominant action per local decision area without hiding required secondary ticket action;
+- touch targets/accessibility;
+- FI/EN/RU text expansion;
 - dark theme;
 - focus/keyboard web;
-- loading/empty/error states;
-- privacy-sensitive data absent from unauthorized screenshots;
-- no dating-like visual emphasis on individual profiles.
+- loading/empty/stale/error/restricted states;
+- private exact location absent from unauthorized screenshots/HTML;
+- no dating-like person-first emphasis;
+- unsupported/old client UX is clear and non-looping.
 
 ## Agent workflow
-For frontend PRs:
 1. boot isolated app/worktree;
-2. seed deterministic fixture data;
-3. navigate target flow;
+2. seed deterministic fixtures including ticketed/social, recurring overrides, private-home and cancelled states;
+3. navigate target flow/deep link;
 4. capture screenshots;
 5. compare with reference/checklist;
-6. fix visible defects before requesting review.
+6. fix visible defects before review.
 
 ## Visual regression
-Once stable screens exist, add screenshot regression with tolerant thresholds for platform font/raster differences. Do not blindly update baselines; changed baselines require intentional review.
+Add screenshot regression once stable. Tolerate known platform font/raster differences, but never blindly accept changed baseline.

@@ -1,109 +1,29 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Meet — Master Architecture Board</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meet — Master Architecture 1.2</title>
 <style>
-:root{--bg:#0b0f16;--panel:#121925;--panel2:#182232;--line:#344158;--text:#edf3fb;--muted:#9dabc0;--blue:#8eb9ff;--green:#8bd5ba;--amber:#e4bd77;--purple:#c7a3f4;--red:#ef9b9b}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}.top{position:sticky;top:0;z-index:10;background:#0b1018ee;backdrop-filter:blur(10px);border-bottom:1px solid #252f41;padding:14px 20px;display:flex;justify-content:space-between;gap:20px;align-items:center}.top h1{font-size:16px;margin:0}.top span{font-size:12px;color:var(--muted)}main{max-width:1550px;margin:auto;padding:24px}.hero{border:1px solid #34425a;background:linear-gradient(135deg,#172337,#101620);border-radius:16px;padding:22px}.hero h2{margin:0 0 8px;font-size:25px}.hero p{margin:5px 0;color:#bec9da;max-width:1000px}.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.badge{font-size:11px;padding:5px 8px;border:1px solid #3a4861;background:#0f1622;border-radius:999px}.section{margin-top:20px}.section>h2{font-size:15px;margin:0 0 10px;color:#dbe6f5}.board{display:flex;gap:13px;align-items:stretch;overflow:auto;padding:16px;border:1px solid #252f42;border-radius:15px;background:#0f151f}.lane{min-width:225px;border:1px solid #2d384c;border-radius:12px;background:#111925;padding:10px}.lane h3{font-size:11px;margin:0 0 8px;color:#7f8ca2;text-transform:uppercase;letter-spacing:1px}.card{border:1px solid #3a465d;background:#182130;border-radius:9px;padding:10px;margin:7px 0;font-size:12px;font-weight:700}.card small{display:block;font-weight:400;color:#9eacc0;margin-top:3px;line-height:1.35}.blue{border-top:3px solid var(--blue)}.green{border-top:3px solid var(--green)}.amber{border-top:3px solid var(--amber)}.purple{border-top:3px solid var(--purple)}.red{border-top:3px solid var(--red)}.arrow{display:flex;align-items:center;color:#637089;font-size:26px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.doc{display:block;color:inherit;text-decoration:none;border:1px solid #2d384b;border-radius:12px;background:#111925;padding:14px}.doc:hover{border-color:#59719a;background:#151f2d}.doc strong{font-size:13px}.doc p{font-size:11px;color:#a7b4c7;margin:6px 0 0}.flow{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;white-space:pre-wrap;color:#c7d2e3;border:1px solid #2d384b;background:#0d131d;border-radius:12px;padding:15px;overflow:auto}.roadmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.phase{border:1px solid #2d384b;border-radius:10px;background:#111925;padding:12px}.phase b{font-size:12px}.phase p{font-size:11px;color:#a7b4c7;margin:5px 0}.rules{columns:2;column-gap:30px}.rules li{font-size:12px;color:#bcc8d9;margin-bottom:7px;break-inside:avoid}@media(max-width:800px){.rules{columns:1}.arrow{display:none}.board{flex-direction:column}.lane{min-width:100%}}
-</style>
-</head>
-<body>
-<div class="top"><h1>Meet — Master Architecture Board v1.0</h1><span>Finland → Nordics → EU · Codex source of truth lives in /docs</span></div>
-<main>
-<section class="hero">
-<h2>Event-first IRL social network</h2>
-<p><b>Core promise:</b> discover what is happening nearby, find people to go with, or create an activity yourself.</p>
-<p>External/official events solve cold start. Participation, Pods, real attendance, trusted connections and community-created events form the proprietary network effect.</p>
-<div class="badges"><span class="badge">React Native + Expo</span><span class="badge">Next.js</span><span class="badge">NestJS + Fastify</span><span class="badge">PostgreSQL 18 + PostGIS</span><span class="badge">Valkey</span><span class="badge">GCP Finland</span><span class="badge">Cloudflare</span><span class="badge">Terraform</span></div>
-</section>
+:root{--bg:#0b0e14;--p:#121824;--p2:#182131;--t:#edf2f8;--m:#98a6bb;--l:#2c374b;--a:#91b8ff;--g:#90d2b5;--y:#e2bd79;--r:#ef9e9e;--v:#c9a3ef}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:Inter,system-ui,sans-serif;line-height:1.45}header{position:sticky;top:0;z-index:5;padding:14px 22px;border-bottom:1px solid var(--l);background:#0b0e14ee;backdrop-filter:blur(9px);display:flex;justify-content:space-between;gap:20px}h1{font-size:16px;margin:0}header span{color:var(--m);font-size:12px}.wrap{max-width:1500px;margin:auto;padding:22px}.hero{padding:20px;border:1px solid #34425c;border-radius:16px;background:linear-gradient(135deg,#172338,#111824);margin-bottom:16px}.hero h2{margin:0 0 6px;font-size:24px}.hero p{margin:4px 0;color:#bac5d5}.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.badge{font-size:11px;padding:4px 8px;border:1px solid #3a4862;border-radius:999px;background:#0e1520}.grid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:12px;margin:12px 0}.card{border:1px solid var(--l);background:var(--p);border-radius:13px;padding:14px}.card h3{font-size:12px;text-transform:uppercase;letter-spacing:.9px;color:#8998af;margin:0 0 10px}.box{border:1px solid #38465f;border-radius:9px;background:var(--p2);padding:10px;margin:7px 0;font-size:12px}.box strong{display:block}.box small{color:var(--m)}.blue{border-top:3px solid var(--a)}.green{border-top:3px solid var(--g)}.yellow{border-top:3px solid var(--y)}.red{border-top:3px solid var(--r)}.violet{border-top:3px solid var(--v)}.flow{display:flex;align-items:center;gap:8px;overflow:auto;padding:14px;border:1px solid var(--l);border-radius:13px;background:#0f1520;margin:12px 0}.flow .box{min-width:170px}.arr{font-size:20px;color:#687793}.section{margin-top:24px}.section h2{font-size:17px}.rules{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rule{padding:12px;border-left:3px solid var(--g);background:#101722;border-radius:7px;font-size:12px}.danger{border-left-color:var(--r)}code{color:#d9e6ff;background:#1b2535;border-radius:4px;padding:1px 4px}a{color:#a9c8ff}@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.grid,.rules{grid-template-columns:1fr}.wrap{padding:12px}}
+</style></head><body>
+<header><h1>Meet — Master Architecture</h1><span>Architecture 1.2 · Finland → Nordics → EU</span></header>
+<div class="wrap">
+<section class="hero"><h2>Event-first IRL social network</h2><p>Stable product identity is <b>Event</b>. A person physically attends an <b>EventOccurrence</b>. Admission/ticketing and Meet social participation are separate contracts.</p><div class="badges"><span class="badge">React Native + Expo / EAS</span><span class="badge">Next.js</span><span class="badge">NestJS + Fastify</span><span class="badge">PostgreSQL 18 + PostGIS</span><span class="badge">GCP Finland</span><span class="badge">Cloudflare</span><span class="badge">Terraform</span></div></section>
 
-<section class="section"><h2>1. System architecture</h2><div class="board">
-<div class="lane green"><h3>User surfaces</h3><div class="card">Mobile App<small>React Native · Expo · Expo Router · TypeScript</small></div><div class="card">Consumer Web<small>Next.js · public event pages · deep links</small></div><div class="card">B2B Dashboard<small>Organizations · RBAC · events · check-in · analytics</small></div><div class="card">Admin Console<small>Isolated privileged surface · MFA · audit</small></div></div>
-<div class="arrow">→</div>
-<div class="lane blue"><h3>Edge & application</h3><div class="card">Cloudflare<small>DNS · WAF · bot controls · rate limits · Turnstile · CDN</small></div><div class="card">GCP HTTPS Load Balancer<small>origin protection → Cloud Run</small></div><div class="card">NestJS Modular Monolith<small>REST/OpenAPI · Fastify · domain modules</small></div><div class="card">Realtime Gateway<small>WebSocket · Valkey Pub/Sub</small></div></div>
-<div class="arrow">→</div>
-<div class="lane amber"><h3>Authoritative data</h3><div class="card">PostgreSQL 18 + PostGIS<small>transactional source of truth · geo · FTS</small></div><div class="card">Valkey<small>ephemeral cache · locks · presence · fan-out only</small></div><div class="card">Cloud Storage<small>signed uploads · quarantine · media</small></div><div class="card">BigQuery<small>warehouse · analytics · future ML datasets</small></div></div>
-<div class="arrow">→</div>
-<div class="lane purple"><h3>Async & intelligence</h3><div class="card">Transactional Outbox<small>business mutation + event in one DB transaction</small></div><div class="card">Pub/Sub + Cloud Tasks<small>idempotent jobs · delays · retries · DLQ</small></div><div class="card">Workers<small>ingestion · notifications · media · moderation</small></div><div class="card">Discovery Ranker<small>attendance probability objective · ML later</small></div></div>
-</div></section>
+<div class="flow"><div class="box blue"><strong>Event</strong><small>canonical identity / series / organizer / translations</small></div><div class="arr">→</div><div class="box green"><strong>EventOccurrence</strong><small>physical date/time/place/capacity</small></div><div class="arr">→</div><div class="box yellow"><strong>Admission</strong><small>NONE · FREE · EXTERNAL_TICKET · future INTERNAL_TICKET</small></div><div class="arr">+</div><div class="box violet"><strong>Meet Participation</strong><small>OPEN · APPROVAL · INVITE · DISABLED</small></div><div class="arr">→</div><div class="box green"><strong>IRL attendance</strong><small>Pods · chat · check-in · reputation</small></div></div>
 
-<section class="section"><h2>2. Event supply → social network</h2><div class="flow">Municipal / Open Data APIs
-Ticket & Event Provider APIs
-Tourism / Visit APIs
-Organization Partner Feeds
-ICS / RSS
-Organization Direct Publishing
-Community Events
-        │
-        ▼
-Fetch → Raw Record + Rights → Validate → Normalize → Resolve Organizer/Venue → Geocode → Classify → Dedupe
-        │
-        ▼
-Canonical Event + EventOccurrence → Translation / Moderation → Feed / Search / Map
-        │
-        ▼
-"I'm going" → Participation → Pods around any event → Context Chat → Check-in / IRL Attendance
-        │
-        ▼
-Structured Reputation → Mutual Connections → Community-created Events → More Supply</div></section>
+<div class="grid">
+<div class="card blue"><h3>Clients</h3><div class="box"><strong>Mobile</strong><small>React Native · Expo Router · EAS Build/Submit/Update</small></div><div class="box"><strong>Consumer Web</strong><small>Next.js · SEO · canonical deep links</small></div><div class="box"><strong>B2B</strong><small>organizations · RBAC · event/occurrence tools</small></div><div class="box"><strong>Admin</strong><small>separate StaffAccount · MFA · audit</small></div></div>
+<div class="card green"><h3>Application</h3><div class="box"><strong>NestJS modular monolith</strong><small>REST + OpenAPI · module-owned writes</small></div><div class="box"><strong>Realtime</strong><small>WebSocket · reconnect · REST recovery</small></div><div class="box"><strong>Workers</strong><small>outbox · Pub/Sub · Cloud Tasks</small></div><div class="box"><strong>Operational control</strong><small>Postgres flags/client policy · Valkey cache</small></div></div>
+<div class="card yellow"><h3>Data</h3><div class="box"><strong>PostgreSQL + PostGIS</strong><small>authoritative · V2 DBML · geo · transactions</small></div><div class="box"><strong>Valkey</strong><small>ephemeral cache/presence/fanout only</small></div><div class="box"><strong>Cloud Storage</strong><small>quarantine → processed media</small></div><div class="box"><strong>BigQuery</strong><small>warehouse, not operational truth</small></div></div>
+<div class="card red"><h3>Trust / Reliability</h3><div class="box"><strong>Private home</strong><small>occurrence-scoped encrypted exact location</small></div><div class="box"><strong>Identity</strong><small>external strong ID; documents never stored</small></div><div class="box"><strong>Moderation</strong><small>reports · evidence · actions · appeals</small></div><div class="box"><strong>Compatibility</strong><small>minimum client · capabilities · stale truth revalidation</small></div></div>
+</div>
 
-<section class="section"><h2>3. Core domain modules</h2><div class="grid">
-<div class="doc"><strong>Auth / Users</strong><p>Managed auth subject mapping, profile, preferences, devices, lifecycle.</p></div>
-<div class="doc"><strong>Identity Verification</strong><p>Provider abstraction; verification outcome only, never passport storage.</p></div>
-<div class="doc"><strong>Organizations</strong><p>Claims, verification, OWNER/ADMIN/EVENT_MANAGER/MODERATOR/ANALYST/BILLING.</p></div>
-<div class="doc"><strong>Events / Venues</strong><p>Canonical events, occurrences, recurrence, translations, private/public location.</p></div>
-<div class="doc"><strong>Event Ingestion</strong><p>Connectors, raw records, provenance, rights, dedupe and canonical reconciliation.</p></div>
-<div class="doc"><strong>Discovery</strong><p>Feed, map, FTS/fuzzy search, deterministic ranking, future search/ML seam.</p></div>
-<div class="doc"><strong>Participation</strong><p>Join, approval, capacity, waitlist, offers, invitations, check-in.</p></div>
-<div class="doc"><strong>Pods</strong><p>Small social groups attached to an occurrence — launch differentiator.</p></div>
-<div class="doc"><strong>Chat / Connections</strong><p>Context chat and mutual connection DM; no random unsolicited DM.</p></div>
-<div class="doc"><strong>Reputation</strong><p>Attendance/no-show and structured feedback; no public human star score.</p></div>
-<div class="doc"><strong>Safety / Moderation</strong><p>Reports, blocks, evidence, cases, reason-coded actions and appeals.</p></div>
-<div class="doc"><strong>Notifications / Billing</strong><p>Push/in-app/email; Stripe provider boundary and entitlements later.</p></div>
-</div></section>
+<section class="section"><h2>Event supply / canonicalization</h2><div class="flow"><div class="box">Source registry</div><div class="arr">→</div><div class="box">Import run + raw record</div><div class="arr">→</div><div class="box">Normalize Event / Occurrence</div><div class="arr">→</div><div class="box">Resolve org / venue</div><div class="arr">→</div><div class="box">Dedupe</div><div class="arr">→</div><div class="box">Canonical + aliases</div><div class="arr">→</div><div class="box">Feed / Search / Map</div></div></section>
 
-<section class="section"><h2>4. Safety architecture</h2><div class="board">
-<div class="lane red"><h3>Private home</h3><div class="card">18+ Host</div><div class="card">Phone Verified</div><div class="card">Strong Identity Verified</div><div class="card">Exact Address Separate + KMS Encrypted</div><div class="card">Coarse Public Map Point Only</div></div>
-<div class="arrow">→</div>
-<div class="lane red"><h3>Moderation</h3><div class="card">Report / Classifier Signal</div><div class="card">Triage + Evidence Snapshot</div><div class="card">Moderation Case</div><div class="card">Reason-coded Action</div><div class="card">Notice + Appeal</div></div>
-<div class="arrow">→</div>
-<div class="lane red"><h3>Product constraints</h3><div class="card">No Dating Positioning</div><div class="card">No Sexual Solicitation</div><div class="card">No Random DM</div><div class="card">No Public 1–5 Human Rating</div><div class="card">AI Triage ≠ Sole Irreversible Judge</div></div>
-</div></section>
+<section class="section"><h2>Runtime</h2><div class="flow"><div class="box">Cloudflare<br><small>WAF · rate limit · Turnstile</small></div><div class="arr">→</div><div class="box">GCP HTTPS LB</div><div class="arr">→</div><div class="box">Cloud Run<br><small>API · realtime · workers</small></div><div class="arr">→</div><div class="box">Cloud SQL / Valkey / PubSub / Storage</div></div><p style="color:var(--m);font-size:12px">DB pools are bounded (API default 8/instance; realtime/workers lower) and Cloud Run max instances must respect database connection headroom.</p></section>
 
-<section class="section"><h2>5. Roadmap</h2><div class="roadmap">
-<div class="phase"><b>Phase 0</b><p>Monorepo, toolchain, contracts, local infra, migrations, observability, CI/Terraform.</p></div>
-<div class="phase"><b>Phase 1</b><p>Auth, profiles, 18+ policy, Finland config, onboarding.</p></div>
-<div class="phase"><b>Phase 2</b><p>Events, venues, recurrence, ingestion, provenance, dedupe.</p></div>
-<div class="phase"><b>Phase 3</b><p>Feed, map, search, deterministic recommendations.</p></div>
-<div class="phase"><b>Phase 4</b><p>Community event creation and host management.</p></div>
-<div class="phase"><b>Phase 5</b><p>Participation, capacity, approval, waitlist, reminders.</p></div>
-<div class="phase"><b>Phase 6</b><p>Pods, chat, WebSocket realtime.</p></div>
-<div class="phase"><b>Phase 7</b><p>Attendance, reputation, connections.</p></div>
-<div class="phase"><b>Phase 8</b><p>Trust, identity, moderation, private-home safeguards.</p></div>
-<div class="phase"><b>Phase 9</b><p>Organizations and B2B2C tooling.</p></div>
-<div class="phase"><b>Phase 10–11</b><p>Production hardening, legal/security gates, Finland launch.</p></div>
-<div class="phase"><b>Phase 12–13</b><p>Monetization after activity proof; ML and Nordic expansion later.</p></div>
-</div></section>
+<section class="section"><h2>Mobile lifecycle</h2><div class="flow"><div class="box">EAS Build</div><div class="arr">→</div><div class="box">App Store / Play</div><div class="arr">→</div><div class="box">Supported client versions</div><div class="arr">↔</div><div class="box">/v1/client/bootstrap</div><div class="arr">→</div><div class="box">capabilities / min version</div></div><p style="color:var(--m);font-size:12px">EAS Update only targets compatible <code>runtimeVersion</code>. Backend never assumes every user is on the latest binary.</p></section>
 
-<section class="section"><h2>6. Codex source-of-truth documents</h2><div class="grid">
-<a class="doc" href="docs/01_PRODUCT_AND_FEATURES.md"><strong>01 Product & Features</strong><p>Complete product behavior and feature inventory.</p></a>
-<a class="doc" href="docs/02_DOMAIN_AND_DATABASE.md"><strong>02 Domain & Database</strong><p>Module ownership, Postgres/PostGIS, outbox, idempotency.</p></a>
-<a class="doc" href="docs/03_API_AND_STATE_MACHINES.md"><strong>03 API & States</strong><p>REST families, realtime channels and state machines.</p></a>
-<a class="doc" href="docs/04_EVENT_INGESTION_AND_DISCOVERY.md"><strong>04 Ingestion & Discovery</strong><p>Cold-start supply, rights, dedupe, ranking/search.</p></a>
-<a class="doc" href="docs/05_TRUST_SECURITY_PRIVACY.md"><strong>05 Trust/Security/Privacy</strong><p>Identity, home-event safety, GDPR/DSA engineering.</p></a>
-<a class="doc" href="docs/06_INFRASTRUCTURE_DEVOPS.md"><strong>06 Infra & DevOps</strong><p>GCP Finland, Cloud Run, Cloud SQL, Valkey, Terraform, CI/CD.</p></a>
-<a class="doc" href="docs/07_ANALYTICS_I18N_SCALING.md"><strong>07 Analytics/i18n/Scaling</strong><p>North-star telemetry, country config and scale path.</p></a>
-<a class="doc" href="docs/08_REPOSITORY_STRUCTURE.md"><strong>08 Repository Structure</strong><p>Final monorepo/application/module layout.</p></a>
-<a class="doc" href="docs/09_FIXED_ARCHITECTURE_DECISIONS.md"><strong>09 Fixed ADRs</strong><p>Architecture Codex may not replace without an ADR.</p></a>
-<a class="doc" href="docs/10_IMPLEMENTATION_BACKLOG.md"><strong>10 Implementation Backlog</strong><p>Exact build order from repository foundation to Nordic expansion.</p></a>
-<a class="doc" href="docs/11_DEFINITION_OF_DONE.md"><strong>11 Definition of Done</strong><p>Tests, security, telemetry, contracts and CI gates.</p></a>
-<a class="doc" href="schemas/database.dbml"><strong>Database DBML</strong><p>Machine-readable database blueprint.</p></a>
-</div></section>
+<section class="section"><h2>Non-negotiable invariants</h2><div class="rules"><div class="rule">External ticket is <b>admission</b>, never social join mode.</div><div class="rule">EventOccurrence is the unit for participation, check-in, Pods and private location.</div><div class="rule">Dedupe merge preserves aliases, deep links and provenance.</div><div class="rule">Native recurrence is intentionally limited and timezone/DST tested.</div><div class="rule danger">Private exact address is never in generic Event/feed/map payload.</div><div class="rule danger">Operational safety flags do not depend on PostHog.</div><div class="rule">Push/WebSocket are not source of truth; REST/database state wins.</div><div class="rule">Staff identity is separate from consumer User identity.</div></div></section>
 
-<section class="section"><h2>7. Non-negotiable implementation rules</h2><ol class="rules">
-<li>Event is the core product entity.</li><li>Backend starts as modular monolith, not microservices.</li><li>PostgreSQL is authoritative; Valkey is ephemeral.</li><li>REST + OpenAPI are the primary contracts.</li><li>Retry-prone writes are idempotent.</li><li>Domain side effects use transactional outbox.</li><li>First-party IDs use UUIDv7.</li><li>Time is UTC plus IANA timezone where local semantics matter.</li><li>Imported events preserve provenance and rights metadata.</li><li>Country differences live in country configuration.</li><li>Initial public network is 18+.</li><li>Private-home host requires strong identity verification.</li><li>Exact home address is never in generic public DTOs.</li><li>No passport scans/numbers stored by Meet.</li><li>No random DMs.</li><li>No public star rating for people.</li><li>AI moderation is triage/pre-screening, not sole irreversible authority.</li><li>Recommendation objective is successful offline attendance.</li><li>Admin is isolated, MFA protected and audited.</li><li>Architecture changes require ADR, migration and rollback.</li></ol></section>
-</main>
-</body>
-</html>
+<section class="section"><h2>Source of truth</h2><p style="color:var(--m)">Codex starts at <code>AGENTS.md</code> → <code>docs/00_INDEX.md</code> → relevant specs. Database blueprint: <code>schemas/database.dbml</code> V2. Rationale: <code>docs/adr/</code>. If ADR/prose/DBML conflict, implementation stops until documentation is reconciled.</p></section>
+</div></body></html>

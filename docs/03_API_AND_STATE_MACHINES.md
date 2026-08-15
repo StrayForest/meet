@@ -1,282 +1,138 @@
-# 03 — API contracts and state machines
+# 03 — API contracts, client policy and state machines
 
 ## 1. API style
-
-- Base path: `/v1`.
+- Base path `/v1`.
 - REST + JSON UTF-8.
-- OpenAPI validated in CI.
-- Typed clients generated for mobile/web/B2B/admin.
-- No GraphQL as primary API.
-- Errors use stable machine code and Problem Details-style shape.
-
-Example:
-```json
-{
-  "type": "https://errors.example.com/event-capacity-full",
-  "title": "Event capacity is full",
-  "status": 409,
-  "code": "EVENT_CAPACITY_FULL",
-  "detail": "No confirmed places remain.",
-  "request_id": "..."
-}
-```
+- OpenAPI validated in CI; typed clients generated.
+- Problem Details-style errors with stable `code`.
+- Cursor pagination for growing mutable collections.
+- Server remains backward-compatible across the documented mobile compatibility window; see `CLIENT_COMPATIBILITY.md`.
 
 ## 2. Auth/authorization
+Every endpoint declares auth requirement, actor type, domain/resource permission, organization role if applicable, safety/account restrictions and feature/country gates. UI authorization never substitutes server authorization.
 
-Consumer request:
-1. verify Identity Platform credential/session;
-2. map auth subject → internal UUIDv7 user;
-3. enforce account/safety status;
-4. enforce domain permission/resource membership.
+## 3. Client bootstrap/config
+- `GET /v1/client/bootstrap`
+Returns safe public/runtime configuration needed by clients:
+  - minimum supported app version by platform
+  - recommended/latest version
+  - native/runtime compatibility identifiers
+  - supported API capabilities
+  - maintenance/degraded-mode signals
+  - operationally safe public feature availability
+  - country/localization bootstrap
 
-Every endpoint must declare:
-- authentication requirement;
-- actor type;
-- resource/domain permission;
-- organization role if relevant;
-- safety/account restriction;
-- country/feature gate.
+The endpoint does not expose secret/admin kill-switch details.
 
-Never rely on UI authorization.
-
-## 3. Pagination
-
-Cursor-based only for growing mutable collections.
-Parameters:
-- `limit`
-- `cursor`
-
-Cursor contains/encodes stable ordered fields + ID tie-breaker.
-
-## 4. Endpoint families
-
-### Me/User
+## 4. User endpoints
 - `GET /v1/me`
 - `PATCH /v1/me/profile`
-- `GET /v1/me/preferences`
-- `PATCH /v1/me/preferences`
+- `GET/PATCH /v1/me/preferences`
 - `GET /v1/me/verifications`
+- device/push registration endpoints
+- legal acceptance endpoints where needed
 - `POST /v1/me/data-export`
-- `DELETE /v1/me`
-- device/push token endpoints
+- `GET /v1/me/data-export/{id}`
+- `DELETE /v1/me` starts durable deletion workflow
+- `GET /v1/me/deletion-status`
 
-### Discovery
+## 5. Discovery
 - `GET /v1/feed`
 - `GET /v1/map/events`
 - `GET /v1/search`
 - `GET /v1/categories`
 - `GET /v1/cities`
 
-### Events
-- `GET /v1/events/{eventId}`
+Responses carry occurrence freshness/version metadata sufficient for client revalidation decisions.
+
+## 6. Events
+- `GET /v1/events/{eventId}` resolves aliases to canonical event
 - `POST /v1/events`
 - `PATCH /v1/events/{eventId}`
 - `POST /v1/events/{eventId}/publish`
 - `POST /v1/events/{eventId}/cancel`
 - `GET /v1/events/{eventId}/occurrences`
 - `GET /v1/occurrences/{occurrenceId}`
+- occurrence override/cancel endpoints for authorized hosts/organizations
 
-### Participation
+Occurrence DTO separates:
+- `admission`
+- `socialParticipation`
+- `waitlist`
+- `location`
+
+Generic occurrence DTO never contains exact private-home address.
+
+## 7. Participation
 - `POST /v1/occurrences/{id}/join`
 - `POST /v1/occurrences/{id}/leave`
-- `POST /v1/occurrences/{id}/join-requests/{requestId}/approve`
-- `POST /v1/occurrences/{id}/join-requests/{requestId}/reject`
-- `GET /v1/occurrences/{id}/participants`
-- `GET /v1/occurrences/{id}/waitlist`
-- `POST /v1/waitlist-offers/{id}/accept`
-- `POST /v1/waitlist-offers/{id}/decline`
-- `POST /v1/occurrences/{id}/check-in`
+- approval request approve/reject
+- participant list
+- waitlist list/offer accept/decline
+- check-in
 
-### Pods
-- `GET /v1/occurrences/{id}/pods`
-- `POST /v1/occurrences/{id}/pods`
-- `GET /v1/pods/{podId}`
-- `POST /v1/pods/{podId}/join`
-- `POST /v1/pods/{podId}/leave`
-- `POST /v1/pods/{podId}/requests/{id}/approve`
-- `POST /v1/pods/{podId}/requests/{id}/reject`
+Participation mode is `OPEN | APPROVAL_REQUIRED | INVITE_ONLY | DISABLED`.
+External ticket acquisition is not a participation state.
 
-### Chat
-- `GET /v1/conversations`
-- `GET /v1/conversations/{id}/messages`
-- `POST /v1/conversations/{id}/messages`
-- `POST /v1/messages/{id}/report`
+## 8. Admission/tickets
+V1 read model may expose:
+- mode `NONE | FREE | EXTERNAL_TICKET`
+- external URL/provider/price display
 
-### Connections
-- `GET /v1/connections`
-- `POST /v1/connections/{userId}`
-- `DELETE /v1/connections/{userId}`
-- `POST /v1/users/{userId}/block`
-- `DELETE /v1/users/{userId}/block`
+Future internal ticket endpoints are feature-gated and not implied by V1 social participation APIs.
 
-### Feedback
-- `POST /v1/occurrences/{id}/attendance-feedback`
-- `POST /v1/occurrences/{id}/people/{userId}/feedback`
+## 9. Pods
+Pods target one occurrence and use social ParticipationMode only. No ticket/admission semantics.
 
-### Safety
-- `POST /v1/reports`
-- `POST /v1/safety/share-plans`
-- `DELETE /v1/safety/share-plans/{id}`
-- public expiring share token endpoint with minimal fields
+## 10. Safety/private location
+- report/block/share-plans endpoints
+- exact private location is fetched via a dedicated authorized endpoint after current membership/verification/disclosure policy is revalidated
+- never embed exact private location into feed/map/general event payloads
 
-### Organizations
-- `GET /v1/organizations/{id}`
-- `POST /v1/organizations`
-- `PATCH /v1/organizations/{id}`
-- `POST /v1/organizations/{id}/claim`
-- `GET /v1/organizations/{id}/members`
-- `POST /v1/organizations/{id}/members`
-- `PATCH /v1/organizations/{id}/members/{userId}`
-- organization event/attendee/check-in/analytics endpoints
+## 11. Organizations/admin
+Organization endpoints enforce RBAC. Admin endpoints use separate staff identity/scopes and audited domain commands.
 
-### Admin
-All under `/v1/admin/...` and staff-only:
-- reports;
-- moderation cases;
-- appeals;
-- users;
-- events;
-- organizations/claims;
-- ingestion/source health;
-- dedupe;
-- verification status;
-- feature controls;
-- audit search.
+## 12. Idempotency
+Retry-prone mutations accept `Idempotency-Key`. Same actor scope + operation + key + different request hash → conflict.
 
-## 5. WebSocket
+## 13. Event state
+Event: DRAFT, PENDING_REVIEW, PUBLISHED, CANCELLED, COMPLETED, REMOVED, ARCHIVED.
 
-Initial authenticated realtime endpoint.
-Authorized channel classes:
-- `conversation:{id}`
-- `occurrence:{id}:participants`
-- `occurrence:{id}:waitlist`
-- `pod:{id}`
-- `user:{id}:notifications`
+Occurrence: SCHEDULED, JOIN_CLOSED, CANCELLED, COMPLETED, REMOVED.
 
-Events are versioned:
-- `message.created.v1`
-- `message.deleted.v1`
-- `participant.updated.v1`
-- `waitlist.slot_offered.v1`
-- `event.updated.v1`
-- `event.cancelled.v1`
+An imported update cannot resurrect a safety-removed event/occurrence.
 
-Durable recovery uses REST. WebSocket is transport, not source of truth.
+## 14. Participation state
+REQUESTED, WAITLISTED, SLOT_OFFERED, CONFIRMED, REJECTED, EXPIRED, CANCELLED_BY_USER, REMOVED_BY_HOST, ATTENDED, NO_SHOW.
 
-## 6. Event state machine
+Capacity-safe transition to CONFIRMED. Waitlist offer expires deterministically. Safety restrictions can force removal.
 
-Event:
-- DRAFT
-- PENDING_REVIEW
-- PUBLISHED
-- CANCELLED
-- COMPLETED
-- REMOVED
-- ARCHIVED
+## 15. Admission is not state machine participation
+Admission mode can change independently from Meet participation where source/organizer rules permit. Example: EXTERNAL_TICKET + OPEN.
 
-Occurrence:
-- SCHEDULED
-- JOIN_CLOSED
-- CANCELLED
-- COMPLETED
-- REMOVED
+## 16. Pod state
+Pod: DRAFT, OPEN, FULL, CLOSED, CANCELLED, COMPLETED, REMOVED.
+Membership: REQUESTED, CONFIRMED, REJECTED, LEFT, REMOVED.
 
-Rules:
-- publishing requires validation/policy pass;
-- cancellation is distinct from moderation removal;
-- completed occurrence cannot reopen;
-- imported update cannot override safety removal.
+## 17. Organization/identity/moderation
+Organization: UNCLAIMED, CLAIM_PENDING, VERIFIED, SUSPENDED, CLOSED.
+Identity verification: CREATED, PENDING, VERIFIED, FAILED, EXPIRED, REVOKED.
+Moderation report/case/appeal states remain command-driven, never arbitrary raw status patches.
 
-## 7. Participation state machine
+## 18. Notification state
+Logical Notification: ACTIVE/READ/ARCHIVED semantics as applicable.
+NotificationDelivery: QUEUED, SENT, DELIVERED where provider supports, FAILED_RETRYABLE, FAILED_FINAL, SUPPRESSED.
+Delivery status never changes canonical event/participation truth.
 
-States:
-- REQUESTED
-- WAITLISTED
-- SLOT_OFFERED
-- CONFIRMED
-- REJECTED
-- EXPIRED
-- CANCELLED_BY_USER
-- REMOVED_BY_HOST
-- ATTENDED
-- NO_SHOW
+## 19. WebSocket contract
+Detailed source: `REALTIME.md`.
+WebSocket is a transport for durable and ephemeral updates, never source of truth. Reconnect always reauthenticates/resubscribes and durable recovery occurs via REST/cursors.
 
-Rules:
-- unique user + occurrence;
-- capacity-safe transition to CONFIRMED;
-- waitlist offer has expiry;
-- accepting expired offer fails deterministically;
-- attendance/no-show only after appropriate event/check-in rules;
-- safety/block can force removal/restriction.
+## 20. Caching and stale truth
+Clients may cache discovery/event data for UX, but before high-impact actions they revalidate:
+- join/leave/approval
+- ticket/action CTA if source freshness is uncertain
+- imminent event cancellation/material time/location changes
+- exact private-home address access
 
-## 8. Pod state machine
-
-Pod:
-- DRAFT
-- OPEN
-- FULL
-- CLOSED
-- CANCELLED
-- COMPLETED
-- REMOVED
-
-Membership:
-- REQUESTED
-- CONFIRMED
-- REJECTED
-- LEFT
-- REMOVED
-
-## 9. Organization state machine
-
-- UNCLAIMED
-- CLAIM_PENDING
-- VERIFIED
-- SUSPENDED
-- CLOSED
-
-## 10. Identity verification state
-
-- CREATED
-- PENDING
-- VERIFIED
-- FAILED
-- EXPIRED
-- REVOKED
-
-## 11. Moderation state
-
-Report:
-- SUBMITTED
-- TRIAGED
-- LINKED_TO_CASE
-- CLOSED
-
-Case:
-- OPEN
-- TRIAGED
-- INVESTIGATING
-- ACTIONED
-- APPEALED
-- CLOSED
-
-Appeal:
-- SUBMITTED
-- UNDER_REVIEW
-- UPHELD
-- OVERTURNED
-- PARTIALLY_OVERTURNED
-- CLOSED
-
-Transitions occur through domain commands, never raw status patches.
-
-## 12. Notification state
-
-- QUEUED
-- SENT
-- DELIVERED where provider supports
-- FAILED_RETRYABLE
-- FAILED_FINAL
-- SUPPRESSED
-
-All delivery jobs have deduplication keys.
+A stale cached event cannot override current server state.

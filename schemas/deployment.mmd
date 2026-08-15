@@ -1,11 +1,11 @@
 flowchart TB
   Internet --> CF[Cloudflare DNS/WAF/CDN/Turnstile]
-  CF --> GLB[GCP External HTTPS LB]
-  GLB --> API[Cloud Run api]
-  GLB --> RT[Cloud Run realtime]
-  API --> VPC[Private VPC connectivity]
+  CF --> GLB[GCP External HTTPS LB + origin policy]
+  GLB --> API[Cloud Run: api]
+  GLB --> RT[Cloud Run: realtime]
+  API --> VPC[VPC/private connectivity]
   RT --> VPC
-  VPC --> SQL[(Cloud SQL PostgreSQL/PostGIS HA)]
+  VPC --> SQL[(Cloud SQL PostgreSQL 18 + PostGIS HA)]
   VPC --> VAL[(Memorystore Valkey HA)]
   API --> PUB[Pub/Sub]
   API --> TASKS[Cloud Tasks]
@@ -15,6 +15,22 @@ flowchart TB
   WORK --> VAL
   API --> GCS[Cloud Storage]
   WORK --> GCS
-  API --> SM[Secret Manager/KMS]
+  API --> SM[Secret Manager / KMS]
   WORK --> SM
   API --> BQ[BigQuery]
+  API --> PH[PostHog analytics/experiments]
+  API --> OBS[OTel / Sentry]
+  GH[GitHub Actions + WIF] --> AR[Artifact Registry]
+  AR --> API
+  AR --> RT
+  AR --> WORK
+  EAS[Expo EAS Build/Submit/Update] --> STORES[Apple App Store / Google Play]
+  STORES --> MOBILE[Mobile clients]
+  EAS -. compatible OTA .-> MOBILE
+  MOBILE --> CF
+
+  Note1[DB connection budget:\nAPI pool default 8/instance;\nrealtime/worker lower;\nmax instances constrained by DB headroom]
+  API --- Note1
+
+  Note2[OperationalFlags/ClientPolicies:\nPostgreSQL authoritative,\nValkey cached, Admin audited;\nindependent from PostHog]
+  SQL --- Note2

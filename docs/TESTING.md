@@ -1,47 +1,76 @@
 # TESTING — Verification strategy
 
 ## Philosophy
-Test business invariants at the cheapest reliable layer, then protect critical journeys end-to-end. Mocks do not replace integration tests for PostgreSQL/PostGIS, concurrency or provider contracts.
+Test business invariants at the cheapest reliable layer, then protect critical journeys end-to-end. Mocks do not replace real Postgres/PostGIS concurrency/constraint tests or provider contract fixtures.
 
 ## Layers
-1. Domain unit: state transitions, eligibility, ranking math, policy.
-2. Application: authorization/orchestration with fakes.
-3. Repository integration: real PostgreSQL/PostGIS/Valkey test environment.
-4. API contract: auth, validation, stable errors, idempotency, pagination.
-5. Provider/connector contract: fixtures, retries, cancellation, malformed data.
-6. E2E: critical mobile/web/B2B/admin journeys.
-7. Visual/accessibility: approved reference screens, themes/locales/large text.
-8. Load/resilience: join storm, feed/map, chat bursts, queue backlog/failure.
+1. domain unit: state transitions, admission/participation policy, recurrence, ranking, safety policy;
+2. application: authorization/orchestration with fakes;
+3. repository integration: real PostgreSQL/PostGIS + Valkey;
+4. API contract: auth, validation, errors, idempotency, pagination, client compatibility;
+5. connector/provider contracts;
+6. E2E mobile/web/B2B/admin;
+7. realtime reconnect/recovery;
+8. visual/accessibility;
+9. load/resilience.
 
 ## Determinism
-Inject clock/UUID/provider fakes where required. Seed fixture data with stable IDs/times/locations. Tests must not depend on current wall-clock or third-party production APIs.
+Inject clock/UUID/provider fakes where needed. Stable fixture times/locations/IDs. No critical test depends on production third-party APIs or current wall clock.
 
-## Critical invariants
-- final event slot assigned once;
+## Mandatory domain/data invariants
+- EventOccurrence is participation/check-in/Pod unit;
+- EXTERNAL_TICKET + OPEN social participation works;
+- Pod cannot use admission/ticket semantics;
+- final social capacity slot assigned once;
 - waitlist offer once/atomic;
-- duplicate async delivery safe;
-- cancelled event not joinable;
-- blocked user communication denied;
-- exact home location never serialized without authorization;
-- organization role escalation denied;
-- payment webhook idempotent when billing exists;
-- source merge retains provenance;
-- recurrence correct across DST.
+- recurring local time remains correct across DST;
+- unsupported recurrence rejected/expanded by connector policy, not silently misinterpreted;
+- private exact location never serialized without current authorization;
+- recurring occurrences can use different private/public locations;
+- canonical connection pair prevents A↔B duplicates;
+- conversation DB context/type XOR constraint;
+- idempotency actor_scope works for user/system/anonymous scopes;
+- notification push failure does not remove durable in-app notification;
+- dedupe merge preserves alias/deep-link resolution/provenance;
+- duplicate outbox/PubSub/Task delivery safe;
+- safety-removed event cannot be resurrected by import;
+- operational safety flag works independently of PostHog.
+
+## Mobile compatibility tests
+Maintain fixtures/contracts for:
+- latest client;
+- minimum supported client;
+- capability negotiation;
+- deprecated field/enum transition;
+- force-update/bootstrap state;
+- EAS runtimeVersion compatibility configuration validation.
+
+Backend PR introducing contract change proves supported old-client behavior or follows deliberate deprecation process.
+
+## Realtime tests
+Force connection termination and assert:
+- reconnect with backoff;
+- reauthentication/resubscription;
+- durable message/state recovery via REST cursor;
+- duplicate realtime events deduped;
+- revoked membership cannot resubscribe;
+- presence/typing expiry safely;
+- slow-consumer/backpressure behavior.
+
+## API/security tests
+Auth, IDOR/horizontal access, org role escalation, staff scopes, private location leak, blocked-user contact, unauthorized WS channel, webhook signatures, upload validation, rate limits.
 
 ## Mobile E2E
-Use a Maestro-class framework against dev/test builds. Cover onboarding, discovery, join/approval/waitlist, create, Pod/chat, report, check-in, verification gating.
+Onboarding, discovery, deep link, external-ticket + social join, approval/waitlist, create/recurrence, private-home gating, Pod/chat, report, check-in, verification and stale/cancelled event refresh.
 
 ## Web E2E
-Playwright for public web, B2B and admin. Include keyboard/focus and role-based routes.
+Public canonical/alias redirects, SEO/noindex privacy, B2B/admin keyboard/focus/RBAC.
 
-## Visual QA
-Follow `design-docs/visual-qa.md`; references are intentional artifacts. A changed baseline is reviewed, not blindly accepted.
+## Visual/accessibility
+Follow `design-docs/visual-qa.md`; test themes/locales/large text/reduced motion/screen reader/keyboard/contrast.
 
-## Accessibility
-Automated scanners plus manual critical-flow tests. Test screen readers, keyboard, large text/zoom, reduced motion, contrast and locale expansion.
-
-## Performance/load
-k6 or equivalent profiles use realistic read/write mixes. Load tests assert correctness as well as latency.
+## Load/resilience
+k6-equivalent profiles for feed/map, popular-event join storm, chat/realtime reconnect, queue backlog and ingestion batch. Assert correctness as well as latency.
 
 ## CI
-Fast unit/type/lint on every PR; integration/contracts/migrations/build/security always; E2E/visual jobs targeted then increasingly mandatory as apps stabilize. Flaky critical tests are bugs, not permanently retried away.
+Lint/type/unit fast; integration/contracts/migrations/schema checks/security always. E2E/visual progressively mandatory as apps exist. Critical flaky tests are bugs, not permanent retries.

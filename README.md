@@ -1,36 +1,47 @@
 # Meet — IRL Social Platform
 
-Meet is the implementation repository for an **event-first IRL social network / real-world social marketplace** launching in Finland and designed for Nordic/EU expansion.
+Meet is an **event-first IRL social network / real-world social marketplace** launching in Finland and designed for Nordic/EU expansion.
+
+## Current architecture
+Architecture generation: **1.2**.
+
+Core domain:
+`Event (canonical/series) → EventOccurrence (physical instance) → social participation / Pods / attendance`.
+
+Ticket/admission is separate from Meet participation. The V2 schema and accepted ADRs supersede any earlier illustrative model.
 
 ## Start here
-
 For Codex/engineering:
-1. `AGENTS.md` — short agent map and golden invariants.
-2. `ARCHITECTURE.md` — technical system map.
-3. `docs/00_INDEX.md` — progressive documentation map.
-4. `docs/product-specs/` — task-sized product contracts.
-5. `docs/DESIGN.md` + `docs/design-docs/` — UI/UX source of truth.
-6. `docs/09_FIXED_ARCHITECTURE_DECISIONS.md` — frozen decisions.
-7. `docs/exec-plans/` — active/completed multi-step plans.
-8. `docs/10_IMPLEMENTATION_BACKLOG.md` — phased build sequence.
-9. `docs/11_DEFINITION_OF_DONE.md` — quality bar.
+1. `AGENTS.md`
+2. `ARCHITECTURE.md`
+3. `docs/00_INDEX.md`
+4. `docs/09_FIXED_ARCHITECTURE_DECISIONS.md` + accepted `docs/adr/`
+5. `schemas/database.dbml` for V2 data blueprint
+6. `docs/exec-plans/active/phase-0-foundation.md`
+7. `docs/10_IMPLEMENTATION_BACKLOG.md`
+8. `docs/11_DEFINITION_OF_DONE.md`
 
-First Codex instruction: `CODEX_BOOTSTRAP_PROMPT.md`.
+For product/design:
+- `docs/PRODUCT_SENSE.md`
+- `docs/01_PRODUCT_AND_FEATURES.md`
+- `docs/product-specs/`
+- `docs/DESIGN.md`
+- `docs/design-docs/`
+- `design/DESIGN_SYSTEM_PREVIEW.html`
 
-## Product promise
+Mobile/runtime-specific:
+- `docs/MOBILE_RELEASES.md`
+- `docs/CLIENT_COMPATIBILITY.md`
+- `docs/REALTIME.md`
+- `docs/DEEP_LINKS_SEO.md`
 
-**Discover what is happening nearby, find people to go with, or create an activity yourself.**
+## Fixed stack
+React Native + Expo, Next.js, NestJS + Fastify, PostgreSQL 18 + PostGIS, Valkey, GCP Finland/Cloud Run/Cloud SQL, Cloudflare, Terraform, PostHog + BigQuery, OpenTelemetry + Sentry.
 
-Imported and official events make the product useful before community density. Participation, Pods, attendance, trusted connections and community events create the proprietary social layer.
+## Codex start command
+Give Codex:
 
-## Fixed technical baseline
+> Read AGENTS.md, ARCHITECTURE.md and docs/00_INDEX.md. Use architecture 1.2 / schemas/database.dbml V2. Execute docs/exec-plans/active/phase-0-foundation.md and Phase 0 of docs/10_IMPLEMENTATION_BACKLOG.md in dependency order. Do not redesign fixed ADRs or implement obsolete join_mode/ticket semantics.
 
-React Native + Expo · Next.js · NestJS/Fastify · TypeScript · PostgreSQL/PostGIS · Valkey · GCP Finland · Cloud Run · Pub/Sub/Cloud Tasks · Cloud Storage · Cloudflare · Terraform · PostHog/BigQuery · OpenTelemetry/Sentry.
-
-## Design baseline
-
-The design is event-first, calm and practical: restrained light/dark themes, clear hierarchy, one dominant CTA, no dating swipe/person-browsing metaphors. Machine-readable tokens live in `design/tokens.json`; open `design/DESIGN_SYSTEM_PREVIEW.html` for a visual reference.
-
-## Development principle
-
-The repository is the system of record. Codex works from small relevant specs and execution plans rather than one giant chat prompt. Physical infrastructure may scale, but domain boundaries/contracts/data ownership are designed to evolve without an avoidable rewrite.
+## Conflict rule
+If ADR/prose/DBML conflict, implementation stops until documentation is reconciled. Chat history is never higher authority than indexed repository specs.

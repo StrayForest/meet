@@ -1,20 +1,35 @@
 flowchart LR
-  U[Consumer Mobile/Web] --> CF[Cloudflare]
-  B[B2B Dashboard] --> CF
-  A[Admin Console] --> CF
+  M[Mobile\nReact Native + Expo] --> CF[Cloudflare]
+  W[Consumer Web\nNext.js] --> CF
+  B[B2B\nNext.js] --> CF
+  A[Admin\nseparate staff auth] --> CF
   CF --> LB[GCP HTTPS Load Balancer]
-  LB --> API[NestJS API Modular Monolith]
+  LB --> API[NestJS API\nmodular monolith]
   LB --> RT[Realtime Gateway]
-  API --> PG[(PostgreSQL + PostGIS)]
-  API --> VK[(Valkey)]
-  RT --> VK
-  API --> ASYNC[Pub/Sub + Cloud Tasks]
-  API --> GCS[Cloud Storage]
-  SRC[External Event Sources] --> ING[Ingestion Workers]
-  ING --> ASYNC
-  ASYNC --> WK[Workers]
+  API --> PG[(PostgreSQL + PostGIS\nauthoritative)]
+  API --> VK[(Valkey\nephemeral)]
+  API --> OUT[Transactional Outbox]
+  OUT --> PS[Pub/Sub / Cloud Tasks]
+  PS --> WK[Workers]
   WK --> PG
+  API --> GCS[Cloud Storage]
   WK --> GCS
-  API --> ID[Strong Identity Provider]
-  API --> AN[PostHog / BigQuery]
-  API --> OT[OpenTelemetry / Sentry]
+  RT --> VK
+  RT --> PG
+  SRC[External Event Sources] --> ING[Ingestion Workers]
+  ING --> PS
+  API --> ID[External strong identity provider]
+  API --> PH[PostHog\nanalytics + experiments]
+  API --> BQ[BigQuery]
+  API --> OBS[OTel / Sentry]
+  OPS[Operational Flags + Client Policies] --> PG
+  EAS[Expo EAS Build / Submit / Update] -. delivers .-> M
+  M -. REST recovery .-> API
+
+  subgraph Domain[Core domain]
+    E[Event\ncanonical/series] --> O[EventOccurrence\nphysical instance]
+    O --> AD[Admission policy]
+    O --> SP[Meet social participation]
+    O --> POD[Pods / attendance]
+  end
+  API --> Domain

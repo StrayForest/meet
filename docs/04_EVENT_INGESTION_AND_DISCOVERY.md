@@ -1,220 +1,111 @@
-# 04 — Event ingestion, discovery, search and recommendations
+# 04 — Event ingestion, discovery, dedupe and canonical identity
 
 ## 1. Goal
+Imported/official supply makes Meet useful nationwide before community density exists. Social participation/Pods create proprietary value on top of any eligible physical event.
 
-The app must be useful across Finland before community supply reaches density. Imported and official events provide initial liquidity; social participation and Pods create proprietary network effects.
+## 2. Source classes
+1. municipal/open-data APIs
+2. ticket/event provider APIs
+3. tourism/Visit APIs
+4. organization partner APIs
+5. ICS/RSS
+6. organization direct publishing
+7. community-created events
+8. scraping only when terms/robots/licensing explicitly permit and after review
 
-## 2. Event source classes
+## 3. Source registry and connector contract
+Each source has a registry row/config with:
+- source key/type
+- country/region scope
+- rights/license metadata + review date
+- connector version/config
+- rate limit/quota policy
+- health/freshness SLA
+- enabled operational flag
 
-1. Finnish municipal/open-data APIs.
-2. Ticket/event provider APIs.
-3. Tourism/Visit APIs.
-4. Organization partner APIs.
-5. ICS/RSS feeds.
-6. Organization direct publishing.
-7. Community-created events.
-8. Scraping only when terms/robots/licensing explicitly permit it and after review.
+Connector exposes cursor/watermark, fetch/pagination, parse, cancellation/deletion semantics and health.
 
-## 3. Connector interface
+## 4. Import runs
+Every sync is represented by `ingestion_runs` with status, cursor/watermark, counts, timing and error summary. Raw records keep fetch/source update times, content hash, rights snapshot and payload/object reference.
 
-Every connector exposes:
-- source key;
-- country/region scope;
-- rights/license metadata;
-- cursor/watermark strategy;
-- fetch/pagination;
-- parser;
-- rate-limit policy;
-- deletion/cancellation semantics;
-- source health.
-
-Canonical Event must never contain source-specific fields that force coupling to one provider.
-
-## 4. Pipeline
-
+## 5. Pipeline
 `Fetch → Raw Record → Validate → Normalize → Resolve Organizer/Venue → Geocode → Classify → Dedupe → Canonical Upsert → Translate/Moderate → Publish Projection`
 
-### Raw record stores
-- source key;
-- source event ID;
-- fetched_at;
-- source updated_at;
-- response/hash metadata;
-- license/rights snapshot;
-- raw payload or object-storage reference;
-- parse status/errors.
+## 6. Canonical event/occurrence mapping
+Normalize stable Event identity separately from concrete EventOccurrence identity. Ticket/source records that describe individual dates map to occurrence source links where possible.
 
-## 5. Canonical normalization
+Admission/ticket data is normalized independently from Meet social participation policy. Imported ticket source never disables social participation by default; policy decides whether social layer is eligible.
 
-Normalize:
-- title;
-- organizer;
-- venue;
-- start/end;
-- timezone;
-- coordinates/address;
-- categories;
-- language;
-- ticket URL;
-- price representation;
-- age restrictions;
-- accessibility;
-- media;
-- cancellation state.
+Online-only source items are excluded from V1 public discovery unless a future explicit product decision enables them. Hybrid records require a physical occurrence.
 
-## 6. Deduplication
+## 7. Dedupe candidate score
+Signals:
+- normalized title
+- organizer
+- venue identity/similarity
+- start/end proximity
+- geo distance
+- performers
+- shared provider/external identifiers
 
-### Candidate generation
-Find events in a sensible time/geo window.
+High confidence auto-link; medium admin queue; low remain separate.
 
-### Score signals
-- normalized title similarity;
-- organizer similarity;
-- venue identity/similarity;
-- start-time proximity;
-- end-time proximity;
-- geo distance;
-- performer/artist overlap;
-- shared external identifiers.
+## 8. Stable identity after merge — mandatory
+A merge never makes an old Meet ID disappear semantically.
 
-### Thresholds
-- high confidence → auto-link/merge;
-- medium → admin dedupe queue;
-- low → remain separate.
+Use:
+- `event_aliases(alias_event_id → canonical_event_id)`
+- merge/audit metadata
+- equivalent occurrence alias/history if occurrence-level duplicate IDs were publicly issued
 
-Never erase provenance when sources merge into one canonical event.
+Rules:
+- old public deep link resolves to canonical event and web returns canonical redirect where appropriate;
+- internal reads resolve aliases centrally;
+- saved references/Pods/analytics can be migrated or resolved without user-visible loss;
+- alias chains are flattened/prevented from cycles;
+- canonical event cannot alias to itself;
+- provenance remains attached to canonical source mappings.
 
-## 7. Source precedence
-
+## 9. Source precedence
 Default field authority:
-1. verified organizer direct management;
-2. official organizer partner API;
-3. authoritative municipal/open data;
-4. licensed ticket/event provider;
-5. lower-confidence source;
-6. community suggestion.
+1. verified organizer direct management
+2. official organizer partner API
+3. authoritative municipal/open data
+4. licensed ticket/event provider
+5. lower-confidence source
+6. community suggestion
 
-Precedence can be field-specific. Safety/legal overrides always win.
+Precedence may be field-specific. Safety/legal removal always wins.
 
-## 8. Source disappearance/cancellation
+## 10. Disappearance/cancellation
+One source disappearing does not immediately delete/cancel canonical event. Reconcile explicit cancellation, remaining active sources, organizer status, timing and source reliability.
 
-One source disappearing does not immediately delete canonical event.
-Reconcile:
-- explicit cancellation;
-- other active sources;
-- organizer-owned status;
-- event time;
-- source reliability.
+## 11. Organization/venue source mappings
+Organizations and venues keep explicit source mappings instead of stuffing source-specific IDs into canonical rows. Claiming an organization never destroys source mappings.
 
-## 9. Organization claiming through imported supply
+## 12. Discovery V1
+PostgreSQL/PostGIS + deterministic ranking.
+Eligibility before rank:
+- physical/hybrid occurrence
+- scheduled/published
+- time/country/geo scope
+- user age/audience/safety eligibility
+- social participation availability when relevant
+- blocked relationships
 
-Imported supply may create UNCLAIMED organization profiles.
-Claim flow:
-1. user requests claim;
-2. relation/domain/business evidence;
-3. strong identity where required;
-4. automated/staff review;
-5. VERIFIED organization;
-6. verified owner gets controlled canonical overrides.
+Rank signals: time relevance, distance, category affinity, language, social context, organizer reliability, data quality, normalized popularity, freshness/exploration, attendance history.
 
-## 10. Discovery V1
+## 13. Search
+Postgres FTS + pg_trgm + PostGIS. Natural-language parser only produces structured filters and never generates events.
 
-PostgreSQL/PostGIS + deterministic ranker.
+## 14. Map
+Viewport/radius/time/filter query. Private-home returns coarse public location only. National events are never downloaded wholesale to client.
 
-Eligibility filters happen before rank:
-- occurrence published/scheduled;
-- time window;
-- country;
-- age eligibility;
-- safety/account restrictions;
-- event audience policy;
-- availability/join state;
-- blocked relationships;
-- geo scope.
+## 15. Search extraction seam
+Discovery uses read/search interfaces. Future external search index is an async projection from versioned domain/outbox events; PostgreSQL stays authoritative.
 
-## 11. Rank signals
+## 16. Recommendation ML later
+Target `P(successful_attendance | user, occurrence, context)`, not CTR. Requires warehouse quality, offline evaluation, privacy/fairness review and controlled experiment.
 
-Positive:
-- starts soon/time relevance;
-- distance;
-- interest/category affinity;
-- language match;
-- seats available;
-- organizer reliability;
-- event data quality;
-- connections/social context;
-- normalized popularity;
-- freshness/exploration;
-- historical attendance affinity.
-
-Penalties:
-- repeated exposure;
-- high cancellation history;
-- low organizer trust;
-- unrealistic travel/time;
-- low data quality;
-- safety/risk flags.
-
-Diversity constraints prevent a homogeneous feed.
-
-## 12. Search V1
-
-- PostgreSQL full-text search;
-- `pg_trgm` fuzzy title/organizer/venue matching;
-- PostGIS spatial filters;
-- structured filters.
-
-Natural-language query is parsed to a structured filter object. It does not generate events.
-
-## 13. Map
-
-Endpoint takes:
-- viewport bounds or center/radius;
-- time range;
-- filters;
-- zoom/cluster hint.
-
-Private-home events only return coarse public location unless actor is authorized for exact address.
-
-## 14. Search-engine extraction seam
-
-Discovery depends on an interface/read repository, not direct assumptions about Postgres implementation.
-
-When metrics justify it, an OpenSearch/Elastic-class index can be populated asynchronously from existing versioned outbox events. PostgreSQL remains source of truth.
-
-## 15. Recommendation ML later
-
-Only after reliable data.
-
-Target:
-`P(attended | user, occurrence, context)`
-
-Possible features:
-- views/saves/joins/cancels/attendance;
-- category/time/day affinity;
-- distance tolerance;
-- languages;
-- event size;
-- organizer history;
-- connection signals;
-- repeated organizer/category;
-- no-show risk.
-
-Release process:
-1. warehouse data quality;
-2. offline evaluation;
-3. compare against deterministic ranker;
-4. privacy/fairness review;
-5. feature-flagged experiment;
-6. optimize attendance/retention/safety, not CTR alone.
-
-## 16. Source health KPIs
-
-- fetch success rate;
-- freshness lag;
-- parse error rate;
-- events imported/updated/cancelled;
-- dedupe rate;
-- stale records;
-- API quota;
-- rights/license review date.
+## 17. Source health
+Track fetch success, freshness lag, parse errors, imported/updated/cancelled counts, dedupe rate, stale records, quota and rights review date.

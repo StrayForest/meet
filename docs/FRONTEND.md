@@ -8,54 +8,82 @@
 
 ## State
 - Server state: TanStack Query.
-- Small local UI state: Zustand only where React/local navigation state is insufficient.
+- Small local UI state: Zustand only where React/navigation state is insufficient.
 - Forms: React Hook Form + shared Zod schemas.
-- Do not mirror server entities into global client stores.
+- Do not mirror server entities into a global client store.
 
-## API
-Generated typed client from OpenAPI/shared contracts. No hand-written guessed response shapes. Boundary data is validated or comes from generated typed SDK contracts.
+## API/contracts
+Generated typed client from OpenAPI/shared contracts. No guessed response shapes.
+Mobile request metadata includes platform/app version/build/runtime/capabilities through shared client infrastructure.
+Follow `CLIENT_COMPATIBILITY.md`; do not assume latest app and backend deploy together.
+
+## Event model in UI
+UI consumes separate fields for:
+- Event canonical identity;
+- selected EventOccurrence;
+- Admission (`Tickets/Free/...`);
+- Meet social participation (`Join/Request/Waitlist/...`).
+
+Never recreate a single `joinMode` that treats `EXTERNAL_TICKET` as social participation state.
+
+## High-impact revalidation
+Cached lists/details may render quickly, but before join/waitlist acceptance/check-in/exact private address and other high-impact actions the client uses current server truth. Push/WebSocket cannot mark a mutation successful by themselves.
 
 ## Design implementation
-- Tokens originate from `design/tokens.json` and are exposed through `packages/ui`.
-- No raw hex colors, ad-hoc spacing or arbitrary radii in product screens except documented one-off media data.
-- Shared primitives: Button, Text, Icon, Avatar, Badge, Chip, Card shell, Input, Sheet/Modal, Toast, Skeleton, EmptyState, ErrorState.
-- Share tokens/primitives across platforms, not giant screens.
+- Tokens originate `design/tokens.json` via `packages/ui`.
+- No raw ad-hoc visual system.
+- Shared primitives, not giant cross-platform screens.
+- Event imagery/activity context has higher hierarchy than person browsing.
 
 ## Mobile navigation
-Five persistent destinations: Home, Map, Create, Chats, Profile. Labels stay visible. Create may receive visual emphasis but must remain a normal accessible tab/action.
+Home, Map, Create, Chats, Profile. Labels visible. Create may be visually emphasized but remains accessible navigation/action.
 
-## Rendering rules
-- Lists must virtualize once data can grow.
-- Images use responsive derivatives and placeholders.
-- Avoid layout shift.
-- All async screens implement loading, refreshing, empty, partial-error and full-error states.
-- Offline behavior is explicit; never pretend a mutation succeeded before durable confirmation unless the operation has designed optimistic semantics.
+## Deep links
+Canonical HTTPS URLs are primary share links. Expo Router maps verified iOS Universal Links / Android App Links to Event/Occurrence/Organization screens. See `DEEP_LINKS_SEO.md`.
+
+## Async/offline states
+Every async screen supports loading, refreshing, empty, partial-error/stale and full-error states.
+Offline browsing may use cached data; mutations never pretend durable success without server confirmation unless explicitly designed optimistic behavior is reversible/safe.
+
+## Lists/maps/images
+- virtualize growing lists;
+- responsive image derivatives/placeholders;
+- avoid layout shift;
+- map requests viewport clusters/pages; never load nationwide events client-side.
+
+## Realtime
+Follow `REALTIME.md`. Clients expect disconnect/reconnect, reauth/resubscribe and REST recovery. Presence/typing are approximate and disposable.
 
 ## Accessibility
-- Semantic labels/roles.
-- Dynamic text scaling.
-- Minimum target 44pt iOS / 48dp Android; shared design token uses 48 logical px where possible.
-- Contrast meets WCAG 2.2 AA.
-- No color-only state meaning.
-- Keyboard/focus support on web/admin/B2B.
-- Respect reduced motion.
+- semantic labels/roles;
+- dynamic text scaling;
+- minimum target 44pt iOS / 48dp Android, shared token 48 logical px where practical;
+- WCAG 2.2 AA web contrast/semantics;
+- no color-only meaning;
+- keyboard/focus web/B2B/admin;
+- reduced motion.
 
 ## Visual verification
-Every user-facing PR affecting layout must provide automated or agent-captured screenshots for defined reference viewports and compare against `docs/design-docs/visual-qa.md`.
+User-facing PR affecting layout provides automated/agent-captured screenshots for defined reference states/viewports and follows `design-docs/visual-qa.md`.
 
 ## Performance budgets
 Initial goals:
 - avoid blocking JS work >50ms in normal interaction paths;
-- list scroll stays smooth on target mid-range devices;
-- public web LCP target <2.5s p75 when feasible;
-- image/card loading must be incremental;
-- map must not load all national events client-side.
+- smooth list scroll on target mid-range devices;
+- public web LCP <2.5s p75 when feasible;
+- incremental image/card loading;
+- bounded map/search results.
+
+## Mobile release
+Follow `MOBILE_RELEASES.md`; no production-only behavior depends on an OTA update being received immediately.
 
 ## Frontend anti-patterns
 - business authorization in UI only;
-- huge screen components without feature boundaries;
-- duplicate API DTOs;
+- giant screen components;
+- duplicate DTOs;
 - unbounded `useEffect` orchestration;
-- inline colors/spacing;
-- icon-only critical actions without accessible label/tooltips where needed;
-- custom navigation behavior that fights iOS/Android conventions.
+- inline arbitrary design values;
+- icon-only critical action without accessible name;
+- fighting native navigation conventions;
+- treating push/realtime as source of truth;
+- assuming old supported clients do not exist.

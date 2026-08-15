@@ -1,13 +1,73 @@
 {
-  "project":"meet",
-  "architecture_version":"1.1",
-  "product":"event-first IRL social network / real-world social marketplace",
-  "launch":{"country":"FI","locales":["fi","en","ru"],"minimum_age":18},
-  "runtime":{"node":"24 LTS","package_manager":"pnpm 11","monorepo":"Turborepo","language":"TypeScript"},
-  "clients":{"mobile":"React Native + Expo","web":"Next.js","b2b":"Next.js","admin":"Next.js"},
-  "backend":{"framework":"NestJS + Fastify","shape":"modular monolith","api":"REST + OpenAPI","async":"transactional outbox + Pub/Sub + Cloud Tasks"},
-  "data":{"primary":"PostgreSQL 18 + PostGIS","query":"Drizzle + targeted SQL","cache":"Valkey","objects":"GCP Cloud Storage","warehouse":"BigQuery"},
-  "cloud":{"provider":"GCP","primary_region":"europe-north1","compute":"Cloud Run","database":"Cloud SQL","edge":"Cloudflare","iac":"Terraform"},
-  "design":{"contract":"docs/DESIGN.md","tokens":"design/tokens.json","preview":"design/DESIGN_SYSTEM_PREVIEW.html","navigation":["Home","Map","Create","Chats","Profile"],"themes":["light","dark"],"accessibility":"WCAG 2.2 AA"},
-  "analytics":"PostHog + BigQuery","observability":"OpenTelemetry + Sentry","north_star":"Successful IRL Participations / week"
+  "project": "meet",
+  "architecture_version": "1.2",
+  "product": "event-first IRL social network / real-world social marketplace",
+  "launch": {
+    "country": "FI",
+    "locales": ["fi", "en", "ru"],
+    "minimum_age": 18,
+    "event_presence": ["PHYSICAL", "HYBRID"]
+  },
+  "domain": {
+    "event_identity": "Event is stable canonical/series identity",
+    "participation_unit": "EventOccurrence",
+    "admission_modes": ["NONE", "FREE", "EXTERNAL_TICKET", "INTERNAL_TICKET"],
+    "participation_modes": ["OPEN", "APPROVAL_REQUIRED", "INVITE_ONLY", "DISABLED"],
+    "recurrence_v1": ["DAILY", "WEEKLY", "MONTHLY", "INTERVAL", "BYDAY", "COUNT", "UNTIL"],
+    "canonical_aliases": true
+  },
+  "runtime": {
+    "node": "24 LTS",
+    "package_manager": "pnpm 11",
+    "monorepo": "Turborepo",
+    "language": "TypeScript"
+  },
+  "clients": {
+    "mobile": "React Native + Expo",
+    "web": "Next.js",
+    "b2b": "Next.js",
+    "admin": "Next.js"
+  },
+  "mobile_delivery": {
+    "build": "EAS Build",
+    "submit": "EAS Submit",
+    "ota": "EAS Update with explicit runtimeVersion",
+    "compatibility_contract": "docs/CLIENT_COMPATIBILITY.md"
+  },
+  "backend": {
+    "framework": "NestJS + Fastify",
+    "shape": "modular monolith",
+    "api": "REST + OpenAPI",
+    "async": "transactional outbox + Pub/Sub + Cloud Tasks",
+    "realtime": "WebSocket + Valkey Pub/Sub + REST recovery"
+  },
+  "data": {
+    "primary": "PostgreSQL 18 + PostGIS",
+    "query": "Drizzle + targeted SQL",
+    "cache": "Valkey",
+    "objects": "GCP Cloud Storage",
+    "warehouse": "BigQuery",
+    "blueprint": "schemas/database.dbml"
+  },
+  "cloud": {
+    "provider": "GCP",
+    "primary_region": "europe-north1",
+    "compute": "Cloud Run",
+    "database": "Cloud SQL",
+    "edge": "Cloudflare",
+    "iac": "Terraform"
+  },
+  "operational_flags": "PostgreSQL source + Valkey cache + audited Admin",
+  "experiments": "PostHog",
+  "design": {
+    "contract": "docs/DESIGN.md",
+    "tokens": "design/tokens.json",
+    "preview": "design/DESIGN_SYSTEM_PREVIEW.html",
+    "navigation": ["Home", "Map", "Create", "Chats", "Profile"],
+    "themes": ["light", "dark"],
+    "accessibility": "WCAG 2.2 AA"
+  },
+  "analytics": "PostHog + BigQuery",
+  "observability": "OpenTelemetry + Sentry",
+  "north_star": "Successful IRL Participations / week"
 }

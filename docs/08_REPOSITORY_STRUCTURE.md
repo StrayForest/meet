@@ -34,6 +34,7 @@
 │  └─ DESIGN_SYSTEM_PREVIEW.html
 ├─ infra/
 ├─ docs/
+│  ├─ adr/
 │  ├─ design-docs/
 │  ├─ product-specs/
 │  ├─ exec-plans/{active,completed}/
@@ -41,27 +42,40 @@
 │  ├─ generated/
 │  ├─ DESIGN.md
 │  ├─ FRONTEND.md
+│  ├─ BACKEND.md
+│  ├─ MOBILE_RELEASES.md
+│  ├─ CLIENT_COMPATIBILITY.md
+│  ├─ REALTIME.md
+│  ├─ DEEP_LINKS_SEO.md
 │  ├─ PRODUCT_SENSE.md
+│  ├─ OPERATIONS.md
 │  ├─ PLANS.md
 │  ├─ QUALITY_SCORE.md
 │  ├─ RELIABILITY.md
 │  └─ SECURITY.md
 └─ schemas/
+   ├─ database.dbml
+   └─ *.mmd
 ```
 
 ## API modules
-`auth, users, identity-verification, organizations, venues, events, event-ingestion, discovery, participation, pods, chat, connections, reputation, safety, moderation, notifications, billing, analytics, admin, platform`.
+`auth, users, staff, identity-verification, organizations, venues, media, events, event-ingestion, discovery, participation, pods, chat, connections, reputation, safety, moderation, notifications, billing, analytics, admin, platform`.
 
-Recommended module dependency direction: `presentation → application → domain`; infrastructure implements ports. Do not create ceremonial abstractions with no value.
+Events module owns Event/EventRecurrence/EventOccurrence policies. Platform owns OperationalFlags, ClientPolicies, idempotency/outbox/audit/country runtime configuration. Staff privileged identity is not a flag on Users.
+
+Recommended dependency direction: `presentation → application → domain`; infrastructure implements ports. Do not create ceremonial abstractions with no value.
 
 ## Shared contracts
-DTO schemas, error codes, event envelopes and safe enums/value types only; no server business logic/provider implementations.
+DTO schemas, error codes, event envelopes and safe enums/value types only. No business logic/provider implementations. AdmissionMode and ParticipationMode are distinct exported contract types.
 
 ## UI
-`packages/ui` owns generated design tokens, primitives, icons/accessibility helpers. Mobile/web share primitives and contracts, not giant screens.
+`packages/ui` owns generated design tokens, primitives, icons/accessibility helpers. Mobile/web share primitives/contracts, not giant screens.
+
+## Mobile
+`apps/mobile` owns Expo Router routes and EAS app configuration; build/release automation follows `MOBILE_RELEASES.md`. Server compatibility logic is not duplicated per screen; it lives in shared client/bootstrap infrastructure.
 
 ## Agent legibility
-As code appears, place local `AGENTS.md` only where package/app-specific commands or constraints materially help. Root rules always win on product/architecture contracts.
+Local `AGENTS.md` only where app/package-specific commands/constraints materially help. Root rules always win on product/architecture/domain contracts.
 
 ## Mechanical enforcement
-Phase 0 adds structural lint/tests for module dependency direction, raw design-token violations, generated-doc freshness and documentation links.
+Phase 0 structural checks cover module dependency direction, raw design-token violations, generated/doc links, DBML/prose architecture checks, obsolete combined join/ticket semantics and client-compatibility contract drift.

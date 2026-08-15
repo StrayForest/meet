@@ -1,7 +1,8 @@
-# Execution plans
+# Plans index
 
-- `active/phase-0-foundation.md` — first implementation plan.
-- `completed/` — archived plans with decision/progress history.
-- `tech-debt-tracker.md` — known deviations/debt.
+- `active/phase-0-foundation.md` — current implementation plan.
+- `completed/architecture-hardening-2026-08-15.md` — completed pre-implementation architecture hardening review.
+- `completed/README.md` — completed-plan conventions.
+- `tech-debt-tracker.md` — deliberate implementation debt.
 
-Create one plan per coherent multi-step objective. Do not make one permanent mega-plan for the entire company.
+Multi-step/risky implementation work keeps progress/decisions in an active plan. Stable decisions graduate into product/design/architecture docs or ADRs rather than living only in plan history.

@@ -3,46 +3,69 @@
 ## Shape
 NestJS + Fastify TypeScript modular monolith. Domain boundaries are more important than folder ceremony.
 
-## Dependency direction
-`presentation → application → domain`; infrastructure implements ports. Domain code must not import NestJS, HTTP, Cloud SDKs, Drizzle or provider clients.
+Dependency direction: `presentation → application → domain`; infrastructure implements ports. Domain code does not import NestJS, HTTP, Cloud SDKs, Drizzle or provider clients.
+
+## Core domain invariants
+- Event = canonical/series identity.
+- EventOccurrence = physical participation unit.
+- AdmissionMode and ParticipationMode are independent.
+- No online-only V1 occurrence type.
+- Private exact location is occurrence-scoped/restricted.
+- Event merges preserve aliases/provenance.
+
+Any backend code introducing `EXTERNAL_TICKET` as a ParticipationMode/join state is architecturally invalid.
 
 ## Controllers
-Thin: authentication context, request validation, command/query call, response mapping. No business transactions or permission shortcuts in controllers.
+Thin: auth context, validation, application command/query, response mapping. No business transactions/permission shortcuts.
 
 ## Application services
-Own use-case orchestration, authorization policy invocation, transaction boundaries and domain-event/outbox emission.
+Own use-case orchestration, authorization, transaction boundaries and outbox emission.
 
 ## Repositories
-Module-owned. Cross-module direct table access is prohibited except explicit platform/read-model infrastructure approved by architecture tests. Discovery may read optimized projections but does not own authoritative event mutations.
+Module-owned. Direct cross-module table access prohibited except explicit platform/read-model infrastructure covered by architecture tests. Discovery may read projections but does not mutate authoritative events.
 
 ## Transactions
-Use DB transactions for invariants such as capacity, waitlist promotion, role changes and outbox writes. External network calls do not occur inside long DB transactions unless unavoidable and explicitly designed.
+Use DB transactions for capacity, waitlist promotion, role changes, alias merge and outbox writes. Avoid external network calls inside long DB transactions.
+
+## Database connection policy
+Use bounded pools from infrastructure config. Launch defaults from `06_INFRASTRUCTURE_DEVOPS.md` (API 8, realtime/worker lower). Do not increase pool/max instances without connection-budget calculation.
 
 ## Errors
-Domain/application errors map to stable Problem Details codes from `references/error-codes.md`. Do not leak SQL/provider error strings to clients.
+Domain/application errors map to stable Problem Details codes. Do not leak SQL/provider errors.
 
 ## Async
-Transactional outbox is mandatory for durable side effects after authoritative mutations. Consumers are idempotent and observable. Pub/Sub delivery order is never assumed globally.
+Transactional outbox mandatory for durable side effects after authoritative mutation. Consumers idempotent; processed-event semantics where necessary. Never assume global Pub/Sub ordering.
+
+## Realtime
+`REALTIME.md` is contract. WebSocket gateway is transport; durable writes precede fanout; reconnect/recovery via REST.
+
+## Client compatibility
+`CLIENT_COMPATIBILITY.md` is mandatory. Additive/backward-compatible API evolution for supported mobile clients. Server bootstrap/capability policy is first-party domain/platform config.
 
 ## Configuration
-Typed runtime configuration; startup fails clearly on missing required production config. No `process.env` reads scattered through domain code.
+Typed runtime config; startup fails clearly on missing production config. No scattered `process.env` reads.
+
+First-party OperationalFlags are DB-backed/audited and independent of PostHog product experiments.
 
 ## External providers
-Every provider has a port/adapter and test fake: auth, email, push, maps/geocoding, KYC, moderation AI, analytics, payments, event-source connectors.
+Every provider uses port/adapter/test fake: auth, email, push, maps/geocoding, KYC, moderation AI, analytics, payments, event connectors, mobile release integrations where automation touches backend tooling.
 
 ## Logging
-Structured, correlation-aware, no sensitive payloads. Use safe IDs/reason codes rather than message bodies, DOB, tokens or exact private addresses.
+Structured/correlation-aware, no sensitive payloads. Safe IDs/reason codes rather than message bodies, DOB, tokens or exact private addresses.
 
 ## Query performance
-Avoid N+1; bounded lists; cursor pagination; explicit indexes; explain/analyze hot SQL during optimization. PostGIS/hot-path SQL may be handwritten and must have integration tests.
+Avoid N+1; bounded lists; cursor pagination; explicit indexes; explain/analyze hot SQL. PostGIS/hot SQL integration-tested.
 
 ## Migrations
-Expand → backfill/migrate → contract. Production rollout must permit old/new app revision overlap. Long backfills run as resumable jobs.
+Expand → backfill/migrate → contract. Old/new Cloud Run revisions and supported mobile clients overlap safely. Long backfills are resumable jobs.
 
 ## Code conventions
-- explicit types at public/module boundaries;
+- explicit public/module-boundary types;
 - avoid `any`; validate unknown external data;
-- dependency injection for providers/clock/ID generator where deterministic tests need it;
+- inject providers/clock/ID generator for deterministic tests;
 - no hidden singleton mutable state;
-- commands mutate, queries read; do not force CQRS framework ceremony;
-- comments explain non-obvious why/invariants, not restate code.
+- commands mutate, queries read without unnecessary CQRS framework ceremony;
+- comments explain why/invariants.
+
+## Schema conflict rule
+`schemas/database.dbml` V2 + accepted ADRs + indexed prose must agree before migration implementation. Codex does not choose one silently if they diverge.

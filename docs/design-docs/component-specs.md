@@ -3,56 +3,70 @@
 All components support light/dark themes, keyboard/screen-reader semantics where applicable and FI/EN/RU text expansion.
 
 ## Button
-Variants: Primary, Secondary, Ghost, Danger, Text.
-Sizes: 48 default, 40 compact only outside critical mobile actions.
-States: default, pressed, focus, disabled, loading.
-Only one Primary in a local decision area.
+Variants: Primary, Secondary, Ghost, Danger, Text. Default height 48; compact 40 only outside critical mobile actions. States: default/pressed/focus/disabled/loading. One Primary per local decision area.
 
 ## EventCard
 Variants: standard list, compact horizontal, map-selected.
-Required skeleton matches final geometry. Card click opens detail; nested CTA remains accessible and must not create conflicting tap targets.
+Required content hierarchy follows selected EventOccurrence. Skeleton matches final geometry.
+
+EventCard supports **two independent action concepts**:
+- `SocialAction`: Join / Request / Waitlist / Joined / View;
+- `AdmissionAction`: Get tickets / Register / Free indicator when relevant.
+
+Do not collapse them into one enum/CTA. When both are actionable, social action remains the primary Meet action and external admission is clearly secondary unless a specific screen context intentionally prioritizes purchasing.
+
+Card click opens detail; nested actions remain accessible without conflicting tap targets.
+
+## OccurrenceSelector
+For recurring Event detail, compact accessible list/chips of upcoming occurrences showing date/time and material location differences. Selecting an occurrence refreshes admission/social capacity/location truth. Never imply series-wide address/capacity when occurrence overrides exist.
+
+## AdmissionAction
+External admission opens validated trusted external URL. Visual/copy never implies ticket purchase state unless verified integration knows it. External-link affordance is explicit.
+
+## SocialAction
+Derived from ParticipationMode/current participation/capacity/waitlist. Before final mutation, high-impact state is revalidated server-side.
 
 ## Avatar / Facepile
-Sizes 24/32/40/56/80. Facepile shows max 3 visible avatars + `+N`; accessible text describes participant count. Missing image uses initials/category-neutral fallback.
+Sizes 24/32/40/56/80. Facepile max 3 visible + `+N`; accessible participant count. Missing image uses neutral fallback.
 
 ## Badge
-Types: Official, Verified organizer, Community, Imported/source, Identity verified, Age/audience. Badges are factual, not prestige gamification.
+Official, Verified organizer, Community, Imported/source, Identity verified, Age/audience. Factual, not prestige gamification.
 
 ## Chip
-Filter/selectable/status forms. Selected state uses fill + icon/label difference, not color alone. Horizontal filter rows remain scrollable with obvious start/end padding.
+Filter/selectable/status. Selected uses fill + icon/label difference, not color alone.
 
 ## Input
-Persistent label; placeholder is example, never substitute for label. Error text appears near control and in summary for complex web forms. Date/time uses locale-aware picker/input.
+Persistent label; placeholder only example. Nearby error text; locale-aware date/time.
 
 ## SearchField
-Clear button, search icon, semantic search role on web. Search query does not commit on every keypress without debouncing/cancellation.
+Clear/search semantics; debounced/cancelled requests.
 
 ## Sheet/Modal
-Mobile uses bottom sheet for contextual secondary decisions; full-screen route for complex forms. Destructive/safety decisions require explicit labels, not ambiguous “Yes/No”.
+Bottom sheet for secondary mobile decisions; full-screen route for complex forms. Destructive/safety actions use explicit labels.
 
 ## Banner/Alert
-Info, success, warning, danger. Persistent material event updates use banner, not transient toast.
+Info/success/warning/danger. Material event update/cancellation is persistent banner, never toast-only.
 
 ## Toast
-Only for lightweight confirmation; never the sole place for cancellation, safety, payment failure or important error information.
+Lightweight confirmation only; never sole cancellation/safety/payment/important-error surface.
 
 ## Skeleton
-Used for predictable network loading. Avoid indefinite spinner-only screens.
+Predictable geometry; avoid indefinite spinner-only screens.
 
 ## EmptyState
-Always explains why and offers one useful next action. Discovery empty state may widen radius/change date/create event.
+Explain why + one useful action. Discovery can widen radius/date/create.
 
-## ErrorState
-Shows human explanation + retry when safe. Preserve user form data after recoverable failures.
+## Error/StaleState
+Human explanation + retry. Preserve form data. When event truth cannot be verified, display stale/degraded state rather than confident join/ticket/location information.
 
 ## Bottom navigation
-5 destinations, icon + label, safe-area aware. Create visual emphasis cannot reduce label/target semantics.
+5 destinations, icon + label, safe-area aware.
 
 ## Event status
-Cancelled/removed/full/waitlisted/approval/confirmed each have text label + icon/shape and consistent state copy.
+Cancelled/removed/full/waitlisted/approval/confirmed each have text + non-color signal.
 
 ## Safety/trust block
-Reusable pattern on join/private-home/host surfaces: verification facts, address policy, report/share-plans actions. Do not create fear-heavy red UI for normal verified state.
+Join/private-home/host reusable pattern: verification facts, address policy, report/share-plans. Normal verified state is calm, not fear-red.
 
 ## Map pin
-Category-neutral brand pin by default; selected pin clearly distinct. Cluster contains count. Private-home pin is coarse and visually does not imply exact entrance/location.
+Neutral brand/category pin, selected distinct, clusters count. Private-home pin is deliberately coarse.

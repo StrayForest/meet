@@ -1,47 +1,13 @@
-# Product spec — Community event creation
+# Product spec — Community event creation — Architecture 1.3
 
-## Goal
-A normal user creates a safe, clear physical activity without learning event-management jargon.
+User creates a safe physical activity without event-management jargon.
 
-## Wizard
-1. Activity/category + title.
-2. One-time or supported recurrence.
-3. Physical place: Public Venue / Outdoor / Private Home / Hybrid.
-4. Admission: None / Free / External ticket-registration.
-5. Meet participation: Open / Approval required / Invite only / Disabled.
-6. Social capacity + waitlist policy + language/audience.
-7. Description/media/accessibility.
-8. Preview + safety/verification checks + publish.
+Wizard: category/title → one-time or supported recurrence → physical place (Public Venue/Outdoor/Private Home) → admission → Meet participation/capacity/waitlist → audience/language → media/accessibility → preview/safety → publish.
 
-Online-only creation is not part of V1.
+Publishing a recurring Event creates/updates EventOccurrenceTemplate plus EventRecurrence; materializer generates concrete occurrences. Template includes duration and default physical location/policies. Single occurrence overrides do not rewrite series defaults.
 
-Autosave draft. Back does not lose data. Validation occurs per step and server-side.
+Private Home immediately explains phone/strong-ID requirement; public label/coarse point are separate from encrypted exact payload.
 
-## Recurrence
-Native editable recurrence is deliberately limited to DAILY/WEEKLY/MONTHLY with INTERVAL/BYDAY/COUNT/UNTIL, local DTSTART and timezone. UI exposes only combinations supported by domain tests.
+External ticket is a separate action; never social join mode. V1 has no online/hybrid creation.
 
-Host can override/cancel a single occurrence without unintentionally rewriting the entire series.
-
-## Private home
-Selecting Private Home immediately explains phone/strong-ID requirement and address privacy. Exact location is stored separately and assigned to the concrete occurrence; it is not inherited as an unavoidable series-level address.
-
-Publish is blocked until verification/policy passes.
-
-## Admission vs social join
-External ticket link is a separate field/action. It never becomes the social join mode. A ticketed event may still allow Open/Approval/Invite Meet participation.
-
-## Moderation
-Risk pre-screen before broad visibility. Policy failure provides reason/remediation where safe. Safety removal cannot be bypassed by editing/reposting duplicate content.
-
-## Host controls
-Edit defaults/series, override occurrence, close social joining, approve/reject, remove with reason, announce, cancel occurrence/series, check-in.
-
-## Acceptance
-- idempotent publish;
-- recurrence local-time/DST tests;
-- unsupported recurrence rejected safely;
-- private location leak tests;
-- admission/participation independence test;
-- media quarantine;
-- cancellation/material-update durable notifications;
-- relevant host actions audited.
+Acceptance: idempotent publish, recurrence/DST/template tests, unsupported recurrence rejection, private-location leak/crypto tests, admission/participation independence, cancellation notifications and audited host-sensitive actions.

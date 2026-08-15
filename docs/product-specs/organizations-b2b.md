@@ -1,44 +1,13 @@
-# Product spec — Organizations and B2B2C
+# Product spec — Organizations and B2B2C — Architecture 1.3
 
-## Goal
-Organizations increase trustworthy event supply first; monetization comes after consumer activity proof.
+Organizations increase trustworthy physical supply before monetization.
 
-## Organization lifecycle
-UNCLAIMED → CLAIM_PENDING → VERIFIED → SUSPENDED/CLOSED.
+Lifecycle: UNCLAIMED→CLAIM_PENDING→VERIFIED→SUSPENDED/CLOSED. Source mappings survive claim.
 
-Imported organizations retain source mappings through claim/verification.
+Membership is separate from roles. One organization member may hold multiple roles: OWNER, ADMIN, EVENT_MANAGER, MODERATOR, ANALYST, BILLING. Permission union remains subject to resource/state/safety policy.
 
-## Claim
-Request → relationship evidence → claimant strong identity where policy requires → staff/automated review → owner role → audit.
+Organizations manage Event series/default template/recurrence separately from concrete occurrence overrides. Admission and Meet participation remain independent.
 
-## Roles
-OWNER, ADMIN, EVENT_MANAGER, MODERATOR, ANALYST, BILLING with explicit server-side permissions.
+Launch B2B: org switcher/profile/team multi-role RBAC/events/recurrence/attendees/check-in/announcements/basic analytics.
 
-## Event management model
-Organizations manage stable Event identity/series and concrete EventOccurrences.
-
-For recurring activities:
-- series/default edits are distinct from occurrence overrides;
-- concrete occurrence can change venue/location/capacity/cancellation without rewriting every future occurrence.
-
-Admission and Meet social participation are separate:
-- AdmissionMode: None / Free / External ticket / future internal ticket;
-- ParticipationMode: Open / Approval / Invite / Disabled;
-- social capacity/waitlist apply to Meet participation, not external ticket inventory.
-
-## Launch B2B
-Organization switcher, profile, team/RBAC, events/recurrence, attendee approval/removal, QR check-in, announcements, basic analytics.
-
-## UX
-Desktop information-dense but clear. Consumer event appearance remains consistent regardless of source. “Official/verified” is factual, not paid prestige.
-
-## Monetization later
-Organization Pro, promoted events, affiliate ticket links, native ticketing. Paid promotion is labeled and cannot bypass safety/eligibility.
-
-## Acceptance
-- tenant isolation and role escalation tests;
-- all sensitive changes audited;
-- imported unclaimed profile can be claimed without losing source provenance;
-- organization recurring occurrence override tests;
-- external ticket and Meet participation remain independent;
-- B2B never infers ticket ownership from Meet participation/check-in unless future verified integration provides it.
+Acceptance: tenant isolation, multi-role union/no duplicate role, claim provenance, occurrence override, audited changes and no ticket-ownership inference from Meet participation.

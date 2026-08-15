@@ -1,36 +1,24 @@
-# Third-party provider register
-
-Architecture fixes provider classes/boundaries; commercial vendor selections may remain pending until integration phase.
+# Third-party provider register — Architecture 1.3
 
 | Capability | Baseline | Status |
 |---|---|---|
-| Consumer auth | Google Cloud Identity Platform | fixed; launch DPA/data-location review required |
-| Strong Finnish identity | FTN-capable provider adapter | vendor selection pending |
-| International age/KYC | document/liveness provider adapter | vendor selection pending |
-| Mobile build/submit | Expo EAS Build + EAS Submit | fixed |
-| Mobile OTA | EAS Update with explicit runtimeVersion compatibility | fixed boundary |
+| Consumer auth | Google Cloud Identity Platform | fixed; DPA/data-location review gate |
+| Finnish strong identity | FTN-capable adapter | vendor pending |
+| International age/KYC | provider adapter | vendor pending |
+| Mobile build/submit/OTA | Expo EAS | fixed boundary |
+| iOS app integrity | Apple App Attest/DeviceCheck | optional risk signal, integration review |
+| Android app integrity | Play Integrity | optional risk signal, integration review |
 | Maps client | MapLibre | fixed |
-| Map tiles/geocoding | provider abstraction | initial vendor to select before production |
-| Product analytics/experiments | PostHog | fixed; not operational kill-switch authority |
-| Operational flags | first-party PostgreSQL + Valkey cache + Admin audit | fixed |
+| Tiles/geocoding | provider abstraction | vendor pending |
+| Product analytics | PostHog | fixed; not ops authority |
 | Warehouse | BigQuery | fixed |
-| Error monitoring | Sentry | fixed |
-| Cloud/compute/data | GCP | fixed |
-| Edge/WAF | Cloudflare | fixed |
-| Billing/payments | Stripe boundary | fixed for monetization phase |
-| Email | provider abstraction | vendor selection pending |
-| Push | APNs/FCM via Expo-compatible implementation initially | implementation within boundary |
-| AI moderation | provider abstraction | production model/vendor selected with safety/cost review |
+| Errors | Sentry | fixed |
+| Cloud/data | GCP | fixed |
+| Edge | Cloudflare | fixed |
+| Origin authentication | Cloud Run ingress/default-URL restrictions + GCP LB controls; preferred Cloudflare custom AOP→GCP frontend mTLS after POC | fixed architecture boundary |
+| Payments | Stripe boundary | monetization phase |
+| Email | adapter | vendor pending |
+| Push | APNs/FCM via Expo-compatible path initially | boundary |
+| AI moderation | adapter | vendor/model pending |
 
-For every production vendor record:
-- region/data processing/residency characteristics;
-- DPA/service terms;
-- retention/subprocessors;
-- security/auth model;
-- outage/degraded behavior;
-- quotas/rate limits;
-- cost model;
-- data export/deletion behavior where relevant;
-- exit/migration strategy.
-
-Do not infer a provider's data residency from the GCP application region. Provider compliance review is a launch gate for auth, identity/KYC, analytics, messaging and payments.
+Every production vendor record includes DPA/data location/subprocessors/retention/security/outage/quotas/cost/deletion/export/exit strategy. Mobile SDK additions also update mobile privacy/store declarations.

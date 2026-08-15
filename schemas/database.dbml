@@ -1,6 +1,6 @@
-Project meet_v2 {
+Project meet_v3 {
   database_type: 'PostgreSQL'
-  Note: 'Authoritative V2 blueprint. PostgreSQL 18 + PostGIS. First-party IDs UUIDv7. Migrations add CHECK constraints noted below.'
+  Note: 'Architecture 1.3 pre-migration design blueprint. PostgreSQL 18 + PostGIS. After P0-006 this file becomes generated/verified from Drizzle schema+migrations per SCHEMA_GOVERNANCE.md.'
 }
 
 Enum user_status { ACTIVE RESTRICTED SUSPENDED DELETION_PENDING DELETED }
@@ -11,7 +11,7 @@ Enum event_access { PUBLIC UNLISTED PRIVATE ORGANIZATION_ONLY }
 Enum admission_mode { NONE FREE EXTERNAL_TICKET INTERNAL_TICKET }
 Enum participation_mode { OPEN APPROVAL_REQUIRED INVITE_ONLY DISABLED }
 Enum waitlist_policy { DISABLED ENABLED }
-Enum place_type { PUBLIC_VENUE OUTDOOR PRIVATE_HOME HYBRID }
+Enum place_type { PUBLIC_VENUE OUTDOOR PRIVATE_HOME }
 Enum participation_state { REQUESTED WAITLISTED SLOT_OFFERED CONFIRMED REJECTED EXPIRED CANCELLED_BY_USER REMOVED_BY_HOST ATTENDED NO_SHOW }
 Enum pod_state { DRAFT OPEN FULL CLOSED CANCELLED COMPLETED REMOVED }
 Enum pod_member_state { REQUESTED CONFIRMED REJECTED LEFT REMOVED }
@@ -26,6 +26,8 @@ Enum appeal_state { SUBMITTED UNDER_REVIEW UPHELD OVERTURNED PARTIALLY_OVERTURNE
 Enum conversation_type { OCCURRENCE POD CONNECTION ORGANIZATION_ANNOUNCEMENT }
 Enum delivery_status { QUEUED SENT DELIVERED FAILED_RETRYABLE FAILED_FINAL SUPPRESSED }
 Enum job_status { REQUESTED RUNNING SUCCEEDED FAILED CANCELLED }
+Enum flag_change_status { PENDING APPROVED REJECTED APPLIED EXPIRED }
+Enum device_integrity_provider { APP_ATTEST PLAY_INTEGRITY }
 
 Table users {
   id uuid [pk]
@@ -109,6 +111,21 @@ Table user_devices {
   indexes { (user_id, device_install_id) [unique] }
 }
 
+Table device_attestations {
+  id uuid [pk]
+  user_device_id uuid [ref: > user_devices.id, not null]
+  provider device_integrity_provider [not null]
+  key_reference varchar
+  public_key bytea
+  assertion_counter bigint
+  latest_verdict jsonb
+  risk_reason_codes jsonb
+  verified_at timestamptz
+  expires_at timestamptz
+  updated_at timestamptz [not null]
+  indexes { (user_device_id, provider) [unique] }
+}
+
 Table legal_documents {
   id uuid [pk]
   document_type varchar [not null]
@@ -137,6 +154,7 @@ Table data_export_requests {
   expires_at timestamptz
   requested_at timestamptz [not null]
   completed_at timestamptz
+  failure_code varchar
 }
 
 Table account_deletion_requests {
@@ -241,13 +259,20 @@ Table organizations {
 }
 
 Table organization_members {
-  organization_id uuid [ref: > organizations.id]
-  user_id uuid [ref: > users.id]
-  role org_role [not null]
+  id uuid [pk]
+  organization_id uuid [ref: > organizations.id, not null]
+  user_id uuid [ref: > users.id, not null]
   status varchar [not null]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   indexes { (organization_id, user_id) [unique] }
+}
+
+Table organization_member_roles {
+  organization_member_id uuid [ref: > organization_members.id]
+  role org_role [not null]
+  granted_at timestamptz [not null]
+  indexes { (organization_member_id, role) [unique] }
 }
 
 Table organization_claims {
@@ -316,6 +341,9 @@ Table ingestion_runs {
   id uuid [pk]
   source_id uuid [ref: > ingestion_sources.id, not null]
   status ingestion_run_status [not null]
+  connector_version varchar [not null]
+  normalizer_version varchar [not null]
+  classifier_version varchar
   cursor_before text
   cursor_after text
   fetched_count int [not null, default: 0]
@@ -353,17 +381,45 @@ Table events {
   owner_user_id uuid [ref: > users.id]
   organization_id uuid [ref: > organizations.id]
   category_id uuid [ref: > event_categories.id]
-  default_admission_mode admission_mode [not null]
-  default_participation_mode participation_mode [not null]
-  default_waitlist_policy waitlist_policy [not null]
-  default_social_capacity int
   min_age int [not null, default: 18]
   max_age int
   audience_policy jsonb [not null]
   accessibility_metadata jsonb
+  version bigint [not null, default: 1]
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   published_at timestamptz
+}
+
+Table private_locations {
+  id uuid [pk]
+  crypto_version varchar [not null]
+  algorithm varchar [not null]
+  kms_key_resource text [not null]
+  encrypted_dek bytea [not null]
+  nonce bytea [not null]
+  aad_version varchar [not null]
+  encrypted_payload bytea [not null]
+  created_at timestamptz [not null]
+  rotated_at timestamptz
+  Note: 'Encrypted payload is a versioned object containing exact address/coordinates/access instructions. No public label is stored here.'
+}
+
+Table event_occurrence_templates {
+  event_id uuid [pk, ref: > events.id]
+  default_duration_minutes int [not null]
+  default_venue_id uuid [ref: > venues.id]
+  default_place_type place_type [not null]
+  default_public_location_label varchar [not null]
+  default_public_geography geography [not null]
+  default_private_location_id uuid [ref: > private_locations.id]
+  default_admission_mode admission_mode [not null]
+  default_participation_mode participation_mode [not null]
+  default_waitlist_policy waitlist_policy [not null]
+  default_social_capacity int
+  default_join_close_offset_minutes int
+  updated_at timestamptz [not null]
+  Note: 'CHECK: PRIVATE_HOME requires default_private_location_id; non-private normally does not reference private location. Template supplies materializer defaults.'
 }
 
 Table event_recurrences {
@@ -378,7 +434,7 @@ Table event_recurrences {
   materialized_through timestamptz
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
-  Note: 'Migration CHECK: frequency DAILY/WEEKLY/MONTHLY; interval>0; COUNT/UNTIL validity.'
+  Note: 'CHECK: frequency DAILY/WEEKLY/MONTHLY; interval>0; COUNT/UNTIL validity; local wall-clock semantics across DST.'
 }
 
 Table event_translations {
@@ -392,27 +448,18 @@ Table event_translations {
   indexes { (event_id, locale) [unique] }
 }
 
-Table private_locations {
-  id uuid [pk]
-  encrypted_address bytea [not null]
-  encrypted_exact_location bytea [not null]
-  public_area_label varchar [not null]
-  disclosure_policy jsonb [not null]
-  created_at timestamptz [not null]
-  updated_at timestamptz [not null]
-}
-
 Table event_occurrences {
   id uuid [pk]
   event_id uuid [ref: > events.id, not null]
   state occurrence_state [not null]
   starts_at timestamptz [not null]
-  ends_at timestamptz
+  ends_at timestamptz [not null]
   timezone varchar [not null]
   venue_id uuid [ref: > venues.id]
   place_type place_type [not null]
+  public_location_label varchar [not null]
+  public_geography geography [not null]
   private_location_id uuid [ref: > private_locations.id]
-  public_geography geography
   admission_mode admission_mode [not null]
   participation_mode participation_mode [not null]
   waitlist_policy waitlist_policy [not null]
@@ -428,7 +475,7 @@ Table event_occurrences {
     (event_id, starts_at)
     (state, starts_at)
   }
-  Note: 'Migration CHECK: PRIVATE_HOME requires private_location_id; non-private must not leak private location; HYBRID still requires physical public/private location.'
+  Note: 'CHECK: ends_at>starts_at; PRIVATE_HOME requires private_location_id; generic/public location lives here; no online/hybrid V1.'
 }
 
 Table event_source_links {
@@ -461,7 +508,7 @@ Table event_aliases {
   reason varchar [not null]
   merged_at timestamptz [not null]
   merged_by_staff_id uuid [ref: > staff_accounts.id]
-  Note: 'Application/migration prevents self-alias, cycles and alias chains; resolve/flatten to live canonical Event.'
+  Note: 'Prevent self/cycles/chains; resolve/flatten to live canonical.'
 }
 
 Table occurrence_aliases {
@@ -497,7 +544,10 @@ Table waitlist_entries {
   ordinal bigint [not null]
   state varchar [not null]
   created_at timestamptz [not null]
-  indexes { (occurrence_id, user_id) [unique] }
+  indexes {
+    (occurrence_id, user_id) [unique]
+    (occurrence_id, ordinal) [unique]
+  }
 }
 
 Table waitlist_offers {
@@ -506,6 +556,8 @@ Table waitlist_offers {
   expires_at timestamptz [not null]
   status varchar [not null]
   created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  Note: 'Migration adds partial UNIQUE for at most one active offer per waitlist_entry.'
 }
 
 Table invitations {
@@ -541,7 +593,6 @@ Table pods {
   meeting_point jsonb
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
-  Note: 'Pod participation_mode cannot use admission semantics; DISABLED normally only terminal/admin policy.'
 }
 
 Table pod_members {
@@ -560,7 +611,7 @@ Table connections {
   status varchar [not null]
   created_at timestamptz [not null]
   indexes { (user_low_id, user_high_id) [unique] }
-  Note: 'Migration CHECK requires distinct canonical ordered pair; application canonicalizes pair before insert.'
+  Note: 'CHECK distinct canonical ordered pair.'
 }
 
 Table conversations {
@@ -571,7 +622,7 @@ Table conversations {
   connection_id uuid [ref: > connections.id]
   organization_id uuid [ref: > organizations.id]
   created_at timestamptz [not null]
-  Note: 'Migration CHECK enforces exactly one context column matching conversation type.'
+  Note: 'CHECK exactly one context column matching conversation type.'
 }
 
 Table conversation_members {
@@ -591,6 +642,7 @@ Table messages {
   body text
   metadata jsonb
   status varchar [not null]
+  content_version bigint [not null, default: 1]
   created_at timestamptz [not null]
   edited_at timestamptz
   deleted_at timestamptz
@@ -608,19 +660,21 @@ Table blocks {
   blocked_user_id uuid [ref: > users.id]
   created_at timestamptz [not null]
   indexes { (blocker_user_id, blocked_user_id) [unique] }
-  Note: 'Migration CHECK blocker != blocked.'
+  Note: 'CHECK blocker != blocked.'
 }
 
 Table feedback {
   id uuid [pk]
   occurrence_id uuid [ref: > event_occurrences.id, not null]
   author_user_id uuid [ref: > users.id, not null]
-  subject_user_id uuid [ref: > users.id]
+  subject_user_id uuid [ref: > users.id, not null]
   structured jsonb [not null]
   would_meet_again boolean
   private_note text
   safety_flag boolean [not null]
   created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes { (occurrence_id, author_user_id, subject_user_id) [unique] }
 }
 
 Table share_plans {
@@ -656,13 +710,30 @@ Table moderation_cases {
   updated_at timestamptz [not null]
 }
 
+Table moderation_case_reports {
+  case_id uuid [ref: > moderation_cases.id]
+  report_id uuid [ref: > reports.id]
+  linked_by_staff_id uuid [ref: > staff_accounts.id]
+  linked_at timestamptz [not null]
+  indexes {
+    (case_id, report_id) [unique]
+    report_id [unique]
+  }
+}
+
 Table moderation_evidence {
   id uuid [pk]
   case_id uuid [ref: > moderation_cases.id, not null]
   evidence_type varchar [not null]
-  reference jsonb [not null]
+  source_entity_type varchar
+  source_entity_id uuid
+  source_version bigint
+  content_hash varchar
+  snapshot_object_uri text
+  reference jsonb
   classification varchar [not null]
   created_at timestamptz [not null]
+  Note: 'Evidence snapshot is immutable/minimized; do not depend on later mutable message/profile/event content.'
 }
 
 Table moderation_actions {
@@ -730,7 +801,7 @@ Table subscriptions {
   amount_minor bigint
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
-  Note: 'Migration CHECK enforces exactly one supported subscriber subject where required.'
+  Note: 'CHECK exactly one supported subscriber subject where required.'
 }
 
 Table billing_transactions {
@@ -764,8 +835,27 @@ Table operational_flags {
   value jsonb [not null]
   environment varchar [not null]
   safety_critical boolean [not null, default: false]
+  requires_two_person_enable boolean [not null, default: false]
+  version bigint [not null, default: 1]
+  last_reason varchar [not null]
   updated_by_staff_id uuid [ref: > staff_accounts.id]
   updated_at timestamptz [not null]
+  Note: 'Updates use optimistic concurrency on version. Disabling may be easier than re-enabling safety-critical flags.'
+}
+
+Table operational_flag_change_requests {
+  id uuid [pk]
+  flag_key varchar [ref: > operational_flags.key, not null]
+  expected_version bigint [not null]
+  proposed_value jsonb [not null]
+  reason varchar [not null]
+  status flag_change_status [not null]
+  requested_by_staff_id uuid [ref: > staff_accounts.id, not null]
+  approved_by_staff_id uuid [ref: > staff_accounts.id]
+  created_at timestamptz [not null]
+  expires_at timestamptz
+  applied_at timestamptz
+  Note: 'For two-person changes requester and approver must differ.'
 }
 
 Table client_policies {
@@ -786,6 +876,7 @@ Table client_policies {
 
 Table audit_logs {
   id uuid [pk]
+  stream_key varchar [not null]
   actor_type varchar [not null]
   actor_id uuid
   action varchar [not null]
@@ -794,16 +885,25 @@ Table audit_logs {
   reason_code varchar
   metadata jsonb
   request_id varchar
+  previous_hash varchar
+  entry_hash varchar [not null]
   created_at timestamptz [not null]
+  indexes { (stream_key, created_at, id) }
+  Note: 'Application role INSERT-only. Critical audit also exported to independent retention-controlled sink.'
 }
 
 Table outbox_events {
   id uuid [pk]
   event_type varchar [not null]
   schema_version int [not null]
+  aggregate_type varchar [not null]
   aggregate_id uuid [not null]
+  aggregate_version bigint
+  actor_type varchar
+  actor_id uuid
+  country_code char(2)
   payload jsonb [not null]
-  correlation_id varchar
+  correlation_id varchar [not null]
   causation_id varchar
   occurred_at timestamptz [not null]
   published_at timestamptz

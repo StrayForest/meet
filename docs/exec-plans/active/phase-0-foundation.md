@@ -1,58 +1,41 @@
-# Active plan — Phase 0 Foundation
+# Active plan — Phase 0 Foundation — Architecture 1.3
 
 ## Goal
-Create an agent-legible, production-shaped monorepo with enforceable architecture/design/domain/mobile-compatibility boundaries **before any product migration/screen locks in obsolete semantics**.
+Create production-shaped monorepo and executable contracts before product implementation.
 
-## Source specs
-- `AGENTS.md`
-- `ARCHITECTURE.md`
-- `docs/00_INDEX.md`
-- `docs/DESIGN.md`
-- `docs/FRONTEND.md`
-- `docs/BACKEND.md`
-- `docs/02_DOMAIN_AND_DATABASE.md`
-- `schemas/database.dbml` V2
-- `docs/MOBILE_RELEASES.md`
-- `docs/CLIENT_COMPATIBILITY.md`
-- `docs/REALTIME.md`
-- `docs/09_FIXED_ARCHITECTURE_DECISIONS.md`
-- accepted ADRs
-- `docs/10_IMPLEMENTATION_BACKLOG.md`
+## Required specs
+AGENTS, ARCHITECTURE, 00_INDEX, BACKEND, 02_DOMAIN_AND_DATABASE, SCHEMA_GOVERNANCE, EVENT_CONTRACTS, database.dbml V3, DESIGN/FRONTEND, MOBILE_RELEASES/PRIVACY/CLIENT_COMPATIBILITY, SECURITY/SUPPLY_CHAIN/ORIGIN, accepted ADRs, backlog.
 
 ## Milestones
-1. pnpm/Turborepo/Node24/strict TS workspace.
-2. app/package skeletons.
-3. lint/format/test/build commands.
-4. design-token generation + UI primitives.
-5. Postgres/PostGIS + Valkey local environment.
-6. V2 Drizzle schema/migration with DB checks/constraints.
-7. shared contract/error/idempotency/client metadata primitives.
-8. first-party OperationalFlag and ClientPolicy service/repository baseline.
+1. pnpm/Turborepo/Node24 strict workspace.
+2. design token pipeline/primitives.
+3. local Postgres18+PostGIS/Valkey/fakes.
+4. V3 Drizzle schema/migration with all CHECK/unique/partial indexes.
+5. schema governance cutover + generated DBML verification.
+6. shared API/value/error/idempotency/client contracts.
+7. typed durable event registry/contracts.
+8. first-party OperationalFlag optimistic concurrency/change approvals + ClientPolicy.
 9. architecture boundary tests.
-10. OTel/Sentry/PostHog adapters/no-op local providers.
-11. Expo/EAS config skeleton + runtimeVersion/channel strategy.
-12. Terraform skeleton + DB connection budget variables.
-13. CI docs/schema/architecture/contracts/migrations checks.
-14. deterministic fixtures/visual screenshot harness shell.
+10. OTel/Sentry/PostHog adapters.
+11. Expo/EAS + mobile privacy/SDK inventory skeleton.
+12. repository/supply-chain controls and WIF design.
+13. Terraform primary/DR/origin/DB-budget skeleton.
+14. CI docs/generated/schema/event-contract/architecture/migration/security/build checks.
+15. deterministic fixtures/visual QA shell.
 
-## Critical Phase-0 assertions
-Automated tests/static checks prove:
-- no `EXTERNAL_TICKET` in ParticipationMode;
-- EventOccurrence owns physical participation fields;
-- private exact location is not a generic Event DTO field;
-- PostHog is not operational kill-switch storage;
-- idempotency uses non-null actor_scope;
-- schema contains staff/device/legal/media/source/alias/notification-delivery/client-policy/operational-flag entities;
-- supported client compatibility contract can be represented before mobile product features.
-
-## Non-goals
-No real consumer feature, production payment/KYC, custom ML or production deployment.
+## Critical assertions
+- EventOccurrenceTemplate can materialize duration/location/policies;
+- no HYBRID/ONLINE V1 enum/path;
+- external ticket not ParticipationMode;
+- exact private location not generic DTO;
+- report→case relationship exists;
+- org multi-role exists;
+- waitlist ordinal/active-offer and feedback uniqueness enforced;
+- outbox envelope matches EVENT_CONTRACTS;
+- ingestion run records code versions;
+- OperationalFlag uses version + optional two-person enable;
+- audit application writer cannot update/delete;
+- generated DBML matches executable schema after cutover.
 
 ## Acceptance
-Fresh checkout has one documented setup command; root checks green; V2 zero→latest migration succeeds; schema/docs/ADRs agree; Codex can boot/test a worktree without hidden human setup.
-
-## Progress log
-- [ ] not started
-
-## Decisions/deviations
-Architecture hardening review completed in documentation before implementation. Any new fixed-stack/domain conflict requires ADR.
+Fresh checkout boots; V3 zero→latest succeeds; generated docs consistent; root checks green; no product UI built on obsolete model.

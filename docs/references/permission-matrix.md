@@ -1,21 +1,18 @@
 # Permission matrix — baseline
 
-`✓` allowed by role when resource/state policy also permits; all server-side.
+Organization membership can contain **multiple roles**; effective permissions are the union of assigned roles, then narrowed by resource/state/safety/country policy.
 
-| Action | Consumer | Host | Org Event Manager | Org Admin | Org Owner | Staff Moderator | Staff Admin |
+| Action | Consumer/Host | EVENT_MANAGER | ANALYST | BILLING | ADMIN | OWNER | Staff Moderator/Admin |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| View public event | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Join eligible event | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| View eligible public event | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Create community event | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Manage own hosted event | — | ✓ | — | — | — | ✓* | ✓* |
-| Create/manage org event | — | — | ✓ | ✓ | ✓ | ✓* | ✓* |
-| Manage org members | — | — | — | ✓ | ✓ | — | ✓* |
-| Billing | — | — | role-specific | BILLING/ADMIN | ✓ | — | restricted staff |
-| Review ordinary reports | — | — | — | — | — | ✓ | ✓ |
-| Permanent ban | — | — | — | — | — | policy-limited | ✓ |
-| View exact private address | confirmed participant/authorized host only, regardless of role; staff access exceptional/audited |
-| View KYC document | never — documents are not stored |
+| Manage own hosted event | host | — | — | — | — | — | audited override only |
+| Create/manage org event | — | ✓ | — | — | ✓ | ✓ | audited override |
+| View org analytics | — | role policy | ✓ | role policy | ✓ | ✓ | restricted |
+| Manage billing | — | — | — | ✓ | ✓ | ✓ | restricted staff |
+| Manage org members/roles | — | — | — | — | ✓ | ✓ | restricted staff |
+| Moderate org community scope | — | optional MODERATOR role | — | — | ✓ | ✓ | staff policy |
+| Permanent platform ban | — | — | — | — | — | — | policy-limited staff |
+| Exact private address | only currently authorized participant/host; org/staff role alone never grants it |
 
-`*` Staff acts through audited moderation/admin commands, not by impersonating ordinary ownership.
-
-Block/restriction/organization state/country policy can further deny an otherwise allowed action.
+KYC documents are never stored/viewable.

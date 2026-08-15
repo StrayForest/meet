@@ -1,42 +1,11 @@
-# Product spec — Admin and moderation
+# Product spec — Admin and moderation — Architecture 1.3
 
-## Goal
-Privileged operations are safe, auditable and impossible to confuse with ordinary consumer ownership.
+Privileged operations use separate StaffAccount/MFA/scopes and never consumer impersonation.
 
-## Staff identity
-Admin/moderation uses separate StaffAccount identity, mandatory MFA and explicit roles/scopes. A consumer User flag does not grant staff access. Staff never “becomes” a consumer user to perform privileged actions.
+Surfaces: moderation queue/cases/reports/appeals, users/restrictions, events/occurrences, org claims, identity status, ingestion/parser versions, dedupe/aliases, OperationalFlags/change approvals, ClientPolicy, audit/operations.
 
-## Core surfaces
-- moderation queue/cases/evidence;
-- reports;
-- appeals;
-- users/account restrictions;
-- events/occurrences;
-- organizations/claims;
-- identity verification status (not documents);
-- ingestion/source health;
-- dedupe/alias management;
-- first-party operational flags;
-- mobile client policy;
-- audit/operations links.
+Multiple Reports may link to one ModerationCase. Evidence used for decisions is immutable/minimized snapshot/reference with source entity/version/hash so later edits/deletes do not erase the reviewed state.
 
-## Dedupe merge
-Before merge show canonical target, source/provenance, occurrence mappings, aliases/public URLs that will be preserved and affected references. Merge cannot create alias cycles/self-alias.
+Safety-critical OperationalFlag changes use optimistic version checks; re-enable may require second staff approval. All high-impact commands audited.
 
-## Operational flags
-Safety-critical changes require reason/confirmation/audit. PostHog product experiments are visually/architecturally separate.
-
-## Client policy
-Changing minimum supported app version/forceUpdate requires reason, platform/version, effective time and audit; UI warns about active-user impact where telemetry exists.
-
-## Moderation
-Reason-coded case/action/appeal workflow. Evidence access is least-privilege. Permanent/high-impact action follows policy/human review requirements.
-
-## Acceptance
-- staff auth/scope tests;
-- no consumer impersonation authorization path;
-- every high-impact command audited;
-- operational flag works independently of PostHog;
-- alias merge preserves old route resolution;
-- client-policy change is audited;
-- exact private location staff access remains exceptional/authorized/audited.
+Acceptance: staff auth/scope, report-case linking, evidence immutability, no consumer impersonation, alias preservation, flag concurrency/two-person rule, exceptional private-location access audit.

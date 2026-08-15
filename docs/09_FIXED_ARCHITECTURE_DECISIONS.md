@@ -1,72 +1,28 @@
-# 09 — Fixed architecture decision index
+# 09 — Fixed architecture decisions — Architecture 1.3
 
-This file is an **index of frozen decisions**, not a substitute for rationale. Accepted rationale lives in `docs/adr/`.
+Accepted decisions are implementation constraints until superseded by accepted ADR.
 
-## Core accepted ADRs
+1. Event-first IRL social marketplace.
+2. Event stable identity + EventOccurrenceTemplate defaults + concrete EventOccurrence participation unit.
+3. V1 physical-only; PUBLIC_VENUE/OUTDOOR/PRIVATE_HOME. No online/hybrid placeholder.
+4. Admission/ticketing separate from Meet participation/waitlist.
+5. Limited timezone-aware recurrence subset.
+6. TypeScript monorepo; React Native+Expo mobile; Next.js web/B2B/admin; NestJS+Fastify backend.
+7. Modular monolith first; extraction only on measured scaling/reliability/ownership need.
+8. PostgreSQL 18 + PostGIS authoritative; Valkey ephemeral; Drizzle + targeted SQL.
+9. REST + OpenAPI clients.
+10. Transactional outbox + governed versioned event contracts + Pub/Sub/Cloud Tasks.
+11. Before P0-006 DBML design truth; after P0-006 Drizzle+migrations executable schema truth and DBML generated/verified.
+12. GCP primary Finland `europe-north1`; preferred DR Stockholm `europe-north2`; Cloud Run/Cloud SQL/Memorystore/Storage; Terraform.
+13. Cloudflare edge with explicit origin bypass prevention/authentication.
+14. First-party versioned/audited OperationalFlags; PostHog only product experiments/analytics.
+15. External event provenance includes source rights and connector/normalizer versions.
+16. 18+ adult network, no dating drift/random DM/public human stars.
+17. External identity verification; no identity documents stored.
+18. Exact private-home payload envelope-encrypted and occurrence-scoped.
+19. Staff identity separate/MFA; privileged audit append-only/tamper-evident.
+20. Mobile EAS lifecycle, compatibility policy, store privacy compliance and optional device-integrity risk signals.
+21. Reliability uses user-journey SLIs/error budgets; DR and scaling triggers are business/workload based, not MAU.
+22. Production engineering uses protected PR/release/supply-chain governance.
 
-| ADR | Scope | Status |
-|---|---|---|
-| `adr/0001-event-first-domain.md` | Event/Occurrence, admission vs participation, recurrence, IRL-only V1 | ACCEPTED |
-| `adr/0002-backend-data.md` | TypeScript modular monolith, PostgreSQL/PostGIS, REST/OpenAPI, outbox | ACCEPTED |
-| `adr/0003-mobile-expo.md` | React Native/Expo, EAS delivery, mobile compatibility | ACCEPTED |
-| `adr/0004-gcp-runtime.md` | GCP Finland, Cloud Run, DB connection budget, operational flags | ACCEPTED |
-| `adr/0005-safety-identity.md` | 18+, strong identity, private-home, staff separation, moderation | ACCEPTED |
-
-## Frozen implementation decisions
-- TypeScript-first pnpm/Turborepo monorepo.
-- React Native + Expo mobile; Next.js consumer web/B2B/admin.
-- NestJS + Fastify modular monolith.
-- PostgreSQL 18 + PostGIS authoritative; Drizzle + targeted SQL.
-- REST + OpenAPI typed clients.
-- transactional outbox + Pub/Sub/Cloud Tasks; consumers idempotent.
-- Valkey ephemeral only.
-- GCP `europe-north1`, Cloud Run/Cloud SQL/Memorystore/Storage/BigQuery, Terraform.
-- Cloudflare edge/WAF/rate limits/Turnstile.
-- Identity Platform consumer auth with explicit launch compliance review.
-- external strong identity/KYC adapter; identity documents never stored.
-- MapLibre + map provider abstraction.
-- PostHog analytics/experiments; **not** operational safety flag authority.
-- first-party operational flags in PostgreSQL + Valkey cache + Admin audit.
-- OpenTelemetry + Sentry.
-- Stripe provider boundary for monetization.
-- UUIDv7 first-party IDs.
-- country-config expansion.
-- imported-event provenance + stable canonical aliases after merge.
-- EventOccurrence is physical participation unit.
-- admission/ticket and Meet social participation are separate policies.
-- V1 physical/hybrid discovery only; no online-only supply.
-- native recurrence deliberately limited to DAILY/WEEKLY/MONTHLY subset.
-- EAS Build/Submit; EAS Update only with compatible runtimeVersion.
-- mobile/API compatibility window + capability negotiation.
-- no random DM; no public human star rating.
-- strong identity for private-home hosts; exact address occurrence-scoped and separately encrypted.
-- staff identity separate from consumer User identity.
-- attendance-oriented recommendation objective.
-
-## Allowed without new ADR
-- compatible dependency upgrades;
-- GCP resource sizing within documented architecture/DB connection budget;
-- indexes/query tuning;
-- cache TTLs;
-- retry/timeouts;
-- experiment rollout;
-- operational-flag value changes;
-- new connector behind existing ingestion interface;
-- provider vendor selection inside an already-fixed provider abstraction after compliance/cost review.
-
-## Requires ADR
-- change cloud provider/core database/core backend/mobile framework;
-- GraphQL as primary API;
-- microservices rewrite;
-- event sourcing as source of truth;
-- self-host identity documents/KYC;
-- merge admission and participation semantics again;
-- change EventOccurrence away from the physical participation unit;
-- admit minors into adult network;
-- enable online-only events in primary V1 discovery model;
-- introduce random unsolicited DMs;
-- make analytics vendor the sole safety/core operational kill-switch authority;
-- remove mobile backward-compatibility policy.
-
-## New ADR requirements
-Use `adr/TEMPLATE.md` and include context, measured problem, decision, alternatives, consequences, compatibility impact, migration, rollback and approval.
+Accepted ADRs: 0001 event/domain, 0002 backend/data/contracts, 0003 mobile, 0004 GCP/reliability, 0005 safety/identity, 0006 schema/event contracts, 0007 DR/SLO, 0008 supply-chain/origin/governance.

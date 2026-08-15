@@ -1,0 +1,11 @@
+# Initial ownership; split into teams as the organization grows.
+* @StrayForest
+/infra/ @StrayForest
+/schemas/ @StrayForest
+/docs/SECURITY.md @StrayForest
+/docs/05_TRUST_SECURITY_PRIVACY.md @StrayForest
+/docs/CRYPTOGRAPHY_KEY_MANAGEMENT.md @StrayForest
+/docs/SUPPLY_CHAIN_SECURITY.md @StrayForest
+/apps/admin/ @StrayForest
+/packages/database/ @StrayForest
+/.github/ @StrayForest

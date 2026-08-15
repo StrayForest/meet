@@ -1,76 +1,32 @@
-# TESTING — Verification strategy
-
-## Philosophy
-Test business invariants at the cheapest reliable layer, then protect critical journeys end-to-end. Mocks do not replace real Postgres/PostGIS concurrency/constraint tests or provider contract fixtures.
+# TESTING — Verification strategy — Architecture 1.3
 
 ## Layers
-1. domain unit: state transitions, admission/participation policy, recurrence, ranking, safety policy;
-2. application: authorization/orchestration with fakes;
-3. repository integration: real PostgreSQL/PostGIS + Valkey;
-4. API contract: auth, validation, errors, idempotency, pagination, client compatibility;
-5. connector/provider contracts;
-6. E2E mobile/web/B2B/admin;
-7. realtime reconnect/recovery;
-8. visual/accessibility;
-9. load/resilience.
+Domain unit; application; real PostgreSQL/PostGIS+Valkey integration; API contracts; connector/provider contracts; mobile/web/B2B/admin E2E; realtime; visual/accessibility; load/resilience; recovery/security drills.
 
-## Determinism
-Inject clock/UUID/provider fakes where needed. Stable fixture times/locations/IDs. No critical test depends on production third-party APIs or current wall clock.
+## Mandatory V3 invariants
+- recurrence materializer gets duration/location/policies from EventOccurrenceTemplate;
+- local recurrence DST correctness;
+- V1 rejects ONLINE/HYBRID creation;
+- private exact location never in generic DTO/read model;
+- encrypted payload roundtrip/wrong-AAD/rotation;
+- external ticket + independent social join;
+- organization member can hold multiple roles without duplicate role;
+- report links exactly to appropriate case workflow;
+- immutable evidence snapshot survives source edit/delete;
+- final capacity slot once;
+- waitlist ordinal unique and at most one active offer;
+- feedback one row per occurrence/author/subject;
+- connection pair unique;
+- conversation context XOR;
+- outbox envelope matches governed contract and duplicate delivery is safe;
+- aggregate version gap handling where used;
+- ingestion run records code versions;
+- operational flag optimistic concurrency + two-person rule;
+- audit writer cannot UPDATE/DELETE and hash-chain verification detects tamper;
+- supported old client remains compatible.
 
-## Mandatory domain/data invariants
-- EventOccurrence is participation/check-in/Pod unit;
-- EXTERNAL_TICKET + OPEN social participation works;
-- Pod cannot use admission/ticket semantics;
-- final social capacity slot assigned once;
-- waitlist offer once/atomic;
-- recurring local time remains correct across DST;
-- unsupported recurrence rejected/expanded by connector policy, not silently misinterpreted;
-- private exact location never serialized without current authorization;
-- recurring occurrences can use different private/public locations;
-- canonical connection pair prevents A↔B duplicates;
-- conversation DB context/type XOR constraint;
-- idempotency actor_scope works for user/system/anonymous scopes;
-- notification push failure does not remove durable in-app notification;
-- dedupe merge preserves alias/deep-link resolution/provenance;
-- duplicate outbox/PubSub/Task delivery safe;
-- safety-removed event cannot be resurrected by import;
-- operational safety flag works independently of PostHog.
-
-## Mobile compatibility tests
-Maintain fixtures/contracts for:
-- latest client;
-- minimum supported client;
-- capability negotiation;
-- deprecated field/enum transition;
-- force-update/bootstrap state;
-- EAS runtimeVersion compatibility configuration validation.
-
-Backend PR introducing contract change proves supported old-client behavior or follows deliberate deprecation process.
-
-## Realtime tests
-Force connection termination and assert:
-- reconnect with backoff;
-- reauthentication/resubscription;
-- durable message/state recovery via REST cursor;
-- duplicate realtime events deduped;
-- revoked membership cannot resubscribe;
-- presence/typing expiry safely;
-- slow-consumer/backpressure behavior.
-
-## API/security tests
-Auth, IDOR/horizontal access, org role escalation, staff scopes, private location leak, blocked-user contact, unauthorized WS channel, webhook signatures, upload validation, rate limits.
-
-## Mobile E2E
-Onboarding, discovery, deep link, external-ticket + social join, approval/waitlist, create/recurrence, private-home gating, Pod/chat, report, check-in, verification and stale/cancelled event refresh.
-
-## Web E2E
-Public canonical/alias redirects, SEO/noindex privacy, B2B/admin keyboard/focus/RBAC.
-
-## Visual/accessibility
-Follow `design-docs/visual-qa.md`; test themes/locales/large text/reduced motion/screen reader/keyboard/contrast.
-
-## Load/resilience
-k6-equivalent profiles for feed/map, popular-event join storm, chat/realtime reconnect, queue backlog and ingestion batch. Assert correctness as well as latency.
+## Reliability/security tests
+Origin bypass test, forced realtime disconnect, queue duplication/backlog, DB restore drill, region-recovery tabletop/automation as maturity grows, supply-chain workflow checks, mobile privacy/SDK inventory gate.
 
 ## CI
-Lint/type/unit fast; integration/contracts/migrations/schema checks/security always. E2E/visual progressively mandatory as apps exist. Critical flaky tests are bugs, not permanent retries.
+Schema/generated-doc drift, pinned Actions policy, lint/type/unit/integration/contracts/migrations/security/build; E2E/visual as apps exist. Critical flaky tests are bugs.

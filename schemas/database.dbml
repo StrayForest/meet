@@ -1,0 +1,516 @@
+Project irl_social_platform {
+  database_type: 'PostgreSQL'
+  Note: 'PostgreSQL 18 + PostGIS. First-party IDs are UUIDv7.'
+}
+
+Enum user_status { ACTIVE RESTRICTED SUSPENDED DELETION_PENDING DELETED }
+Enum event_state { DRAFT PENDING_REVIEW PUBLISHED CANCELLED COMPLETED REMOVED ARCHIVED }
+Enum occurrence_state { SCHEDULED JOIN_CLOSED CANCELLED COMPLETED REMOVED }
+Enum event_origin { IMPORTED ORGANIZATION COMMUNITY PLATFORM }
+Enum event_access { PUBLIC UNLISTED PRIVATE ORGANIZATION_ONLY }
+Enum join_mode { OPEN APPROVAL_REQUIRED INVITE_ONLY EXTERNAL_TICKET }
+Enum place_type { PUBLIC_VENUE OUTDOOR PRIVATE_HOME ONLINE }
+Enum participation_state { REQUESTED WAITLISTED SLOT_OFFERED CONFIRMED REJECTED EXPIRED CANCELLED_BY_USER REMOVED_BY_HOST ATTENDED NO_SHOW }
+Enum org_status { UNCLAIMED CLAIM_PENDING VERIFIED SUSPENDED CLOSED }
+Enum org_role { OWNER ADMIN EVENT_MANAGER MODERATOR ANALYST BILLING }
+Enum verification_status { CREATED PENDING VERIFIED FAILED EXPIRED REVOKED }
+Enum case_state { OPEN TRIAGED INVESTIGATING ACTIONED APPEALED CLOSED }
+
+Table users {
+  id uuid [pk]
+  auth_subject varchar [not null, unique]
+  status user_status [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  deleted_at timestamptz
+}
+
+Table user_public_profiles {
+  user_id uuid [pk, ref: > users.id]
+  nickname varchar [not null]
+  bio text
+  avatar_media_id uuid
+  home_city_id uuid
+  gender_display varchar
+  visibility varchar [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table user_private_profiles {
+  user_id uuid [pk, ref: > users.id]
+  date_of_birth date [not null]
+  gender varchar
+  phone_e164 varchar
+  email_normalized varchar
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table interests {
+  id uuid [pk]
+  slug varchar [unique, not null]
+  parent_id uuid [ref: > interests.id]
+}
+
+Table user_interests {
+  user_id uuid [ref: > users.id]
+  interest_id uuid [ref: > interests.id]
+  weight int
+  indexes { (user_id, interest_id) [unique] }
+}
+
+Table user_languages {
+  user_id uuid [ref: > users.id]
+  locale varchar [not null]
+  proficiency varchar
+  indexes { (user_id, locale) [unique] }
+}
+
+Table user_preferences {
+  user_id uuid [pk, ref: > users.id]
+  discovery jsonb [not null]
+  privacy jsonb [not null]
+  notifications jsonb [not null]
+  updated_at timestamptz [not null]
+}
+
+Table identity_verifications {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  provider varchar [not null]
+  provider_reference varchar [not null]
+  verification_type varchar [not null]
+  status verification_status [not null]
+  country_code char(2)
+  age_threshold int
+  identity_verified boolean [not null]
+  age_verified boolean [not null]
+  verified_at timestamptz
+  expires_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes { (provider, provider_reference) [unique] }
+}
+
+Table countries {
+  code char(2) [pk]
+  default_currency char(3) [not null]
+  default_locale varchar [not null]
+  config jsonb [not null]
+}
+
+Table regions {
+  id uuid [pk]
+  country_code char(2) [ref: > countries.code, not null]
+  name varchar [not null]
+  source_code varchar
+}
+
+Table cities {
+  id uuid [pk]
+  region_id uuid [ref: > regions.id]
+  country_code char(2) [ref: > countries.code, not null]
+  name varchar [not null]
+  timezone varchar [not null]
+  center_geography geography
+}
+
+Table organizations {
+  id uuid [pk]
+  status org_status [not null]
+  type varchar [not null]
+  slug varchar [unique]
+  display_name varchar [not null]
+  description text
+  country_code char(2) [ref: > countries.code]
+  website_url text
+  verified_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table organization_members {
+  organization_id uuid [ref: > organizations.id]
+  user_id uuid [ref: > users.id]
+  role org_role [not null]
+  status varchar [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes { (organization_id, user_id) [unique] }
+}
+
+Table organization_claims {
+  id uuid [pk]
+  organization_id uuid [ref: > organizations.id, not null]
+  claimant_user_id uuid [ref: > users.id, not null]
+  status varchar [not null]
+  evidence jsonb
+  reviewed_by uuid
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table venues {
+  id uuid [pk]
+  organization_id uuid [ref: > organizations.id]
+  name varchar [not null]
+  country_code char(2) [ref: > countries.code, not null]
+  city_id uuid [ref: > cities.id]
+  address jsonb
+  geography geography [not null]
+  timezone varchar [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table raw_event_records {
+  id uuid [pk]
+  source_key varchar [not null]
+  source_event_id varchar [not null]
+  fetched_at timestamptz [not null]
+  source_updated_at timestamptz
+  content_hash varchar [not null]
+  payload jsonb
+  payload_object_uri text
+  rights_metadata jsonb
+  parse_status varchar [not null]
+  error_code varchar
+}
+
+Table events {
+  id uuid [pk]
+  origin event_origin [not null]
+  state event_state [not null]
+  access event_access [not null]
+  join_mode join_mode [not null]
+  place_type place_type [not null]
+  owner_user_id uuid [ref: > users.id]
+  organization_id uuid [ref: > organizations.id]
+  venue_id uuid [ref: > venues.id]
+  category_id uuid
+  default_capacity int
+  min_age int [not null, default: 18]
+  max_age int
+  audience_policy jsonb [not null]
+  recurrence_rule text
+  external_ticket_url text
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  published_at timestamptz
+}
+
+Table event_sources {
+  id uuid [pk]
+  event_id uuid [ref: > events.id]
+  source_key varchar [not null]
+  source_event_id varchar [not null]
+  source_url text
+  license_key varchar
+  rights_metadata jsonb
+  source_updated_at timestamptz
+  last_fetched_at timestamptz [not null]
+  content_hash varchar
+  raw_record_id uuid [ref: > raw_event_records.id]
+  indexes { (source_key, source_event_id) [unique] }
+}
+
+Table event_translations {
+  event_id uuid [ref: > events.id]
+  locale varchar [not null]
+  title varchar [not null]
+  description text
+  source_locale varchar
+  translation_source varchar [not null]
+  updated_at timestamptz [not null]
+  indexes { (event_id, locale) [unique] }
+}
+
+Table event_occurrences {
+  id uuid [pk]
+  event_id uuid [ref: > events.id, not null]
+  state occurrence_state [not null]
+  starts_at timestamptz [not null]
+  ends_at timestamptz
+  timezone varchar [not null]
+  capacity_override int
+  join_closes_at timestamptz
+  public_geography geography
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (event_id, starts_at)
+    (state, starts_at)
+  }
+}
+
+Table private_event_locations {
+  event_id uuid [pk, ref: > events.id]
+  encrypted_address bytea [not null]
+  encrypted_exact_location bytea [not null]
+  public_area_label varchar [not null]
+  disclosure_policy jsonb [not null]
+  updated_at timestamptz [not null]
+}
+
+Table event_media {
+  id uuid [pk]
+  event_id uuid [ref: > events.id, not null]
+  media_id uuid [not null]
+  sort_order int [not null]
+  created_at timestamptz [not null]
+}
+
+Table participations {
+  id uuid [pk]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  user_id uuid [ref: > users.id, not null]
+  state participation_state [not null]
+  joined_at timestamptz
+  cancelled_at timestamptz
+  attendance_source varchar
+  updated_at timestamptz [not null]
+  indexes { (occurrence_id, user_id) [unique] }
+}
+
+Table waitlist_entries {
+  id uuid [pk]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  user_id uuid [ref: > users.id, not null]
+  ordinal bigint [not null]
+  state varchar [not null]
+  created_at timestamptz [not null]
+  indexes { (occurrence_id, user_id) [unique] }
+}
+
+Table waitlist_offers {
+  id uuid [pk]
+  waitlist_entry_id uuid [ref: > waitlist_entries.id, not null]
+  expires_at timestamptz [not null]
+  status varchar [not null]
+  created_at timestamptz [not null]
+}
+
+Table invitations {
+  id uuid [pk]
+  occurrence_id uuid [ref: > event_occurrences.id]
+  invited_user_id uuid [ref: > users.id]
+  invited_by_user_id uuid [ref: > users.id, not null]
+  token_hash varchar
+  status varchar [not null]
+  expires_at timestamptz
+  created_at timestamptz [not null]
+}
+
+Table check_ins {
+  id uuid [pk]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  user_id uuid [ref: > users.id, not null]
+  method varchar [not null]
+  confirmed_by_user_id uuid [ref: > users.id]
+  checked_in_at timestamptz [not null]
+  indexes { (occurrence_id, user_id) [unique] }
+}
+
+Table pods {
+  id uuid [pk]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  created_by_user_id uuid [ref: > users.id, not null]
+  state varchar [not null]
+  join_mode join_mode [not null]
+  title varchar [not null]
+  description text
+  capacity int
+  meeting_point jsonb
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table pod_members {
+  pod_id uuid [ref: > pods.id]
+  user_id uuid [ref: > users.id]
+  state varchar [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes { (pod_id, user_id) [unique] }
+}
+
+Table conversations {
+  id uuid [pk]
+  type varchar [not null]
+  event_id uuid [ref: > events.id]
+  occurrence_id uuid [ref: > event_occurrences.id]
+  pod_id uuid [ref: > pods.id]
+  created_at timestamptz [not null]
+}
+
+Table conversation_members {
+  conversation_id uuid [ref: > conversations.id]
+  user_id uuid [ref: > users.id]
+  role varchar [not null]
+  joined_at timestamptz [not null]
+  left_at timestamptz
+  indexes { (conversation_id, user_id) [unique] }
+}
+
+Table messages {
+  id uuid [pk]
+  conversation_id uuid [ref: > conversations.id, not null]
+  sender_user_id uuid [ref: > users.id, not null]
+  type varchar [not null]
+  body text
+  metadata jsonb
+  status varchar [not null]
+  created_at timestamptz [not null]
+  edited_at timestamptz
+  deleted_at timestamptz
+  indexes { (conversation_id, created_at, id) }
+}
+
+Table connections {
+  id uuid [pk]
+  user_a_id uuid [ref: > users.id, not null]
+  user_b_id uuid [ref: > users.id, not null]
+  status varchar [not null]
+  created_at timestamptz [not null]
+}
+
+Table blocks {
+  blocker_user_id uuid [ref: > users.id]
+  blocked_user_id uuid [ref: > users.id]
+  created_at timestamptz [not null]
+  indexes { (blocker_user_id, blocked_user_id) [unique] }
+}
+
+Table feedback {
+  id uuid [pk]
+  occurrence_id uuid [ref: > event_occurrences.id, not null]
+  author_user_id uuid [ref: > users.id, not null]
+  subject_user_id uuid [ref: > users.id]
+  structured jsonb [not null]
+  would_meet_again boolean
+  private_note text
+  safety_flag boolean [not null]
+  created_at timestamptz [not null]
+}
+
+Table reports {
+  id uuid [pk]
+  reporter_user_id uuid [ref: > users.id, not null]
+  target_type varchar [not null]
+  target_id uuid [not null]
+  reason_code varchar [not null]
+  description text
+  status varchar [not null]
+  created_at timestamptz [not null]
+}
+
+Table moderation_cases {
+  id uuid [pk]
+  state case_state [not null]
+  severity varchar [not null]
+  primary_target_type varchar [not null]
+  primary_target_id uuid [not null]
+  assigned_staff_id uuid
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table moderation_actions {
+  id uuid [pk]
+  case_id uuid [ref: > moderation_cases.id, not null]
+  action_type varchar [not null]
+  reason_code varchar [not null]
+  target_type varchar [not null]
+  target_id uuid [not null]
+  starts_at timestamptz [not null]
+  ends_at timestamptz
+  appealable boolean [not null]
+  actor_staff_id uuid
+  created_at timestamptz [not null]
+}
+
+Table appeals {
+  id uuid [pk]
+  moderation_action_id uuid [ref: > moderation_actions.id, not null]
+  appellant_user_id uuid [ref: > users.id, not null]
+  state varchar [not null]
+  statement text
+  reviewed_by_staff_id uuid
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table notifications {
+  id uuid [pk]
+  user_id uuid [ref: > users.id, not null]
+  category varchar [not null]
+  template_key varchar [not null]
+  payload jsonb [not null]
+  status varchar [not null]
+  dedup_key varchar
+  created_at timestamptz [not null]
+  read_at timestamptz
+}
+
+Table subscriptions {
+  id uuid [pk]
+  organization_id uuid [ref: > organizations.id]
+  user_id uuid [ref: > users.id]
+  provider varchar [not null]
+  provider_customer_id varchar
+  provider_subscription_id varchar
+  status varchar [not null]
+  currency char(3)
+  amount_minor bigint
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table entitlements {
+  id uuid [pk]
+  subject_type varchar [not null]
+  subject_id uuid [not null]
+  key varchar [not null]
+  valid_from timestamptz [not null]
+  valid_until timestamptz
+  source varchar [not null]
+}
+
+Table audit_logs {
+  id uuid [pk]
+  actor_type varchar [not null]
+  actor_id uuid
+  action varchar [not null]
+  target_type varchar
+  target_id uuid
+  reason_code varchar
+  metadata jsonb
+  request_id varchar
+  created_at timestamptz [not null]
+}
+
+Table outbox_events {
+  id uuid [pk]
+  event_type varchar [not null]
+  schema_version int [not null]
+  aggregate_id uuid [not null]
+  payload jsonb [not null]
+  correlation_id varchar
+  causation_id varchar
+  occurred_at timestamptz [not null]
+  published_at timestamptz
+  attempts int [not null, default: 0]
+}
+
+Table idempotency_keys {
+  id uuid [pk]
+  actor_id uuid
+  operation varchar [not null]
+  key varchar [not null]
+  request_hash varchar [not null]
+  outcome jsonb
+  expires_at timestamptz [not null]
+  created_at timestamptz [not null]
+  indexes { (actor_id, operation, key) [unique] }
+}

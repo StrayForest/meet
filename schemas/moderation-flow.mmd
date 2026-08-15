@@ -1,0 +1,15 @@
+flowchart LR
+  R[Report or Classifier Signal] --> T[Triage]
+  T --> E[Evidence Snapshot]
+  E --> C[Moderation Case]
+  C --> H{Human Review Required?}
+  H -->|yes| HR[Reviewer Decision]
+  H -->|low-risk limited automation| AR[Limited Automated Action]
+  HR --> A[Action + Reason Code]
+  AR --> A
+  A --> N[Reasoned User Notice]
+  N --> AP{Appealable?}
+  AP -->|yes| P[Appeal]
+  P --> REV[Review]
+  REV --> CLOSE[Close / Uphold / Overturn]
+  AP -->|no| CLOSE

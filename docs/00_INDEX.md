@@ -13,43 +13,51 @@ The repository is the system of record. Use progressive disclosure: read only th
 - `product-specs/index.md` — task-sized behavior/acceptance contracts.
 
 ## Design/frontend
-- `DESIGN.md` — visual/product design source of truth.
-- `FRONTEND.md` — frontend engineering rules.
-- `design-docs/index.md` — design decisions, screens/components/accessibility/visual QA.
-- `../design/tokens.json` — machine-readable tokens.
-- `../design/DESIGN_SYSTEM_PREVIEW.html` — visual reference.
+- `DESIGN.md`
+- `FRONTEND.md`
+- `design-docs/index.md`
+- `../design/tokens.json`
+- `../design/DESIGN_SYSTEM_PREVIEW.html`
 
 ## Backend/data/API
+- `BACKEND.md`
 - `02_DOMAIN_AND_DATABASE.md`
 - `03_API_AND_STATE_MACHINES.md`
 - `04_EVENT_INGESTION_AND_DISCOVERY.md`
 - `../schemas/database.dbml`
 
-## Safety/security/reliability
+## Safety/security/reliability/operations
 - `05_TRUST_SECURITY_PRIVACY.md`
 - `SECURITY.md`
 - `RELIABILITY.md`
+- `OPERATIONS.md`
 - `06_INFRASTRUCTURE_DEVOPS.md`
 
-## Analytics/i18n/scaling
+## Testing/analytics/i18n/scaling
+- `TESTING.md`
 - `07_ANALYTICS_I18N_SCALING.md`
+- `references/analytics-event-catalog.md`
 
-## Repository and execution
+## Repository/execution/governance
 - `08_REPOSITORY_STRUCTURE.md`
 - `PLANS.md`
 - `exec-plans/index.md`
 - `10_IMPLEMENTATION_BACKLOG.md`
 - `11_DEFINITION_OF_DONE.md`
 - `QUALITY_SCORE.md`
+- `adr/README.md`
 
 ## References/generated
-- `references/`
-- `generated/`
+- `references/research-sources.md`
+- `references/finland-event-sources.md`
+- `references/design-system-reference-llms.txt`
+- `references/permission-matrix.md`
+- `references/error-codes.md`
+- `references/data-classification.md`
+- `references/config-secret-registry.md`
+- `references/provider-register.md`
+- `generated/README.md`
 - architecture diagrams under `../schemas/`
 
 ## Documentation rules
-- Stable decisions belong in indexed docs, not chat history.
-- Complex tasks keep progress/decision logs under `exec-plans/`.
-- Generated docs are regenerated, not hand-edited.
-- CI will eventually lint links, architecture boundaries and generated-doc freshness.
-- When implementation disproves a spec, update the spec/decision intentionally; never allow silent drift.
+Stable decisions belong in indexed docs, not chat history. Complex tasks keep progress/decision logs under `exec-plans/`. Generated docs are regenerated, not hand-edited. CI validates links, architecture boundaries and generated freshness as implementation appears. When reality disproves a spec, change it intentionally through the appropriate decision process; never allow silent drift.

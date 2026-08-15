@@ -20,7 +20,9 @@ P0-013 client compatibility/bootstrap.
 P0-014 Expo/EAS + mobile privacy/SDK inventory skeleton.
 P0-015 deterministic fixtures/visual QA.
 P0-016 repository/supply-chain baseline.
-P0-017 Terraform primary+DR/origin/DB-budget foundation.
+P0-017a Terraform primary/runtime + DB connection-budget foundation.
+P0-017b Terraform DR recovery skeleton.
+P0-017c Terraform origin-security skeleton.
 P0-018 CI including `scripts/check-context-budget.mjs`.
 
 Gate: fresh checkout boots; V3 zero→latest; generated DBML matches; event contracts typed; no ONLINE/HYBRID/obsolete join semantics; critical DB invariants tested.

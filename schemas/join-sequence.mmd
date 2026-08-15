@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant C as Client
+  participant A as API
+  participant P as Participation Module
+  participant DB as PostgreSQL
+  participant O as Transactional Outbox
+  participant W as Workers
+  C->>A: POST join + Idempotency-Key
+  A->>P: authorize + command
+  P->>DB: begin transaction / capacity lock
+  DB-->>P: existing participation + capacity
+  P->>DB: insert/update participation
+  P->>O: insert domain event in same transaction
+  P-->>A: confirmed / requested / waitlisted
+  A-->>C: stable logical outcome
+  O->>W: publish after commit
+  W-->>C: notifications/realtime side effects

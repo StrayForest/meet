@@ -1,0 +1,20 @@
+flowchart TB
+  Internet --> CF[Cloudflare DNS/WAF/CDN/Turnstile]
+  CF --> GLB[GCP External HTTPS LB]
+  GLB --> API[Cloud Run api]
+  GLB --> RT[Cloud Run realtime]
+  API --> VPC[Private VPC connectivity]
+  RT --> VPC
+  VPC --> SQL[(Cloud SQL PostgreSQL/PostGIS HA)]
+  VPC --> VAL[(Memorystore Valkey HA)]
+  API --> PUB[Pub/Sub]
+  API --> TASKS[Cloud Tasks]
+  PUB --> WORK[Cloud Run workers]
+  TASKS --> WORK
+  WORK --> SQL
+  WORK --> VAL
+  API --> GCS[Cloud Storage]
+  WORK --> GCS
+  API --> SM[Secret Manager/KMS]
+  WORK --> SM
+  API --> BQ[BigQuery]

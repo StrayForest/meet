@@ -1,15 +1,15 @@
-# Architecture Decision Records
+# Architecture Decision Records — Architecture 1.3
 
-Accepted architecture rationale lives here. `../09_FIXED_ARCHITECTURE_DECISIONS.md` is only the quick index.
+`../09_FIXED_ARCHITECTURE_DECISIONS.md` is the index; rationale lives here.
 
 ## Accepted
-- `0001-event-first-domain.md` — Event/Occurrence, admission vs participation, recurrence, physical V1.
-- `0002-backend-data.md` — TypeScript modular monolith, PostgreSQL/PostGIS, REST/OpenAPI, outbox.
-- `0003-mobile-expo.md` — React Native/Expo, EAS delivery and client compatibility.
-- `0004-gcp-runtime.md` — GCP/Cloud Run, connection budget and operational controls.
-- `0005-safety-identity.md` — adult network, verification, private-home/staff safety.
+- `0001-event-first-domain.md` — Event/OccurrenceTemplate/Recurrence/physical Occurrence and admission separation.
+- `0002-backend-data.md` — modular monolith, PostgreSQL/PostGIS, REST/OpenAPI, governed outbox.
+- `0003-mobile-expo.md` — Expo/EAS, compatibility/privacy/integrity lifecycle.
+- `0004-gcp-runtime.md` — GCP Finland, Stockholm DR path, origin controls.
+- `0005-safety-identity.md` — adult network, identity/private-home/moderation evidence.
+- `0006-schema-event-contract-governance.md` — executable schema authority + event contract versions.
+- `0007-reliability-dr-slo.md` — SLI/error budgets/DR based on business impact.
+- `0008-supply-chain-origin-governance.md` — repository, artifact and origin security.
 
-## Process
-New architectural change starts from `TEMPLATE.md` as PROPOSED. It is not implementation authority until explicitly accepted and indexed in `09_FIXED_ARCHITECTURE_DECISIONS.md`.
-
-ADR must record context, decision, alternatives, consequences, compatibility/migration/rollback and evidence/approval where relevant. Superseded ADRs remain in history and point to the replacement.
+New fixed decisions start from `TEMPLATE.md` as PROPOSED and are not implementation authority until explicitly accepted/indexed. Superseded ADRs remain historical and point to replacement.

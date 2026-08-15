@@ -1,9 +1,16 @@
-# Architecture hardening review — 2026-08-15
+# Architecture hardening history — 2026-08-15
 
-Status: specification review completed.
+Status: **SUPERSEDED FOR IMPLEMENTATION**.
 
-Architecture generation 1.2 replaces earlier illustrative domain/schema semantics. Resolved areas are documented in the accepted ADRs, `schemas/database.dbml` V2, `MOBILE_RELEASES.md`, `CLIENT_COMPATIBILITY.md`, `REALTIME.md`, `DEEP_LINKS_SEO.md`, infrastructure docs and the updated backlog.
+This file records an earlier Architecture 1.2 review. Do **not** use its V2/physical-hybrid wording as implementation authority.
 
-Key closed items: admission vs social participation, Event vs EventOccurrence, limited recurrence, occurrence-scoped private location, complete V2 data blueprint, mobile release/old-client policy, first-party operational flags, realtime recovery, DB connection budget, stable dedupe aliases, staff identity and physical/hybrid-only V1 discovery.
+Architecture 1.3 supersedes it through:
+- `AGENTS.md`, `ARCHITECTURE.md`, `project-manifest.json`;
+- accepted ADR-0001…0008;
+- `docs/SCHEMA_GOVERNANCE.md` and `docs/EVENT_CONTRACTS.md`;
+- V3 pre-migration blueprint `schemas/database.dbml`;
+- Architecture 1.3 Phase 0 backlog/active plan.
 
-Implementation evidence remains pending. If Phase 0 discovers a new contradiction, stop that implementation path and reconcile specs/ADR before code proceeds.
+1.3 additionally closed recurrence materialization defaults, physical-only V1, public/private location separation, multi-role org RBAC, report→case/evidence snapshots, parser-version provenance, outbox contract drift, schema-generation governance, waitlist/reputation constraints, optimistic/two-person safety flags, SLO/DR, supply-chain/origin security, audit/crypto/data lifecycle and mobile privacy/device-integrity architecture.
+
+Implementation evidence remains pending.

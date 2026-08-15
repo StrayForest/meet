@@ -1,4 +1,4 @@
-# 08 — Final repository structure
+# 08 — Repository structure — Architecture 1.3
 
 ```text
 /
@@ -7,31 +7,13 @@
 ├─ README.md
 ├─ CODEX_BOOTSTRAP_PROMPT.md
 ├─ project-manifest.json
-├─ package.json
-├─ pnpm-workspace.yaml
-├─ turbo.json
-├─ tsconfig.base.json
-├─ .github/workflows/
-├─ apps/
-│  ├─ mobile/
-│  ├─ web/
-│  ├─ b2b/
-│  ├─ admin/
-│  ├─ api/
-│  └─ workers/
-├─ packages/
-│  ├─ contracts/
-│  ├─ database/
-│  ├─ config/
-│  ├─ auth/
-│  ├─ analytics/
-│  ├─ observability/
-│  ├─ i18n/
-│  ├─ ui/
-│  └─ testing/
-├─ design/
-│  ├─ tokens.json
-│  └─ DESIGN_SYSTEM_PREVIEW.html
+├─ .github/
+│  ├─ CODEOWNERS
+│  ├─ PULL_REQUEST_TEMPLATE.md
+│  └─ workflows/
+├─ apps/{mobile,web,b2b,admin,api,workers}/
+├─ packages/{contracts,database,config,auth,analytics,observability,i18n,ui,testing}/
+├─ design/{tokens.json,DESIGN_SYSTEM_PREVIEW.html}
 ├─ infra/
 ├─ docs/
 │  ├─ adr/
@@ -40,19 +22,28 @@
 │  ├─ exec-plans/{active,completed}/
 │  ├─ references/
 │  ├─ generated/
-│  ├─ DESIGN.md
-│  ├─ FRONTEND.md
 │  ├─ BACKEND.md
+│  ├─ FRONTEND.md
+│  ├─ DESIGN.md
+│  ├─ SCHEMA_GOVERNANCE.md
+│  ├─ EVENT_CONTRACTS.md
 │  ├─ MOBILE_RELEASES.md
+│  ├─ MOBILE_PRIVACY_COMPLIANCE.md
 │  ├─ CLIENT_COMPATIBILITY.md
+│  ├─ DEVICE_APP_INTEGRITY.md
 │  ├─ REALTIME.md
 │  ├─ DEEP_LINKS_SEO.md
-│  ├─ PRODUCT_SENSE.md
-│  ├─ OPERATIONS.md
-│  ├─ PLANS.md
-│  ├─ QUALITY_SCORE.md
+│  ├─ SECURITY.md
+│  ├─ CRYPTOGRAPHY_KEY_MANAGEMENT.md
+│  ├─ AUDIT_LOGGING.md
+│  ├─ DATA_LIFECYCLE_AND_RETENTION.md
 │  ├─ RELIABILITY.md
-│  └─ SECURITY.md
+│  ├─ SLO_SLI_ERROR_BUDGETS.md
+│  ├─ DISASTER_RECOVERY.md
+│  ├─ ORIGIN_SECURITY.md
+│  ├─ SUPPLY_CHAIN_SECURITY.md
+│  ├─ REPOSITORY_GOVERNANCE.md
+│  └─ CAPACITY_AND_COST_MODEL.md
 └─ schemas/
    ├─ database.dbml
    └─ *.mmd
@@ -61,21 +52,13 @@
 ## API modules
 `auth, users, staff, identity-verification, organizations, venues, media, events, event-ingestion, discovery, participation, pods, chat, connections, reputation, safety, moderation, notifications, billing, analytics, admin, platform`.
 
-Events module owns Event/EventRecurrence/EventOccurrence policies. Platform owns OperationalFlags, ClientPolicies, idempotency/outbox/audit/country runtime configuration. Staff privileged identity is not a flag on Users.
-
-Recommended dependency direction: `presentation → application → domain`; infrastructure implements ports. Do not create ceremonial abstractions with no value.
+Events owns `Event`, `EventOccurrenceTemplate`, `EventRecurrence`, `EventOccurrence` and private-location assignment policy. Platform owns country runtime config, OperationalFlags, ClientPolicies, idempotency, outbox and audit infrastructure. Staff identity is never a User flag.
 
 ## Shared contracts
-DTO schemas, error codes, event envelopes and safe enums/value types only. No business logic/provider implementations. AdmissionMode and ParticipationMode are distinct exported contract types.
+DTO schemas, stable error codes, durable event envelopes and safe value types/enums. No server business logic/provider implementation.
 
-## UI
-`packages/ui` owns generated design tokens, primitives, icons/accessibility helpers. Mobile/web share primitives/contracts, not giant screens.
-
-## Mobile
-`apps/mobile` owns Expo Router routes and EAS app configuration; build/release automation follows `MOBILE_RELEASES.md`. Server compatibility logic is not duplicated per screen; it lives in shared client/bootstrap infrastructure.
-
-## Agent legibility
-Local `AGENTS.md` only where app/package-specific commands/constraints materially help. Root rules always win on product/architecture/domain contracts.
+## Schema authority
+Before P0-006 DBML is design blueprint. After P0-006 `packages/database` Drizzle schema + ordered migrations are executable truth and DBML/schema docs are generated/verified. See `SCHEMA_GOVERNANCE.md`.
 
 ## Mechanical enforcement
-Phase 0 structural checks cover module dependency direction, raw design-token violations, generated/doc links, DBML/prose architecture checks, obsolete combined join/ticket semantics and client-compatibility contract drift.
+Phase 0 validates module dependencies, design-token use, docs/index links, generated freshness, domain-event contracts, obsolete ticket/join semantics, physical-only V1, mobile compatibility and schema drift.

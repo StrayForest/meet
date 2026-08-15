@@ -1,0 +1,14 @@
+flowchart LR
+  S[Source Connector] --> R[Raw Record + Rights]
+  R --> V[Validate]
+  V --> N[Normalize]
+  N --> E[Resolve Venue/Organizer]
+  E --> G[Geocode]
+  G --> C[Classify]
+  C --> D[Dedupe Candidates]
+  D -->|high confidence| M[Canonical Upsert]
+  D -->|medium| Q[Admin Dedupe Queue]
+  Q --> M
+  M --> T[Translation/Moderation]
+  T --> P[Published Event/Occurrence]
+  P --> F[Feed/Search/Map]

@@ -1,6 +1,6 @@
 # Design docs index
 
-Status: APPROVED = implementation contract; RESEARCH = evidence; EXPERIMENT = feature-flag/test.
+Status: APPROVED = implementation contract; RESEARCH = evidence; EXAMPLE = visual implementation reference.
 
 | Doc | Status | Purpose |
 |---|---|---|
@@ -13,6 +13,15 @@ Status: APPROVED = implementation contract; RESEARCH = evidence; EXPERIMENT = fe
 | `screen-state-matrix.md` | APPROVED | loading/empty/stale/error/restricted/live states |
 | `accessibility-content-localization.md` | APPROVED | WCAG/copy/FI-EN-RU |
 | `visual-qa.md` | APPROVED | screenshot/manual verification |
+| `screen-reference-pack.md` | EXAMPLE | map to HTML page references under `design/screens/` |
+
+## Visual page references
+`../../design/screens/index.html` links to the complete example pack:
+- consumer `M01–M88`;
+- organization/B2B `B01–B18`;
+- staff/Admin `A01–A20`.
+
+The HTML pack is subordinate to APPROVED product/design/security contracts. Use one screen ID as a visual reference; do not bulk-read all mockups during implementation.
 
 ## Design decisions
 DD-001 event-first hierarchy; profiles secondary.

@@ -3,6 +3,9 @@
 ## Principle
 UI is not accepted because it compiles. Codex must drive/see deterministic states and compare them to the design/product contract.
 
+## Reference pack
+`design/screens/` contains stable example IDs. When a matching example exists, record the ID in the task/PR (for example `M21 Event detail`, `B07 Attendees`, `A03 Moderation case`) and compare hierarchy/state against that one reference. Do not bulk-load the entire pack.
+
 ## Reference viewports
 Web: 390×844, 768×1024, 1440×900.
 Native: representative modern iPhone, representative mid-range Android, one large-text pass.
@@ -43,11 +46,11 @@ Native: representative modern iPhone, representative mid-range Android, one larg
 - unsupported/old client UX is clear and non-looping.
 
 ## Agent workflow
-1. boot isolated app/worktree;
-2. seed deterministic fixtures including ticketed/social, recurring overrides, private-home and cancelled states;
+1. search `design/screens/*-data.js` for the target screen ID/title;
+2. boot isolated app/worktree and seed deterministic fixture;
 3. navigate target flow/deep link;
-4. capture screenshots;
-5. compare with reference/checklist;
+4. capture screenshot at reference viewport;
+5. compare to that reference + approved contracts/checklist;
 6. fix visible defects before review.
 
 ## Visual regression

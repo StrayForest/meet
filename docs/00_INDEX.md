@@ -8,7 +8,7 @@
 | `DB` | schema/migration | `02_DOMAIN_AND_DATABASE.md`, `SCHEMA_GOVERNANCE.md`, targeted `../schemas/database.dbml` section |
 | `API` | endpoint/application logic | relevant `product-specs/*`, `BACKEND.md`, `03_API_AND_STATE_MACHINES.md` |
 | `EV` | Event/recurrence/participation | relevant product spec, `02_DOMAIN_AND_DATABASE.md`; add `DB` only for schema changes |
-| `UI` | consumer/B2B/admin UI | relevant product spec, relevant `design-docs/*`, `../design/tokens.json` |
+| `UI` | consumer/B2B/admin UI | relevant product spec, relevant `design-docs/*`, `../design/tokens.json`; search one `../design/screens/*-data.js` screen ID only when a visual reference helps |
 | `MOB` | Expo/release/client lifecycle | `MOBILE_RELEASES.md`, `CLIENT_COMPATIBILITY.md`; add privacy/deep-links only if touched |
 | `RT` | chat/realtime | `product-specs/pods-chat-connections.md`, `REALTIME.md` |
 | `ING` | event import/discovery supply | `04_EVENT_INGESTION_AND_DISCOVERY.md`; add `DB` only for persistence changes |
@@ -24,6 +24,7 @@
 - Full `database.dbml`: only schema-wide work such as P0-006/audit; otherwise search table names and read bounded spans.
 - `01_PRODUCT_AND_FEATURES.md`: inventory only; use task-sized `product-specs/*` for implementation.
 - `MASTER_*`, completed plans, competitor research and `references/`: on-demand only, never routine preload.
-- `DESIGN_SYSTEM_PREVIEW.html`: visual reference only.
+- `DESIGN_SYSTEM_PREVIEW.html`: design-system visual reference only.
+- `design/screens/*.html` and full screen data files: visual-reference library; search one screen ID/title rather than bulk-reading.
 
 If accepted ADR/product contract/schema truth disagree, stop the affected path and reconcile; do not solve conflicts by loading the entire repository.

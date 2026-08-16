@@ -6,11 +6,7 @@ import { basename, extname, join, relative } from 'node:path';
 const root = process.cwd();
 const failures = [];
 const ignoredDirs = new Set(['.git', 'node_modules', '.next', 'dist', 'build', 'coverage']);
-const forbiddenNames = [
-  /^\.env($|\.)/i,
-  /^id_(rsa|dsa|ecdsa|ed25519)$/i,
-  /\.(p12|pfx|key)$/i
-];
+const safeEnvTemplates = new Set(['.env.example', '.env.sample', '.env.template']);
 const secretPatterns = [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
   /\bghp_[A-Za-z0-9]{36}\b/,
@@ -21,6 +17,14 @@ const secretPatterns = [
 ];
 const textExtensions = new Set(['.md', '.txt', '.json', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.yml', '.yaml', '.toml', '.ini', '.conf', '.env', '.sh', '.ps1', '.dbml', '.mmd', '.html', '.css']);
 const requiredIgnoreRules = ['.env', '.env.*', 'node_modules/', '.terraform/', '*.tfstate', '*.tfvars', '*.key', '*.p12', '*.pfx'];
+
+function isSensitiveFilename(path) {
+  const name = basename(path).toLowerCase();
+  if (safeEnvTemplates.has(name)) return false;
+  return /^\.env($|\.)/i.test(name)
+    || /^id_(rsa|dsa|ecdsa|ed25519)$/i.test(name)
+    || /\.(p12|pfx|key)$/i.test(name);
+}
 
 function scanSecrets(label, body) {
   for (const pattern of secretPatterns) {
@@ -39,9 +43,7 @@ function walk(dir) {
     }
     if (!entry.isFile()) continue;
 
-    if (forbiddenNames.some(pattern => pattern.test(basename(entry.name)))) {
-      failures.push(`current tree contains sensitive filename: ${rel}`);
-    }
+    if (isSensitiveFilename(rel)) failures.push(`current tree contains sensitive filename: ${rel}`);
 
     const size = lstatSync(abs).size;
     const ext = extname(entry.name).toLowerCase();
@@ -67,6 +69,7 @@ function checkGitignore() {
   for (const rule of requiredIgnoreRules) {
     if (!rules.has(rule)) failures.push(`.gitignore missing required safety rule: ${rule}`);
   }
+  if (!rules.has('!.env.example')) failures.push('.gitignore must explicitly allow a sanitized .env.example template');
 }
 
 function checkHistory() {
@@ -103,9 +106,7 @@ function checkHistory() {
   for (const raw of names.split(/\r?\n/)) {
     const name = raw.trim();
     if (!name) continue;
-    if (forbiddenNames.some(pattern => pattern.test(basename(name)))) {
-      failures.push(`git history contains sensitive filename: ${name}`);
-    }
+    if (isSensitiveFilename(name)) failures.push(`git history contains sensitive filename: ${name}`);
   }
   scanSecrets('git history', patches);
 }

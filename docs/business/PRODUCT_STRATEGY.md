@@ -1,72 +1,76 @@
-# Product strategy — from event discovery to IRL social graph
+# Product strategy — local opportunity to real-world participation
 
 ## Strategic thesis
-Meet is not trying to win by being the largest event directory. Events are the context that makes real-world social participation easier, safer and less awkward.
+Meet helps people turn local opportunities into real-world participation. Events create the opportunity; social context reduces the friction of going; repeated participation **may** create a durable network.
 
-The long-term product thesis is: **Meet becomes a privacy-governed social graph of who actually does things with whom, anchored in real physical activities and organizations.**
+Meet is not trying to win by being the largest event directory. The immediate user problem is simpler: `what can I do nearby, and if I do not want to go alone, can I find suitable company?`
 
-The value chain is:
-`physical supply → relevant discovery → social confidence → commitment → IRL attendance → repeat co-attendance/connections → communities/organizers → better local supply`.
+A privacy-governed graph of real co-participation is a **long-term hypothesis, not a predetermined destination**. Persistent connections, communities and reputation earn roadmap priority only if observed behaviour shows that they improve future participation.
+
+The proof chain is:
+`physical supply → relevant discovery → social confidence → intent → IRL attendance → repeat IRL action → optional durable connection/community → better local supply`.
 
 ## Evidence over self-description
-Meet should not require people to tell us what they supposedly like before receiving value. Declared interests are low-cost claims and may differ from actual behaviour. Cold-start discovery is driven by explicit filters/search/session intent, time, travel tolerance, language and event quality.
+Meet should not require people to declare hobbies/interests before receiving value. Cold-start discovery uses explicit filters/search/session intent, time, travel tolerance, language and event quality.
 
-Personalization is learned progressively from privacy-safe evidence, with **credible attendance and repeat participation weighted much more strongly than clicks**. Join/save behaviour is useful but weaker; impressions are not preference evidence. Users retain explicit filters and personalization controls so observed history never becomes a cage.
+Personalization learns progressively from privacy-safe evidence. Credible attendance and repeat participation outweigh clicks; join/save are weaker; impressions are not preference evidence. Users retain filters and controls including reset/pause personalization and the ability to exclude activity from recommendation learning. Inferred interests are never public identity labels without explicit choice.
 
-Do not expose inferred interests as public identity labels unless the user explicitly chooses to do so.
+## Launch wedge
+The launch promise must be understandable without Meet terminology:
 
-## Wedge vs destination
-Launch wedge: help an adult answer `what can I do nearby, who is going, and how can I participate?`.
+**Find something worth doing nearby. If you do not want to go alone, find company.**
 
-Long-term destination: a trusted local participation network where event, attendance, connection and organizer graphs improve discovery and make future participation easier.
-
-Meet must not become a passive calendar with social decoration. If social mechanics do not materially improve attendance or repeat behaviour, simplify or change the thesis.
+The product must prove that social context materially changes offline behaviour. It must not become a passive calendar with social decoration or a generic social network.
 
 ## Minimum proof loop
-Before expanding feature breadth, prove this loop in Helsinki:
-1. relevant physical event is discovered;
-2. user has enough **social confidence** to act;
-3. user joins/saves/commits;
-4. user actually attends;
-5. user repeats participation and/or forms a useful connection.
+Before feature breadth, prove in Helsinki:
+1. a relevant physical event is discovered;
+2. the user understands what arrival will feel like and has enough social confidence to act;
+3. the user saves/joins/expresses social intent;
+4. the user actually attends;
+5. the user takes another useful IRL action: repeat participation and/or an explicitly desired connection.
 
-The minimum proof loop has priority over advanced reputation, broad B2B analytics, native ticketing, custom ML and additional social surfaces.
+Persistent connections are not required for success. If users prefer event-scoped company and leave satisfied without building a graph, the product must respect that evidence.
+
+## Solo participation and arrival confidence
+A core hypothesis is that Meet can reduce the friction of arriving alone. Event detail should test useful, truthful signals such as `solo-friendly`, `newcomer-friendly`, host identity/context, public-place clarity, event language, accessibility and concise arrival instructions.
+
+`Solo-friendly` must not become an unsupported marketing badge. Prefer organizer-provided structured facts initially and evidence-derived aggregates only when data quality/privacy thresholds are met.
+
+Arrival experience is a first-class product surface: where to meet, how to recognize the host/group, what happens in the first minutes, whether newcomers commonly attend, and other concise information that reduces uncertainty.
 
 ## Social confidence
-Social confidence is the user's decision-stage belief that joining will be comfortable, understandable and safe enough — especially when arriving alone. It is not a vanity score.
+Social confidence is the decision-stage belief that participation will be understandable, comfortable and safe enough. Measure it through decision behaviour and lightweight reason capture: social/host context viewed, find-company flow opened, join completed/abandoned, and optional reasons such as insufficient information, no suitable company, language, distance, price, timing or safety/comfort.
 
-Measure it through decision behaviour and lightweight reason capture: social context viewed, Pod/group opened, participant/host trust context viewed, join completed/abandoned, and optional reasons such as `not enough information`, `no suitable company`, `language`, `too far`, `too expensive`, `timing`, `safety/comfort`.
-
-Never optimize social confidence through fake urgency, fake attendee counts or manipulative popularity cues.
+Never use fake urgency, fake attendee counts or manipulative popularity cues.
 
 ## Product prioritization test
-A proposed feature is high priority only if it materially improves at least one of:
-- relevant opportunity density;
+A feature is high priority only if it materially improves at least one of:
+- relevant opportunity success;
 - discovery → social confidence;
 - social confidence → intent;
 - intent → attendance;
+- solo-to-social attendance;
 - attendance quality/safety;
 - repeat IRL participation;
-- endogenous supply/liquidity;
+- endogenous local supply/liquidity;
 - organizer willingness to pay without degrading consumer value.
 
-Features that mainly increase browsing time, vanity engagement or architecture sophistication are not strategic by default.
+Browsing time, vanity engagement and architecture sophistication are not strategic outcomes.
 
 ## Social mechanics
-Pods, attendee context, chat, connections and reputation are means, not goals. Keep them only when evidence shows they reduce participation friction, improve trust, increase attendance or improve repeat behaviour.
+Pods, attendee context, chat, connections and reputation are means, not goals. `Pod` may remain an internal/domain term, but V1 consumer UI should default to plain action language such as `find company`, `join group` or validated fi/en/ru equivalents.
 
-User-facing terminology should explain the action before teaching Meet jargon. `Pods` may remain an internal/domain name; UI copy should be tested against plain concepts such as `find company` / `join a group` in fi/en/ru.
+V1 social communication is event/occurrence-scoped. No random DMs and no dating positioning. Persistent connection UX is evidence-gated and mutual; the product should prefer proposing a useful next IRL action over collecting abstract connections.
 
-No random DMs and no dating positioning.
-
-## Public web and progressive identity
-Public event/organization/category/city pages are both useful product surfaces and a distribution engine. Let users see real value before demanding a profile. Ask for identity only when the requested action needs it, then resume that action after onboarding.
+## Public web and progressive trust
+Let users browse useful public event/category/city/organization surfaces before signup. Ask for identity only when an action requires it, then resume that action. Trust requirements increase with risk: browsing requires no phone verification; higher-risk participation, organizer and safety-sensitive actions may require stronger verification according to policy.
 
 ## Social proof
-Imported event supply and Meet social supply are different truths. Never turn lack of Meet activity into prominent negative social proof. `0 going` is not a useful badge. Show social context when it helps a decision; otherwise show the event without pretending or shaming low density.
+Imported event supply and Meet social supply are different truths. Never turn lack of Meet activity into prominent negative proof. Do not show `0 going` badges. Show privacy-safe social context only when it helps a decision.
 
 ## Private homes
-PRIVATE_HOME remains architecturally supported but rollout-limited/flagged. Public venues and outdoor activities are sufficient to prove PMF. Expansion requires explicit trust/safety evidence; do not accept avoidable liability merely to increase feature completeness.
+PRIVATE_HOME remains supported by the domain/security architecture but is **not a consumer V1 launch capability**. Public venues and outdoor activities are sufficient for PMF. Any user-facing rollout requires a separate evidence gate covering trust, safety, moderation, operations and legal/privacy review.
 
 ## Product expansion rule
-Do not respond to weak conversion/attendance/repeat by adding unrelated features. First investigate relevance, liquidity, social confidence, cohort choice, trust, event quality, commitment UX and positioning. Feature breadth follows evidence.
+Do not answer weak conversion/attendance/repeat by adding unrelated features. Investigate relevance, multidimensional liquidity, cohort choice, trust, event quality, arrival confidence, commitment UX and positioning first. Feature breadth follows evidence.

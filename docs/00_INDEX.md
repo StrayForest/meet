@@ -19,6 +19,7 @@
 | `ARCH` | architecture boundaries | `ARCHITECTURE_FITNESS_FUNCTIONS.md`, targeted module contract; `MODULE_OWNERSHIP.md` only for ownership metadata |
 | `TEST` | tests/QA | `TESTING.md` + the contract being tested |
 | `AN` | analytics/i18n | `07_ANALYTICS_I18N_SCALING.md` + named reference only if needed |
+| `VAL` | pre-PMF scope/experiments/user evidence | start with `validation/MVP_BOUNDARY.md`; add `validation/ASSUMPTION_REGISTER.md`, `validation/USER_RESEARCH.md` or `business/PMF_HYPOTHESES.md` only as needed |
 | `BIZ` | PMF/product/GTM/liquidity/economics/competition | start with `business/PMF_HYPOTHESES.md`; add exactly one relevant source: `PRODUCT_STRATEGY`, `BEACHHEAD_MARKET`, `GTM_AND_DISTRIBUTION`, `CITY_LIQUIDITY_MODEL`, `NETWORK_EFFECTS_AND_MOAT`, `BUSINESS_MODEL_AND_UNIT_ECONOMICS`, `COMPETITIVE_POSITIONING`, `INVESTOR_MILESTONES`, `OPERATING_MODEL` |
 | `ADR` | architecture change | `09_FIXED_ARCHITECTURE_DECISIONS.md` + relevant accepted ADR |
 
@@ -29,5 +30,6 @@
 - `DESIGN_SYSTEM_PREVIEW.html` and full screen data files: visual reference only; search one screen ID/title.
 - `ARCHITECTURE_MATURITY_LADDER.md`: roadmap/scale decision only, never routine task context.
 - Business docs are decision/evidence contracts, not default engineering context. Load `BIZ` only for product/growth/economics decisions.
+- Validation docs are mandatory when a proposed pre-PMF feature may cross the MVP boundary; architecture readiness never overrides `VAL` gates.
 
-If accepted ADR/product/business contract/schema truth disagree, stop the affected path and reconcile; do not solve conflicts by loading the entire repository.
+If accepted ADR/product/business/validation contract/schema truth disagree, stop the affected path and reconcile; do not solve conflicts by loading the entire repository.

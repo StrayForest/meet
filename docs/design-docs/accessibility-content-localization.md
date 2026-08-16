@@ -56,4 +56,6 @@ Required before Finland launch:
 - manual cognitive walkthrough with older users.
 
 ## Finnish usability validation
-Do not substitute “Nordic aesthetic” assumptions for research. Test at least three age bands (18–30, 31–50, 51+) and include Finnish-first plus international residents. Key tasks: find event, understand source, join, waitlist, inspect participants, create event, private-home safety, report/block.
+Do not substitute “Nordic aesthetic” assumptions for research. Test at least three age bands (18–30, 31–50, 51+) and include Finnish-first plus international residents. Key V1 tasks: find an event, understand source/organizer, understand time/place/language/accessibility, join or waitlist, use `Find company` where enabled, inspect privacy-safe participant context, create a PUBLIC_VENUE/OUTDOOR event where that surface is enabled, and report/block.
+
+PRIVATE_HOME is explicitly NOT a V1 usability/launch acceptance task. If later activated through its evidence/safety/legal/ops gate, it receives a separate accessibility, comprehension and safety study before rollout.

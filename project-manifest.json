@@ -6,26 +6,108 @@
     "country": "FI",
     "locales": ["fi", "en", "ru"],
     "minimum_age": 18,
-    "event_presence": ["PHYSICAL"]
+    "event_presence": ["PHYSICAL"],
+    "social_liquidity_beachhead": "Helsinki metropolitan area"
   },
-  "domain": {
-    "event_identity": "Event",
-    "occurrence_defaults": "EventOccurrenceTemplate",
-    "participation_unit": "EventOccurrence",
-    "admission_modes": ["NONE", "FREE", "EXTERNAL_TICKET", "INTERNAL_TICKET"],
-    "participation_modes": ["OPEN", "APPROVAL_REQUIRED", "INVITE_ONLY", "DISABLED"],
-    "recurrence_v1": ["DAILY", "WEEKLY", "MONTHLY", "INTERVAL", "BYDAY", "COUNT", "UNTIL"],
-    "canonical_aliases": true
+  "runtime": {
+    "node": "24 LTS",
+    "package_manager": "pnpm 11",
+    "monorepo": "Turborepo",
+    "language": "TypeScript"
   },
-  "runtime": {"node": "24 LTS", "package_manager": "pnpm 11", "monorepo": "Turborepo", "language": "TypeScript"},
-  "clients": {"mobile": "React Native + Expo", "web": "Next.js", "b2b": "Next.js", "admin": "Next.js"},
-  "backend": {"framework": "NestJS + Fastify", "shape": "modular monolith", "api": "REST + OpenAPI", "async": "transactional outbox + Pub/Sub + Cloud Tasks", "realtime": "WebSocket + Valkey Pub/Sub + REST recovery"},
-  "data": {"primary": "PostgreSQL 18 + PostGIS", "query": "Drizzle + targeted SQL", "cache": "Valkey", "objects": "GCP Cloud Storage", "warehouse": "BigQuery", "design_blueprint": "schemas/database.dbml", "runtime_truth_after_p0_006": "Drizzle schema + migrations"},
-  "cloud": {"provider": "GCP", "primary_region": "europe-north1", "dr_region": "europe-north2", "compute": "Cloud Run", "database": "Cloud SQL", "edge": "Cloudflare", "iac": "Terraform"},
-  "mobile_delivery": {"build": "EAS Build", "submit": "EAS Submit", "ota": "EAS Update with explicit runtimeVersion"},
-  "operational_flags": "PostgreSQL source + Valkey cache + versioned audited Admin",
-  "experiments": "PostHog",
-  "analytics": "PostHog + BigQuery",
-  "observability": "OpenTelemetry + Sentry",
-  "north_star": "Successful IRL Participations / week"
+  "clients": {
+    "mobile": "React Native + Expo",
+    "web": "Next.js",
+    "b2b": "Next.js",
+    "admin": "Next.js"
+  },
+  "backend": {
+    "framework": "NestJS + Fastify",
+    "shape": "modular monolith",
+    "api": "REST + OpenAPI",
+    "durable_async_baseline": "transactional outbox + versioned idempotent event contracts",
+    "realtime_baseline": "WebSocket + authoritative REST recovery when realtime scope is activated"
+  },
+  "data": {
+    "primary": "PostgreSQL 18 + PostGIS",
+    "query": "Drizzle + targeted SQL",
+    "objects": "GCP Cloud Storage when object storage is required",
+    "design_blueprint": "schemas/database.dbml",
+    "runtime_truth_after_p0_006": "Drizzle schema + ordered migrations + database-native invariants"
+  },
+  "cloud": {
+    "provider": "GCP",
+    "primary_region": "europe-north1",
+    "compute_preference": "Cloud Run",
+    "database_preference": "Cloud SQL",
+    "edge": "Cloudflare",
+    "iac": "Terraform"
+  },
+  "capabilities": {
+    "required_baseline": {
+      "postgres_postgis": {
+        "status": "required",
+        "activation_gate": "P0 schema/application foundation"
+      },
+      "transactional_outbox": {
+        "status": "required-when-durable-async-exists",
+        "activation_gate": "first durable asynchronous side effect"
+      },
+      "primary_gcp_runtime": {
+        "status": "required-before-production",
+        "activation_gate": "production deployment"
+      }
+    },
+    "optional_or_evidence_gated": {
+      "valkey": {
+        "status": "optional",
+        "purpose": "ephemeral cache/coordination/realtime fanout",
+        "activation_gate": "measured latency, coordination or realtime need; PostgreSQL remains authoritative"
+      },
+      "pubsub": {
+        "status": "deferred",
+        "purpose": "managed durable event transport",
+        "activation_gate": "measured workload/reliability/ownership need beyond the transactional outbox baseline"
+      },
+      "cloud_tasks": {
+        "status": "deferred",
+        "purpose": "managed task scheduling/delivery",
+        "activation_gate": "provider/background-work reliability requirement that simpler execution cannot satisfy"
+      },
+      "bigquery": {
+        "status": "deferred",
+        "purpose": "warehouse/advanced analytics",
+        "activation_gate": "analytics volume/query needs exceed operational analytics tooling"
+      },
+      "stockholm_dr": {
+        "status": "deferred",
+        "region": "europe-north2",
+        "purpose": "regional disaster recovery",
+        "activation_gate": "measured RTO/RPO, safety or business-impact requirement"
+      },
+      "custom_ml_recommendations": {
+        "status": "post-pmf",
+        "activation_gate": "rules-based recommendation baseline is proven insufficient with adequate behavioural evidence"
+      },
+      "service_extraction": {
+        "status": "post-evidence",
+        "activation_gate": "measured independent scaling, reliability isolation or ownership/deployment need"
+      }
+    }
+  },
+  "mobile_delivery": {
+    "build": "EAS Build",
+    "submit": "EAS Submit",
+    "ota": "EAS Update with explicit runtimeVersion compatibility"
+  },
+  "operational_flags": "PostgreSQL source of truth; cache only if activated; versioned and audited Admin controls",
+  "experiments": "PostHog or equivalent product analytics/experimentation; never operational truth",
+  "analytics": "PostHog baseline; warehouse deferred until justified",
+  "observability": "OpenTelemetry + Sentry or equivalent implementation selected in Phase 0",
+  "north_star": "Successful IRL Participations / week",
+  "scope_authority": [
+    "docs/validation/MVP_BOUNDARY.md",
+    "docs/validation/ASSUMPTION_REGISTER.md",
+    "docs/business/PMF_HYPOTHESES.md"
+  ]
 }

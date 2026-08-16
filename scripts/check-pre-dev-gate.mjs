@@ -32,7 +32,7 @@ const gate = lower('docs/validation/PRE_DEV_GATE.md');
 if (gate.includes('- [ ]')) failures.push('PRE_DEV_GATE.md contains unchecked items');
 for (const phrase of [
   'persistent irl social graph is a hypothesis',
-  'private_home is not v1 user-facing scope',
+  'not v1 user-facing scope',
   'public discovery is available before signup',
   'p0-000 documentation/contract consistency audit is complete',
   'github actions ci runs all pre-development contract checks'

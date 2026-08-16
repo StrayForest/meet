@@ -1,21 +1,21 @@
 # 01 — Product and complete feature specification — Architecture 1.3
 
 ## Product thesis
-Meet is the real-world social layer for cities: understand what is happening nearby, who is going and how to participate.
+Meet helps people turn local opportunities into real-world participation: understand what is happening nearby, decide whether it feels worth/comfortable attending, and find company when going alone is a barrier.
 
-Events are the launch context, not the end-state moat. Long-term, Meet aims to become a privacy-governed graph of real participation: **who actually does things with whom**, anchored in physical activities and organizations. See `business/PRODUCT_STRATEGY.md`.
+Events are the launch context. A privacy-governed graph of real participation is a **long-term hypothesis**, not a predetermined destination. Persistent connections/communities earn scope only when evidence shows they improve future IRL participation. See `business/PRODUCT_STRATEGY.md`.
 
-Core loop: official/imported physical supply → discovery → Meet participation → Pods/social context → IRL attendance → trust/connections → repeat/community supply → organizations → more discovery.
+Core proof loop: physical supply → relevant discovery → arrival/social confidence → intent → credible IRL attendance → repeat IRL action and/or explicitly desired connection.
 
-**Business proof:** Meet succeeds only if this loop produces repeated successful IRL participation. Passive browsing/registration is not PMF. Falsifiable launch hypotheses live in `business/PMF_HYPOTHESES.md`.
+**Business proof:** passive browsing, registration and time-in-app are not PMF. Successful IRL participation is the north-star outcome. Falsifiable hypotheses live in `business/PMF_HYPOTHESES.md`; pre-PMF scope is governed by `validation/MVP_BOUNDARY.md`.
 
 ## Launch
-Finland nationwide coverage; **social activation and paid growth city-by-city with Helsinki metro first**; 18+ adult network. Finland is the first PMF/operating market, not the assumed end-state TAM.
+Finland nationwide coverage; **social activation and paid growth city-by-city with Helsinki metro first**; 18+ adult network. Nationwide coverage is not a claim of nationwide social liquidity.
 
-**Launch languages are fixed: Finnish (`fi`), English (`en`) and Russian (`ru`).** All three serve potential starting users and must remain end-to-end supported across onboarding, discovery, core participation, safety and notifications. Measure product outcomes by language cohort and cross-language participation without turning Meet into a language-exclusive brand. See `business/BEACHHEAD_MARKET.md`.
+**Launch languages are fixed: Finnish (`fi`), English (`en`) and Russian (`ru`).** All three remain end-to-end supported across onboarding, discovery, participation, safety and notifications. Measure outcomes by language and cross-language participation without creating three isolated products.
 
 ## Minimum proof loop
-Before roadmap breadth, prove: relevant discovery → trustworthy social context → intent/join → credible attendance → repeat participation/connection. Product prioritization follows this loop; weak H2–H4 results trigger investigation of liquidity/cohort/trust/positioning before unrelated feature expansion.
+Before roadmap breadth, prove: relevant discovery → trustworthy arrival/social context → meaningful intent → credible attendance → repeat useful IRL action. Social graph formation is optional evidence, not a required user outcome.
 
 ## Core model
 ### Event
@@ -31,48 +31,63 @@ Optional limited DAILY/WEEKLY/MONTHLY + INTERVAL/BYDAY/COUNT/UNTIL using local D
 Concrete **physical** instance users attend. Owns current start/end, physical public location, optional encrypted private-location reference, admission/participation/capacity and state.
 
 ## V1 place model
-PUBLIC_VENUE, OUTDOOR, PRIVATE_HOME only. No online-only or hybrid placeholder in Architecture 1.3. PRIVATE_HOME remains architecturally supported but flag-gated/limited; broad rollout is not required for PMF and waits for explicit trust/safety evidence. A future virtual/hybrid capability requires explicit product/domain ADR.
+The domain supports PUBLIC_VENUE, OUTDOOR and PRIVATE_HOME; consumer V1 exposes **PUBLIC_VENUE and OUTDOOR only**. PRIVATE_HOME is architecturally represented for future compatibility but user-facing rollout is prohibited until a separate trust/safety/legal/operations evidence gate. No online/hybrid placeholder in Architecture 1.3.
 
 ## Admission vs social participation
 AdmissionMode: NONE, FREE, EXTERNAL_TICKET, future feature-gated INTERNAL_TICKET.
 ParticipationMode: OPEN, APPROVAL_REQUIRED, INVITE_ONLY, DISABLED.
 Waitlist applies to Meet-managed social capacity, not external ticket inventory.
 
-Example: a concert may be EXTERNAL_TICKET + OPEN, showing both `Tickets` and `I'm going` as distinct actions.
+A concert may be EXTERNAL_TICKET + OPEN, showing both `Tickets` and `I'm going` as distinct actions.
 
 ## Discovery
-For You, Now, Today, Weekend, Nearby, Saved. Event cards prioritize occurrence time/location/distance, source, admission, social people/capacity/Pods, language and one dominant Meet social action. Search/map filters remain physical-event oriented.
+Primary low-choice surfaces include Today, Weekend, Nearby, Free and Saved/Plans; broader search/filter/map remains available. Event cards prioritize occurrence time/location/distance, source/organizer, admission, language and useful social context only when it helps the decision. Never use `0 going` as negative social proof.
 
-Public web/event/category/organization pages are a first-class product and acquisition surface: genuinely useful without signup, indexable where appropriate, and designed to convert relevant local demand into Meet social participation without leaking private social data or producing thin SEO pages.
+Public web/event/category/organization pages provide real value without signup and are indexable where appropriate. Registration is requested at the first action that genuinely needs identity, then the original action resumes.
+
+## Event detail and arrival confidence
+The occurrence page is the center of the consumer product. Prioritize: title, time, location/distance, price/admission, language, concise description, suitability/context, accessibility where known, organizer/source, truthful social context and clear primary actions.
+
+Test structured `solo-friendly` / `newcomer-friendly` information, but never infer or display it without defensible evidence. Arrival information should answer practical uncertainty: where to meet, how to recognize the host/group, what happens first and other concise facts that make arriving alone easier.
+
+## Progressive trust
+Public browsing requires no phone verification. Save/account actions use the minimum identity necessary. Social participation may require stronger verification only when justified by abuse/risk evidence. Organizer, private-home and other high-risk capabilities use progressively stronger controls. Do not front-load trust friction before value.
 
 ## Event creation
-Category → title/description/languages → one-time/recurrence → physical place → admission → Meet participation/capacity/waitlist → eligibility → media → safety → preview/publish. Recurrence writes template + recurrence; materializer generates occurrences.
+Category → title/description/languages → one-time/recurrence → physical public place → admission → Meet participation/capacity/waitlist → eligibility → media → safety → preview/publish. Recurrence writes template + recurrence; materializer generates occurrences.
 
-## Participation/Pods/chat
-Occurrence-targeted, idempotent, capacity-safe. No random DM. Pods attach to one occurrence and have social participation semantics only. Pods/chat/attendee context are retained only when evidence shows they improve trust, attendance or repeat participation.
+## Participation / company finding / chat
+Occurrence-targeted, idempotent and capacity-safe. `Pod` may remain a domain term but is not required consumer vocabulary. V1 UI defaults to plain validated actions such as `Find company` / `Join group` in fi/en/ru.
 
-## Attendance/reputation
-Check-in/host/peer signals; no continuous tracking. Public trust uses badges/structured aggregates, not public human stars/free-form negative reviews. Successful IRL participation is the business north-star outcome; repeat successful IRL participation is the strongest early PMF signal.
+Social communication is occurrence-scoped for the proof loop. No random/open DM. Persistent connection/DM UX is evidence-gated, mutual and secondary to helping users take another useful IRL action.
+
+## Attendance and recommendations
+Attendance evidence may combine check-in, host, peer, post-event confirmation or equivalent reconciled signals; no continuous tracking. Do not make routine attendance depend on a high-friction ceremony when lower-friction credible evidence is sufficient.
+
+Credible attendance/repeat evidence is the strongest recommendation signal. Users can reset/pause personalization and exclude activity from recommendation learning. Public trust uses structured aggregates/badges only where evidence supports them; no public human stars/free-form negative review scores.
+
+## Accessibility
+Accessibility is a product requirement, not only QA: scalable text, screen-reader semantics, sufficient targets/contrast, reduced-motion support, keyboard-accessible web, non-map location alternatives and no color-only meaning. Event-level accessibility facts (for example wheelchair access, seating, accessible toilet where reliably known) should be structured and useful in discovery/detail rather than buried in prose.
 
 ## Private home
-18+, phone + strong identity host, public coarse occurrence location, separately encrypted exact payload, authorized disclosure only, participant cap, Share My Plans and heightened safety. Broad rollout is deferred until trust/safety evidence supports it; PUBLIC_VENUE/OUTDOOR are sufficient for initial PMF proof.
+Security/domain support remains specified, including exact-location isolation/encryption, but **PRIVATE_HOME is NOT V1** and must not appear in normal consumer creation/discovery. Future rollout requires explicit safety, moderation, operations, legal/privacy and user-evidence approval.
 
 ## Organizations
-UNCLAIMED→CLAIM_PENDING→VERIFIED→SUSPENDED/CLOSED. A member can hold multiple roles among OWNER/ADMIN/EVENT_MANAGER/MODERATOR/ANALYST/BILLING.
+UNCLAIMED→CLAIM_PENDING→VERIFIED→SUSPENDED/CLOSED. Domain roles may include OWNER/ADMIN/EVENT_MANAGER/MODERATOR/ANALYST/BILLING, while V1 UI implements only roles needed by validated organizer workflows.
 
-B2B value hypotheses should be tested early with organizers even if full Org Pro ships later. The strongest hypothesis is measurable qualified reach/attendance/repeat-audience value, not merely paid event listing. Willingness to pay is evidence, not a reason to inflate the feature set.
+B2B hypotheses are tested early. Qualified reach, attendance and repeat-audience value matter more than feature count.
 
 ## Mobile/reliability
 Old supported clients remain compatible; push/realtime are not truth; imminent high-impact state revalidates server truth.
 
 ## Monetization
-Free supply acquisition → promoted events → Org Pro → affiliate tickets → native ticketing only after separate legal/payment review → optional consumer premium without paywalling core social participation. Bottom-up economics live in `business/BUSINESS_MODEL_AND_UNIT_ECONOMICS.md`.
+Free supply acquisition → promoted-event/Org Pro experiments when organizer evidence supports them → affiliate tickets where terms allow. Native ticketing requires separate post-PMF legal/payment review. Consumer premium must never paywall core social participation.
 
 ## Growth discipline
-Nationwide coverage does not imply nationwide paid activation. City expansion follows `business/CITY_LIQUIDITY_MODEL.md`; GTM spend follows downstream attendance/repeat economics, not installs. Mature consumer acquisition optimizes CAC per repeat successful IRL participant. SEO/public web, organizer distribution, communities and referrals are first-class distribution hypotheses.
+Liquidity is measured as a multidimensional marketplace (`city × category/intent × time × language compatibility × radius/area`), not city MAU alone. Expansion follows `business/CITY_LIQUIDITY_MODEL.md`; spend follows attendance/repeat economics, not installs.
 
 ## Capital-efficiency discipline
-Architecture should preserve future scale without forcing all infrastructure/features to be active pre-PMF. `architecture ready` is not `everything deployed`. AI-agent output is valuable only when it closes product/business milestones under normal engineering gates. See `business/OPERATING_MODEL.md`.
+Architecture preserves seams for future scale without forcing services/features active pre-PMF. `architecture ready` is not `build/deploy now`. Validation contracts override completeness-seeking.
 
 ## Deferred
-Minors, online/hybrid participation, broad PRIVATE_HOME rollout, open DMs, stories/reels, voice/video, full Groups, in-house KYC, custom ML before data quality, native ticket marketplace before PMF, feature breadth whose only justification is engagement or architecture completeness.
+Minors; online/hybrid; consumer PRIVATE_HOME; open/random DMs; stories/reels; voice/video; persistent general Groups; broad social/follower graph UX; sophisticated reputation/gamification; in-house KYC; custom ML before data quality/evidence; native ticket marketplace before PMF; advanced Org Pro breadth; consumer premium affecting core participation; active multi-region/service extraction without measured need.

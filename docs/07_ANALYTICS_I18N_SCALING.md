@@ -3,17 +3,24 @@
 ## Analytics
 PostHog for product events/cohorts/experiments; BigQuery warehouse. Server mutations authoritative. Never send raw DOB, exact private location, KYC evidence, message bodies, push tokens or raw device-integrity payloads.
 
-## Metrics
-Marketplace: physical supply, join/fill/show-up/waitlist/time-to-first/repeat. Supply: source freshness/cancellations/coverage/dedupe. Trust: reports/severe incidents/moderation/appeals. Client health: versions/capabilities/reconnect. Reliability uses formal SLIs, not product analytics.
+## Product/business metrics
+North-star outcome: **successful IRL participation**, with repeat successful IRL participation as the strongest PMF signal.
+
+Marketplace: relevant opportunities/user, socially-active opportunities/user, empty-social-card rate, join/fill/show-up/waitlist/time-to-first/repeat. Supply: source freshness/cancellations/coverage/dedupe. Trust: reports/severe incidents/moderation/appeals. Growth: channel → activation → intent → attendance → 30/60-day repeat/referral and CAC per successful/repeat IRL participant. B2B: active orgs, paid conversion, ARPA, retention and campaign outcomes. Client health: versions/capabilities/reconnect. Reliability uses formal SLIs, not product analytics.
+
+Cohorts must be segmented by city, acquisition channel, event category and launch language without using sensitive attributes inappropriately.
 
 ## i18n/time
-fi/en/ru launch. UTC absolute timestamps + occurrence IANA timezone. Recurrence local wall-clock/DST tested.
+**Finnish (`fi`), English (`en`) and Russian (`ru`) are mandatory launch languages.** Language support is part of beachhead/GTM strategy, not a discretionary later localization. UTC absolute timestamps + occurrence IANA timezone. Recurrence local wall-clock/DST tested.
+
+## PMF/liquidity
+Thresholds and falsifiable hypotheses are governed by `business/PMF_HYPOTHESES.md` and `business/CITY_LIQUIDITY_MODEL.md`. Do not replace weak attendance/repeat with vanity registration/MAU reporting.
 
 ## Country config
 Country/locales/currency/age/identity/connectors/payments/legal/private-home/moderation product config centralized. OperationalFlags and experiments are separate concerns.
 
 ## Expansion
-Per country: legal/privacy, identity, source rights, localization, moderation/support, payments/tax, mobile links/store config and city liquidity.
+Per country: legal/privacy, identity, source rights, localization, moderation/support, payments/tax, mobile links/store config and city liquidity. Country availability may precede active GTM; active city growth follows liquidity/economic evidence.
 
 ## Scale
 Do not tie architecture changes to MAU. Use `CAPACITY_AND_COST_MODEL.md`: RPS, concurrent sockets, DB CPU/IO/connections, PostGIS QPS, ingestion records/day, notification fanout, media/egress, queue age and unit cost.

@@ -1,9 +1,5 @@
 # Meet
 
-Event-first IRL social platform. Architecture **1.3** is frozen for greenfield implementation.
+Canonical specification and execution pack for Meet Architecture 1.3.
 
-Codex starts with `AGENTS.md` only. Task-specific context is routed by `docs/00_INDEX.md`; do not preload the documentation tree.
-
-Core model: `Event → EventOccurrenceTemplate + optional EventRecurrence → physical EventOccurrence`.
-
-Bootstrap: `CODEX_BOOTSTRAP_PROMPT.md`.
+Start with `CODEX_BOOTSTRAP_PROMPT.md` for agent work, `docs/00_INDEX.md` for task context routing, and `docs/business/PMF_HYPOTHESES.md` for product/business evidence gates.

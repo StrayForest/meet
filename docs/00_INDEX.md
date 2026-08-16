@@ -19,6 +19,7 @@
 | `ARCH` | architecture boundaries | `ARCHITECTURE_FITNESS_FUNCTIONS.md`, targeted module contract; `MODULE_OWNERSHIP.md` only for ownership metadata |
 | `TEST` | tests/QA | `TESTING.md` + the contract being tested |
 | `AN` | analytics/i18n | `07_ANALYTICS_I18N_SCALING.md` + named reference only if needed |
+| `BIZ` | PMF/GTM/liquidity/economics/competition | start with `business/PMF_HYPOTHESES.md`; add exactly one relevant business source (`BEACHHEAD_MARKET`, `GTM_AND_DISTRIBUTION`, `CITY_LIQUIDITY_MODEL`, `NETWORK_EFFECTS_AND_MOAT`, `BUSINESS_MODEL_AND_UNIT_ECONOMICS`, `COMPETITIVE_POSITIONING`, `INVESTOR_MILESTONES`) |
 | `ADR` | architecture change | `09_FIXED_ARCHITECTURE_DECISIONS.md` + relevant accepted ADR |
 
 ## Large/rare sources
@@ -27,5 +28,6 @@
 - `MASTER_*`, completed plans, competitor research and `references/`: on-demand only.
 - `DESIGN_SYSTEM_PREVIEW.html` and full screen data files: visual reference only; search one screen ID/title.
 - `ARCHITECTURE_MATURITY_LADDER.md`: roadmap/scale decision only, never routine task context.
+- Business docs are decision/evidence contracts, not default engineering context. Load `BIZ` only for product/growth/economics decisions.
 
-If accepted ADR/product contract/schema truth disagree, stop the affected path and reconcile; do not solve conflicts by loading the entire repository.
+If accepted ADR/product/business contract/schema truth disagree, stop the affected path and reconcile; do not solve conflicts by loading the entire repository.

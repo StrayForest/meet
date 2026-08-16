@@ -10,12 +10,12 @@
 | `EV` | Event/recurrence/participation | relevant product spec, `02_DOMAIN_AND_DATABASE.md`; add `CONCURRENCY_AND_CONSISTENCY.md` for critical mutations |
 | `UI` | consumer/B2B/admin UI | relevant product spec, relevant `design-docs/*`, `../design/tokens.json`; add `VISUAL_REGRESSION_CONTRACT.md` only for visual QA |
 | `MOB` | Expo/release/client lifecycle | `MOBILE_RELEASES.md`, `CLIENT_COMPATIBILITY.md`; add privacy/deep-links only if touched |
-| `RT` | chat/realtime | `product-specs/pods-chat-connections.md`, `REALTIME.md`; add dependency/degraded policy only for failure behavior |
+| `RT` | chat/realtime | `product-specs/pods-chat-connections.md`, `REALTIME.md`; add `DEGRADED_MODES.md` only for failure behavior |
 | `ING` | event import/discovery supply | `04_EVENT_INGESTION_AND_DISCOVERY.md`; add `EXTERNAL_DEPENDENCY_POLICY.md` for connector failure semantics |
 | `ASY` | durable domain events | `EVENT_CONTRACTS.md` + owning module/product spec |
 | `SAFE` | safety/private-home/moderation | relevant safety product spec + `SECURITY.md`; add `DATA_CLASSIFICATION.md` and targeted `security/threat-models/*` only when touched |
 | `CTRL` | flags/client policy/privileged controls | `SECURITY.md` + exactly the named control doc (`CLIENT_COMPATIBILITY.md` or `AUDIT_LOGGING.md`) |
-| `OPS` | infra/reliability/observability | `06_INFRASTRUCTURE_DEVOPS.md` + at most one specialist doc: origin, DR, SLO, supply-chain, capacity, degraded modes or external dependency policy |
+| `OPS` | infra/reliability/observability | `06_INFRASTRUCTURE_DEVOPS.md` + at most one specialist doc: `DEGRADED_MODES.md`, origin, DR, SLO, supply-chain, capacity or external dependency policy |
 | `ARCH` | architecture boundaries | `ARCHITECTURE_FITNESS_FUNCTIONS.md`, targeted module contract; `MODULE_OWNERSHIP.md` only for ownership metadata |
 | `TEST` | tests/QA | `TESTING.md` + the contract being tested |
 | `AN` | analytics/i18n | `07_ANALYTICS_I18N_SCALING.md` + named reference only if needed |

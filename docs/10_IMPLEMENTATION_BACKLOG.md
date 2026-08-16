@@ -1,17 +1,17 @@
 # 10 — Implementation backlog — Architecture 1.3
 
-Dependency order. One coherent task/PR preferred. **This file is scheduling, not task context:** use the active exec plan + the smallest pack in `00_INDEX.md`; do not preload phase-wide docs.
+Dependency order. One coherent task/PR preferred. **This file is scheduling, not task context:** use the active exec plan + the smallest pack in `00_INDEX.md`.
 
 ## Phase 0 — Foundation/contracts/governance
-P0-000 docs/link/ADR consistency.
+P0-000 docs/link/ADR consistency, including `node scripts/check-architecture-contracts.mjs`.
 P0-001 pnpm/Turborepo apps+packages+infra.
 P0-002 Node24/pnpm11/strict TS/tooling.
-P0-003 design tokens/primitives.
+P0-003 design tokens/primitives + deterministic visual-regression metadata contract.
 P0-004 shared API/value/error/client contracts.
 P0-005 local Postgres18+PostGIS/Valkey/fake providers.
 P0-006 implement V3 Drizzle schema/migration: EventOccurrenceTemplate, physical location split, org multi-role, report-case/evidence, outbox V3, ingestion versions, waitlist/feedback invariants, versioned flags, tamper-evident audit, device attestation metadata.
 P0-007 schema-governance cutover; generate/verify DBML/schema docs.
-P0-008 architecture boundary checks.
+P0-008 executable architecture fitness checks: dependency direction, client/server boundaries, cross-module persistence, private-location contract leak checks.
 P0-009 typed domain-event registry + compatibility tests.
 P0-010 observability/correlation/Sentry/OTel.
 P0-011 analytics baseline; experiments != ops flags.
@@ -19,13 +19,18 @@ P0-012 OperationalFlags concurrency + two-person framework.
 P0-013 client compatibility/bootstrap.
 P0-014 Expo/EAS + mobile privacy/SDK inventory skeleton.
 P0-015 deterministic fixtures/visual QA.
-P0-016 repository/supply-chain baseline.
+P0-016 repository/supply-chain baseline + required branch protection/PR checks when GitHub plan permits.
 P0-017a Terraform primary/runtime + DB connection-budget foundation.
 P0-017b Terraform DR recovery skeleton.
 P0-017c Terraform origin-security skeleton.
-P0-018 CI including `scripts/check-context-budget.mjs`.
+P0-018 CI including context-budget and architecture-contract checks.
+P0-019 data-classification annotations/policy mapping for persisted/logged/analytics data.
+P0-020 module ownership/criticality metadata validation.
+P0-021 high-risk threat models for account takeover, private-home disclosure, host abuse, moderation/staff compromise, media, SSRF/ingestion, payment and realtime.
+P0-022 external dependency policy adapters + degraded-mode tests for initial providers.
+P0-023 concurrency/consistency contract tests for join/waitlist/approval/capacity/cancel/block/moderation commands.
 
-Gate: fresh checkout boots; V3 zero→latest; generated DBML matches; event contracts typed; no ONLINE/HYBRID/obsolete join semantics; critical DB invariants tested.
+Gate: fresh checkout boots; V3 zero→latest; generated DBML matches; event contracts typed; architecture/data/security contract checks pass; no ONLINE/HYBRID/obsolete join semantics; critical DB invariants tested.
 
 ## Phase 1 — Auth/users/staff/data rights
 Identity Platform adapter; bootstrap/profile/interests/languages/preferences; 18+; devices/push/integrity boundary; legal acceptance; deletion/export; status; FI/i18n; onboarding/web shell; separate StaffAccount/MFA.
@@ -57,13 +62,13 @@ Reports/cases/evidence/actions/appeals/admin; strong ID; home-host gate/exact-lo
 Claim/verification; source mapping; multi-role RBAC; B2B events/templates/recurrence/occurrences; attendees/check-in; analytics/announcements/audit.
 
 ## Phase 10 — Production hardening
-GCP/Cloud SQL HA; origin controls; KMS; backups/PITR/restore; DR tier; deploy/canary; immutable audit sink; EAS prod; SLI/error-budget/cost dashboards; supply-chain/SBOM/provenance; security review/pentest.
+GCP/Cloud SQL HA; origin controls; KMS; backups/PITR/restore; DR tier; deploy/canary; immutable audit sink; EAS prod; SLI/error-budget/cost dashboards; supply-chain/SBOM/provenance; security review/pentest; prove provider degraded modes.
 
 ## Phase 11 — Finland launch gates
-Source freshness, localization/accessibility, legal/DPIA/DSA, provider reviews, moderation/on-call, store privacy manifests, origin bypass tests, restore+DR exercise, safety runbooks, min-client policy, private-home limited flag, Helsinki liquidity.
+Source freshness, localization/accessibility, legal/DPIA/DSA, provider reviews, moderation/on-call, store privacy manifests, origin bypass tests, restore+DR exercise, safety runbooks, min-client policy, private-home limited flag, Helsinki liquidity; concrete high-risk threat models reviewed against implementation.
 
 ## Phase 12 — Monetization
 Stripe Billing, entitlements, promoted events, billing UI, affiliate tickets; native ticketing/Connect only after separate review.
 
 ## Phase 13 — Data/ML/country expansion
-Warehouse quality; attendance dataset; offline ML eval; Sweden/Norway/Denmark config/connectors; external search only on measured need.
+Warehouse quality; attendance dataset; offline ML eval; Sweden/Norway/Denmark config/connectors; external search only on measured need. Use `ARCHITECTURE_MATURITY_LADDER.md` + measured workload before extraction/multi-region changes.

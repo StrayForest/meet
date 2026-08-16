@@ -24,5 +24,12 @@ Accepted decisions are implementation constraints until superseded by accepted A
 20. Mobile EAS lifecycle, compatibility policy, store privacy compliance and optional device-integrity risk signals.
 21. Reliability uses user-journey SLIs/error budgets; DR and scaling triggers are business/workload based, not MAU.
 22. Production engineering uses protected PR/release/supply-chain governance.
+23. Architecture boundaries are executable fitness functions and CI release gates, not prose-only conventions.
+24. Data carries an effective classification that drives logging, retention, analytics, encryption and access controls.
+25. Critical commands have explicit concurrency/consistency/idempotency semantics backed by DB invariants.
+26. External dependencies have bounded failure policies and declared degraded modes; outages never weaken safety/privacy gates.
+27. High-risk boundaries require concrete threat models reviewed against implementation/tests.
+28. Executable modules carry ownership/criticality metadata as team size and production operations require.
+29. Architecture maturity changes are evidence-driven; valuation/MAU alone never justify extraction or multi-region complexity.
 
-Accepted ADRs: 0001 event/domain, 0002 backend/data/contracts, 0003 mobile, 0004 GCP/reliability, 0005 safety/identity, 0006 schema/event contracts, 0007 DR/SLO, 0008 supply-chain/origin/governance.
+Accepted ADRs: 0001 event/domain, 0002 backend/data/contracts, 0003 mobile, 0004 GCP/reliability, 0005 safety/identity, 0006 schema/event contracts, 0007 DR/SLO, 0008 supply-chain/origin/governance. Decisions 23–29 are baseline governance contracts until folded into the next accepted ADR revision.

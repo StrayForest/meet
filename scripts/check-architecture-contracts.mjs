@@ -13,6 +13,8 @@ const required = [
   'docs/VISUAL_REGRESSION_CONTRACT.md',
   'docs/MODULE_OWNERSHIP.md',
   'docs/security/threat-models/README.md',
+  'docs/validation/MVP_BOUNDARY.md',
+  'docs/validation/ASSUMPTION_REGISTER.md',
   'docs/00_INDEX.md',
   'docs/10_IMPLEMENTATION_BACKLOG.md',
   'docs/11_DEFINITION_OF_DONE.md'
@@ -24,9 +26,25 @@ for (const rel of required) {
 }
 
 const mustReference = {
-  'docs/00_INDEX.md': ['ARCHITECTURE_FITNESS_FUNCTIONS.md', 'DATA_CLASSIFICATION.md', 'CONCURRENCY_AND_CONSISTENCY.md', 'DEGRADED_MODES.md'],
-  'docs/10_IMPLEMENTATION_BACKLOG.md': ['check-architecture-contracts.mjs', 'threat-models', 'DATA_CLASSIFICATION.md'],
-  'docs/11_DEFINITION_OF_DONE.md': ['architecture fitness', 'data classification', 'degraded']
+  'docs/00_INDEX.md': [
+    'ARCHITECTURE_FITNESS_FUNCTIONS.md',
+    'DATA_CLASSIFICATION.md',
+    'CONCURRENCY_AND_CONSISTENCY.md',
+    'DEGRADED_MODES.md',
+    'validation/MVP_BOUNDARY.md'
+  ],
+  'docs/10_IMPLEMENTATION_BACKLOG.md': [
+    'validation/MVP_BOUNDARY.md',
+    'data-classification',
+    'threat models',
+    'no consumer PRIVATE_HOME'
+  ],
+  'docs/11_DEFINITION_OF_DONE.md': [
+    'architecture fitness',
+    'data classification',
+    'degraded',
+    'validation/business contract'
+  ]
 };
 
 for (const [rel, needles] of Object.entries(mustReference)) {
@@ -41,4 +59,4 @@ if (failures.length) {
   console.error('Architecture contract check failed:\n' + failures.map(x => `- ${x}`).join('\n'));
   process.exit(1);
 }
-console.log(`Architecture contract check passed (${required.length} required sources).`);
+console.log(`Architecture contract check passed (${required.length} required sources; MVP/validation boundary preserved).`);

@@ -1,0 +1,51 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+.turbo/
+
+# Build/test output
+.next/
+dist/
+build/
+coverage/
+.expo/
+.expo-shared/
+web-build/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mobileprovision
+*.p8
+
+# Terraform local state and sensitive variable files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# OS/editor-local files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

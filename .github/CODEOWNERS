@@ -6,6 +6,9 @@
 /docs/05_TRUST_SECURITY_PRIVACY.md @StrayForest
 /docs/CRYPTOGRAPHY_KEY_MANAGEMENT.md @StrayForest
 /docs/SUPPLY_CHAIN_SECURITY.md @StrayForest
+/docs/security/ @StrayForest
+/docs/adr/ @StrayForest
+/docs/validation/ @StrayForest
 /apps/admin/ @StrayForest
 /packages/database/ @StrayForest
 /.github/ @StrayForest

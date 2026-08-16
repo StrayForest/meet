@@ -20,7 +20,14 @@ const required = [
 ];
 
 for (const rel of required) if (!existsSync(join(root, rel))) failures.push(`missing ${rel}`);
-const text = rel => existsSync(join(root, rel)) ? readFileSync(join(root, rel), 'utf8').toLowerCase() : '';
+
+const normalize = value => value
+  .toLowerCase()
+  .replace(/`/g, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const text = rel => existsSync(join(root, rel)) ? normalize(readFileSync(join(root, rel), 'utf8')) : '';
 
 const mustContain = {
   'AGENTS.md': ['private_home', 'not v1 user-facing scope', 'persistent irl social graph is a **hypothesis**', 'no mandatory hobbies/interests/gender/phone'],
@@ -36,7 +43,9 @@ const mustContain = {
 
 for (const [rel, needles] of Object.entries(mustContain)) {
   const body = text(rel);
-  for (const needle of needles) if (!body.includes(needle)) failures.push(`${rel} missing scope invariant: ${needle}`);
+  for (const needle of needles) {
+    if (!body.includes(normalize(needle))) failures.push(`${rel} missing scope invariant: ${needle}`);
+  }
 }
 
 const consumerHtml = text('design/screens/consumer.html');

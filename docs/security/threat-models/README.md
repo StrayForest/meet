@@ -1,19 +1,31 @@
 # Threat Models — Architecture 1.3
 
-Threat modeling is mandatory for high-risk boundaries. Each model records assets, attacker, attack paths, impact, preventive controls, detection, recovery and residual risk.
+Threat modeling is mandatory for high-risk boundaries. A checklist is not a substitute for a concrete model. Each reachable high-risk boundary has its own file with assets, adversaries, trust boundaries, attack paths, preventive controls, detection, recovery, residual risk and validation mapping.
 
-## Required launch models
+## V1 launch-required models
 
-| Boundary | Primary threats | Mandatory controls |
+| Boundary | Model | Launch status |
 |---|---|---|
-| Account takeover | credential/session theft, recovery abuse | strong auth/session lifecycle, rate limits, revocation, anomaly/audit signals |
-| Private-home disclosure | DTO/log/cache/authz leak, scraping | isolated encrypted payload, dedicated authorization, no generic joins, access audit |
-| Host/event abuse | deceptive venue/event, unsafe organizer behavior | verification/risk gates, reports, limits, moderation, emergency OperationalFlags |
-| Moderation abuse | malicious reports, staff overreach, evidence tamper | case linkage, immutable evidence, scoped staff RBAC/MFA, append-only audit, appeals |
-| Staff compromise | stolen privileged session/key | separate StaffAccount, MFA/security keys, short sessions, least privilege, two-person high-risk control |
-| Media upload | malware/polyglot/content abuse | signed upload, type/size validation, quarantine/scan, safe transforms, separate serving origin |
-| Ingestion/SSRF | hostile source URL/parser payload | allowlisted connectors, SSRF-safe fetcher, egress policy, parser isolation, provenance/version trace |
-| Payment abuse | duplicate charge/refund/webhook spoof | provider idempotency, signed webhooks, ledger/entitlement separation, reconciliation |
-| Realtime abuse | auth bypass, spam, reconnect storm | authenticated subscriptions, authorization per conversation, rate/backpressure, durable source of truth |
+| Account takeover/session recovery | `account-takeover.md` | required before authenticated consumer launch |
+| Host/event abuse | `host-event-abuse.md` | required before community event creation/participation |
+| Moderation/report abuse | `moderation-abuse.md` | required before launch moderation is relied on |
+| Staff compromise | `staff-compromise.md` | required before privileged admin production access |
+| Media upload | `media-upload.md` | required before untrusted user media is accepted |
+| Ingestion/SSRF | `ingestion-ssrf.md` | required before production external ingestion |
+| Realtime/chat abuse | `realtime-abuse.md` | required before occurrence chat/realtime activation |
 
-A high-risk feature cannot launch with only a checklist; its concrete model must be reviewed against implementation and tests.
+## Design-only / activation-gated models
+
+| Boundary | Model | Gate |
+|---|---|---|
+| Private-home disclosure | `private-home-disclosure.md` | design review retained, but PRIVATE_HOME is explicitly NOT V1; re-review against implementation before any user-facing activation |
+| Payment abuse | create `payment-abuse.md` when billing/native payment flows enter implementation scope | monetization/payment evidence + legal/security review |
+
+## Review contract
+For each model:
+1. map every mandatory preventive/detective control to an implementation owner or explicit deferred gate;
+2. map reachable controls to automated/integration/security tests where practical;
+3. record residual risks that remain after controls;
+4. re-review when trust boundaries, providers, authentication model, data classification or product exposure materially changes.
+
+A high-risk feature cannot launch because this directory merely contains a file. The concrete implementation and tests must satisfy the model.

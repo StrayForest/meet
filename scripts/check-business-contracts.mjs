@@ -13,7 +13,9 @@ const required = [
   'docs/business/BUSINESS_MODEL_AND_UNIT_ECONOMICS.md',
   'docs/business/COMPETITIVE_POSITIONING.md',
   'docs/business/INVESTOR_MILESTONES.md',
-  'docs/business/OPERATING_MODEL.md'
+  'docs/business/OPERATING_MODEL.md',
+  'docs/validation/MVP_BOUNDARY.md',
+  'docs/validation/ASSUMPTION_REGISTER.md'
 ];
 
 const failures = required.filter(rel => !existsSync(join(root, rel))).map(rel => `missing ${rel}`);
@@ -30,16 +32,19 @@ for (const rel of launchFiles) {
 const index = join(root, 'docs/00_INDEX.md');
 if (existsSync(index)) {
   const text = readFileSync(index, 'utf8');
-  for (const rel of ['business/PMF_HYPOTHESES.md', 'PRODUCT_STRATEGY', 'OPERATING_MODEL']) {
-    if (!text.includes(rel)) failures.push(`00_INDEX missing business contract reference: ${rel}`);
+  for (const rel of ['business/PMF_HYPOTHESES.md', 'PRODUCT_STRATEGY', 'OPERATING_MODEL', 'validation/MVP_BOUNDARY.md']) {
+    if (!text.includes(rel)) failures.push(`00_INDEX missing business/validation contract reference: ${rel}`);
   }
 }
 
 const product = join(root, 'docs/01_PRODUCT_AND_FEATURES.md');
 if (existsSync(product)) {
-  const text = readFileSync(product, 'utf8');
-  for (const phrase of ['who actually does things with whom', 'minimum proof loop', 'Helsinki metro first']) {
-    if (!text.toLowerCase().includes(phrase.toLowerCase())) failures.push(`product strategy invariant missing: ${phrase}`);
+  const text = readFileSync(product, 'utf8').toLowerCase();
+  for (const phrase of ['minimum proof loop', 'helsinki metro first', 'long-term hypothesis', 'public browsing requires no phone verification']) {
+    if (!text.includes(phrase)) failures.push(`product strategy invariant missing: ${phrase}`);
+  }
+  for (const forbidden of ['social graph is the long-term destination', 'mandatory interests']) {
+    if (text.includes(forbidden)) failures.push(`stale product strategy invariant present: ${forbidden}`);
   }
 }
 
@@ -47,10 +52,11 @@ const agents = join(root, 'AGENTS.md');
 if (existsSync(agents)) {
   const text = readFileSync(agents, 'utf8');
   if (!text.includes('Architecture 1.3 is sufficiently specified')) failures.push('AGENTS must prevent speculative architecture expansion');
+  if (!text.includes('persistent IRL social graph is a **hypothesis**')) failures.push('AGENTS must keep persistent social graph evidence-gated');
 }
 
 if (failures.length) {
   console.error('Business contract check failed:\n' + failures.map(x => `- ${x}`).join('\n'));
   process.exit(1);
 }
-console.log(`Business contract check passed (${required.length} business sources; fi/en/ru + product/PMF discipline preserved).`);
+console.log(`Business contract check passed (${required.length} business/validation sources; fi/en/ru + evidence-gated PMF discipline preserved).`);

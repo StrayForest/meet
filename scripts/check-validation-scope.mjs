@@ -31,7 +31,7 @@ const mustContain = {
   'docs/design-docs/navigation-screen-specs.md': ['discover, my plans, social, profile', 'private_home is not a v1 consumer option'],
   'docs/design-docs/screen-state-matrix.md': ['private_home has no v1 consumer screen/map/disclosure state', 'find company'],
   'docs/design-docs/visual-qa.md': ['consumer-v1-data.js', 'private_home disclosure screens', 'not v1 acceptance requirements'],
-  'docs/testing.md': ['v1 consumer creation rejects private_home', 'deferred-on-activation invariants']
+  'docs/TESTING.md': ['v1 consumer creation rejects private_home', 'deferred-on-activation invariants']
 };
 
 for (const [rel, needles] of Object.entries(mustContain)) {

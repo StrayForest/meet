@@ -28,14 +28,14 @@ Exact window is operational policy and may be extended; shortening it is a relea
 ## 3. Capability negotiation
 Prefer additive capability flags for behavior differences rather than parsing versions throughout business code.
 
-Example capabilities:
+Active capability names should exist only for features actually implemented or entering controlled rollout. Examples for current-scope mechanics may include:
 - `event_admission_v2`
-- `private_home_v1`
-- `pods_v1`
 - `waitlist_offer_v1`
 - `realtime_cursor_v1`
 
-Client sends supported capabilities; server bootstrap returns enabled/required capabilities.
+Names such as `private_home_v1`, persistent-connections capabilities or generic `pods_v1` are **reserved examples only** until their evidence/ADR gates explicitly activate those products. Do not add them to bootstrap responses, client code or rollout logic preemptively.
+
+Client sends supported capabilities; server bootstrap returns only capabilities relevant to active/supported behavior.
 
 ## 4. API evolution rules
 - Add fields/endpoints/state values compatibly where old clients can ignore them.
@@ -45,12 +45,13 @@ Client sends supported capabilities; server bootstrap returns enabled/required c
 - Removal follows measured deprecation period.
 
 ## 5. High-impact action revalidation
-Before actions where stale data can cause physical harm/confusion, client must use current server truth:
+Before actions where stale data can cause physical harm/confusion, client must use current server truth for active features:
 - join/approval/waitlist acceptance
 - event cancellation/material time/location change
 - ticket/action link when source freshness is questionable
-- check-in
-- exact private-home address retrieval
+- check-in/attendance confirmation where implemented
+
+If PRIVATE_HOME is later activated, exact-address retrieval is added to this list and receives its own compatibility/security contract before rollout.
 
 Push/WebSocket never override REST/server authoritative state.
 
@@ -65,7 +66,7 @@ A stale card/detail must:
 ## 7. Client bootstrap endpoint
 `GET /v1/client/bootstrap` is cacheable only for a short controlled TTL and returns:
 - version policy
-- capability policy
+- active capability policy
 - maintenance/degraded state
 - public operational availability
 - country/localization bootstrap

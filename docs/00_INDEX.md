@@ -19,7 +19,7 @@
 | `ARCH` | architecture boundaries | `ARCHITECTURE_FITNESS_FUNCTIONS.md`, targeted module contract; `MODULE_OWNERSHIP.md` only for ownership metadata |
 | `TEST` | tests/QA | `TESTING.md` + the contract being tested |
 | `AN` | analytics/i18n | `07_ANALYTICS_I18N_SCALING.md` + named reference only if needed |
-| `BIZ` | PMF/GTM/liquidity/economics/competition | start with `business/PMF_HYPOTHESES.md`; add exactly one relevant business source (`BEACHHEAD_MARKET`, `GTM_AND_DISTRIBUTION`, `CITY_LIQUIDITY_MODEL`, `NETWORK_EFFECTS_AND_MOAT`, `BUSINESS_MODEL_AND_UNIT_ECONOMICS`, `COMPETITIVE_POSITIONING`, `INVESTOR_MILESTONES`) |
+| `BIZ` | PMF/product/GTM/liquidity/economics/competition | start with `business/PMF_HYPOTHESES.md`; add exactly one relevant source: `PRODUCT_STRATEGY`, `BEACHHEAD_MARKET`, `GTM_AND_DISTRIBUTION`, `CITY_LIQUIDITY_MODEL`, `NETWORK_EFFECTS_AND_MOAT`, `BUSINESS_MODEL_AND_UNIT_ECONOMICS`, `COMPETITIVE_POSITIONING`, `INVESTOR_MILESTONES`, `OPERATING_MODEL` |
 | `ADR` | architecture change | `09_FIXED_ARCHITECTURE_DECISIONS.md` + relevant accepted ADR |
 
 ## Large/rare sources

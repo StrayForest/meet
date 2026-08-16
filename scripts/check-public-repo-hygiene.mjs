@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { lstatSync, readdirSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, extname, join, relative } from 'node:path';
 
 const root = process.cwd();
@@ -18,7 +19,14 @@ const secretPatterns = [
   /\bAIza[0-9A-Za-z_-]{35}\b/,
   /\bsk-proj-[A-Za-z0-9_-]{20,}\b/
 ];
-const textExtensions = new Set(['.md', '.txt', '.json', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.js', '.jsx', '.yml', '.yaml', '.toml', '.ini', '.conf', '.env', '.sh', '.ps1', '.dbml', '.mmd', '.html', '.css']);
+const textExtensions = new Set(['.md', '.txt', '.json', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.yml', '.yaml', '.toml', '.ini', '.conf', '.env', '.sh', '.ps1', '.dbml', '.mmd', '.html', '.css']);
+const requiredIgnoreRules = ['.env', '.env.*', 'node_modules/', '.terraform/', '*.tfstate', '*.tfvars', '*.key', '*.p12', '*.pfx'];
+
+function scanSecrets(label, body) {
+  for (const pattern of secretPatterns) {
+    if (pattern.test(body)) failures.push(`${label} matches secret pattern ${pattern}`);
+  }
+}
 
 function walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -32,7 +40,7 @@ function walk(dir) {
     if (!entry.isFile()) continue;
 
     if (forbiddenNames.some(pattern => pattern.test(basename(entry.name)))) {
-      failures.push(`public repository contains sensitive filename: ${rel}`);
+      failures.push(`current tree contains sensitive filename: ${rel}`);
     }
 
     const size = lstatSync(abs).size;
@@ -42,17 +50,73 @@ function walk(dir) {
 
     let body;
     try { body = readFileSync(abs, 'utf8'); } catch { continue; }
-    for (const pattern of secretPatterns) {
-      if (pattern.test(body)) failures.push(`${rel} matches secret pattern ${pattern}`);
-    }
+    scanSecrets(rel, body);
   }
 }
 
+function checkGitignore() {
+  const path = join(root, '.gitignore');
+  if (!existsSync(path)) {
+    failures.push('missing root .gitignore for public repository safety baseline');
+    return;
+  }
+  const rules = new Set(readFileSync(path, 'utf8')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith('#')));
+  for (const rule of requiredIgnoreRules) {
+    if (!rules.has(rule)) failures.push(`.gitignore missing required safety rule: ${rule}`);
+  }
+}
+
+function checkHistory() {
+  let shallow;
+  try {
+    shallow = execFileSync('git', ['rev-parse', '--is-shallow-repository'], { cwd: root, encoding: 'utf8' }).trim();
+  } catch (error) {
+    failures.push(`cannot verify git history: ${error.message}`);
+    return;
+  }
+  if (shallow === 'true') {
+    failures.push('history-aware secret scan requires a full git checkout (fetch-depth: 0)');
+    return;
+  }
+
+  let names = '';
+  let patches = '';
+  try {
+    names = execFileSync('git', ['log', '--all', '--format=', '--name-only'], {
+      cwd: root,
+      encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024
+    });
+    patches = execFileSync('git', ['log', '--all', '--format=commit:%H', '--patch', '--no-ext-diff', '--text'], {
+      cwd: root,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024
+    });
+  } catch (error) {
+    failures.push(`git history scan failed: ${error.message}`);
+    return;
+  }
+
+  for (const raw of names.split(/\r?\n/)) {
+    const name = raw.trim();
+    if (!name) continue;
+    if (forbiddenNames.some(pattern => pattern.test(basename(name)))) {
+      failures.push(`git history contains sensitive filename: ${name}`);
+    }
+  }
+  scanSecrets('git history', patches);
+}
+
 walk(root);
+checkGitignore();
+checkHistory();
 
 if (failures.length) {
   console.error('Public repository hygiene check failed:\n' + [...new Set(failures)].map(x => `- ${x}`).join('\n'));
   process.exit(1);
 }
 
-console.log('Public repository hygiene check passed (sensitive filenames and high-confidence secret patterns absent).');
+console.log('Public repository hygiene check passed (current tree + full git history scanned for sensitive filenames/high-confidence secret patterns).');

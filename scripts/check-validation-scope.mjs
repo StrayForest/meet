@@ -28,7 +28,7 @@ const mustContain = {
   'docs/01_PRODUCT_AND_FEATURES.md': ['public browsing requires no phone verification', 'private_home is not v1', 'find company', 'long-term hypothesis'],
   'docs/10_IMPLEMENTATION_BACKLOG.md': ['no consumer private_home', 'public discovery + progressive identity', 'find company + occurrence-scoped chat', 'persistent connections experiment (evidence-gated)'],
   'docs/product-specs/new-user-onboarding.md': ['public event/city/category discovery should be available before account creation', 'no mandatory bio/photo/gender/interests'],
-  'docs/design-docs/navigation-screen-specs.md': ['discover, my plans, social, profile', 'private_home is not a v1 consumer option'],
+  'docs/design-docs/navigation-screen-specs.md': ['discover, my plans, social, profile', 'not a v1 consumer option'],
   'docs/design-docs/screen-state-matrix.md': ['private_home has no v1 consumer screen/map/disclosure state', 'find company'],
   'docs/design-docs/visual-qa.md': ['consumer-v1-data.js', 'private_home disclosure screens', 'not v1 acceptance requirements'],
   'docs/TESTING.md': ['v1 consumer creation rejects private_home', 'deferred-on-activation invariants']

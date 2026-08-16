@@ -3,7 +3,7 @@
 ## Layers
 Domain unit; application; real PostgreSQL/PostGIS+Valkey integration; API contracts; connector/provider contracts; mobile/web/B2B/admin E2E; realtime; visual/accessibility; load/resilience; recovery/security drills.
 
-## Mandatory V3 invariants
+## Mandatory invariants
 - recurrence materializer gets duration/location/policies from EventOccurrenceTemplate;
 - local recurrence DST correctness;
 - V1 rejects ONLINE/HYBRID creation;
@@ -25,8 +25,14 @@ Domain unit; application; real PostgreSQL/PostGIS+Valkey integration; API contra
 - audit writer cannot UPDATE/DELETE and hash-chain verification detects tamper;
 - supported old client remains compatible.
 
-## Reliability/security tests
-Origin bypass test, forced realtime disconnect, queue duplication/backlog, DB restore drill, region-recovery tabletop/automation as maturity grows, supply-chain workflow checks, mobile privacy/SDK inventory gate.
+## Architecture/security/reliability tests
+- architecture fitness functions fail on forbidden dependency direction, cross-module persistence reach-through, server-only client import and exact-location DTO leakage;
+- critical command race tests follow `CONCURRENCY_AND_CONSISTENCY.md`;
+- provider contract tests verify timeouts, retry classification, idempotency, webhook replay protection and finite retry horizon;
+- degraded-mode tests prove provider/Valkey/realtime/analytics outages preserve Tier-0 and safety invariants;
+- threat-model controls for private-home, staff, media, ingestion/SSRF, payment and realtime have mapped tests;
+- visual regression uses deterministic fixture/screen metadata from `VISUAL_REGRESSION_CONTRACT.md`;
+- origin bypass, forced realtime disconnect, queue duplication/backlog, DB restore, region recovery, supply-chain workflow and mobile privacy/SDK inventory are exercised at the appropriate maturity stage.
 
 ## CI
-Schema/generated-doc drift, pinned Actions policy, lint/type/unit/integration/contracts/migrations/security/build; E2E/visual as apps exist. Critical flaky tests are bugs.
+Schema/generated-doc drift, architecture-contract check, static architecture boundaries, pinned Actions policy, lint/type/unit/integration/contracts/migrations/security/build; E2E/visual as apps exist. Critical flaky tests are bugs.
